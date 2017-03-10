@@ -6,9 +6,14 @@ type Arguments = (Command, Flags)
 
 type Instructions = (Dispatch, Settings)
 
-data Command =
-    Command
+newtype Command =
+    CommandDiscover DiscoverArgs
     deriving (Show, Eq)
+
+data DiscoverArgs = DiscoverArgs
+    { argDiscFile :: FilePath
+    , argDiscFun :: String
+    } deriving (Show, Eq)
 
 data Flags =
     Flags
@@ -18,9 +23,14 @@ data Configuration =
     Configuration
     deriving (Show, Eq)
 
-data Dispatch =
-    Dispatch
+newtype Dispatch =
+    DispatchDiscover DiscoverSettings
     deriving (Show, Eq)
+
+data DiscoverSettings = DiscoverSettings
+    { setDiscFile :: Path Abs File
+    , setDiscFun :: String
+    } deriving (Show, Eq)
 
 data Settings =
     Settings

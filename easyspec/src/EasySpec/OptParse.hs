@@ -1,6 +1,10 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module EasySpec.OptParse
-    ( module EasySpec.OptParse
-    , module EasySpec.OptParse.Types
+    ( getInstructions
+    , Dispatch(..)
+    , DiscoverSettings(..)
+    , Settings(..)
     ) where
 
 import Import
@@ -18,7 +22,16 @@ getInstructions = do
     combineToInstructions cmd flags config
 
 combineToInstructions :: Command -> Flags -> Configuration -> IO Instructions
-combineToInstructions Command Flags Configuration = pure (Dispatch, Settings)
+combineToInstructions cmd Flags Configuration = (,) <$> disp <*> pure Settings
+  where
+    disp =
+        case cmd of
+            CommandDiscover DiscoverArgs {..} ->
+                DispatchDiscover <$> do
+                    file <- resolveFile' argDiscFile
+                    pure
+                        DiscoverSettings
+                        {setDiscFile = file, setDiscFun = argDiscFun}
 
 getConfiguration :: Command -> Flags -> IO Configuration
 getConfiguration _ _ = pure Configuration
@@ -52,12 +65,20 @@ parseArgs :: Parser Arguments
 parseArgs = (,) <$> parseCommand <*> parseFlags
 
 parseCommand :: Parser Command
-parseCommand = hsubparser $ mconcat [command "command" parseCommandCommand]
+parseCommand = hsubparser $ mconcat [command "discover" parseCommandDiscover]
 
-parseCommandCommand :: ParserInfo Command
-parseCommandCommand = info parser modifier
+parseCommandDiscover :: ParserInfo Command
+parseCommandDiscover = info parser modifier
   where
-    parser = pure Command
+    parser =
+        CommandDiscover <$>
+        (DiscoverArgs <$>
+         strArgument (mconcat [metavar "FILE", help "The file to look in"]) <*>
+         strArgument
+             (mconcat
+                  [ metavar "FUNCTION"
+                  , help "The function to discover properties of"
+                  ]))
     modifier = fullDesc <> progDesc "Command example."
 
 parseFlags :: Parser Flags

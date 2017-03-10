@@ -1,0 +1,8 @@
+flags: {}
+packages:
+- '.'
+extra-deps:
+- introduction-0.0.1.0
+- optparse-applicative-0.13.2.0
+- validity-containers-0.1.0.2
+resolver: lts-7.14

@@ -16,14 +16,14 @@ library
         EasySpec.Types
         EasySpec.OptParse
         EasySpec.OptParse.Types
-    other-modules:
-        Import
     build-depends:
         base >=4.9 && <=5,
         optparse-applicative >=0.13
     default-language: Haskell2010
     default-extensions: NoImplicitPrelude
     hs-source-dirs: src/
+    other-modules:
+        Import
     ghc-options: -Wall
 
 executable easyspec

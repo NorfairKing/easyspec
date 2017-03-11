@@ -7,7 +7,10 @@ import Import
 
 import EasySpec.OptParse
 
+import Control.Monad
 import Data.IORef
+
+import System.FilePath
 
 import DynFlags hiding (Settings)
 import GHC
@@ -19,6 +22,7 @@ import OccName
 import Outputable
 import RdrName
 import TcRnTypes
+import Var
 
 easyspec :: IO ()
 easyspec = do
@@ -40,21 +44,21 @@ dispatch (DispatchDiscover DiscoverSettings {..}) = do
             target <- guessTarget (toFilePath setDiscFile) Nothing
             setTargets [target]
             load LoadAllTargets
-            modSum <- getModSummary $ mkModuleName "Reverse"
+            -- Doesn't work in a project, only in top-level modules
+            modSum <-
+                getModSummary $
+                mkModuleName $ dropExtension $ toFilePath $ filename setDiscFile
             parsedModule <- parseModule modSum
             tmod <- typecheckModule parsedModule
-            -- printO $ tm_renamed_source tmod
-            -- printO $ tm_typechecked_source tmod
             let (tcenv, moddets) = tm_internals_ tmod
-            -- printO $ tcg_rn_exports tcenv
-            printO $ map (map gre_name) $ occEnvElts $ tcg_rdr_env tcenv
-            -- printO $ tcg_binds tcenv
-            -- printO $ tcg_rn_exports tcenv
-            -- env <- liftIO $ readIORef $ tcg_type_env_var tcenv
-            -- printO $ typeEnvElts env
-            -- printO $ typeEnvElts $ tcg_type_env tcenv
-            -- printO $ tcg_binds tcenv
-            -- printO $ tcg_tcs tcenv
+            let names =
+                    concatMap (map gre_name) $ occEnvElts $ tcg_rdr_env tcenv
+            forM_ names $ \name -> do
+                tything <- lookupName name
+                case tything of
+                    Just (AnId i) -> printO (i, varType i)
+                    Just t -> printO t
+                    Nothing -> pure ()
 
 printO
     :: (GhcMonad m, Outputable a)

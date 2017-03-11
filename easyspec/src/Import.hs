@@ -4,6 +4,7 @@ module Import
 
 import Prelude as X hiding (return)
 
+import Control.Monad as X
 import Control.Monad.IO.Class as X
 
 import Data.Monoid as X

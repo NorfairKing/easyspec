@@ -2,7 +2,7 @@ flags: {}
 packages:
 - '.'
 extra-deps:
-- introduction-0.0.1.0
 - optparse-applicative-0.13.2.0
 - validity-containers-0.1.0.2
+- quickspec-0.9.6
 resolver: lts-8.4

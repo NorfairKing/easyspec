@@ -2,7 +2,4 @@
 
 module Reverse where
 
-import Prelude ((==), String)
-
-myString :: String
-myString = "string"
+import Prelude (id, reverse)

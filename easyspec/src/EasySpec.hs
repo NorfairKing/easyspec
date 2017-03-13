@@ -56,6 +56,7 @@ dispatch (DispatchDiscover dsets@DiscoverSettings {..}) = do
             let qsModules =
                     [ imp "Test.QuickSpec"
                     , imp "Test.QuickSpec.Signature"
+                    , imp "Prelude"
                     , IIModule $ mkModuleName "Monomorphic"
                     ]
             setContext qsModules
@@ -106,7 +107,9 @@ createQuickspecSig
 createQuickspecSig ids = do
     constantExprs <- mapM idConstant ids
     let constantList = intercalate ", " constantExprs
-    pure $ "signature [" ++ constantList ++ "]"
+    pure $
+        "signature [" ++
+        constantList ++ ", " ++ "vars [\"a\"] (undefined :: Char)]"
 
 idConstant
     :: GhcMonad m

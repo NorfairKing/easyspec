@@ -13,9 +13,12 @@ author: Tom Sydney Kerckhove
 library
     exposed-modules:
         EasySpec
-        EasySpec.Types
+        EasySpec.Discover
+        EasySpec.Discover.Gather
+        EasySpec.Discover.Utils
         EasySpec.OptParse
         EasySpec.OptParse.Types
+        EasySpec.Types
     build-depends:
         base >=4.9 && <=5,
         optparse-applicative >=0.13,

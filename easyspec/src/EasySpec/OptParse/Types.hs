@@ -12,7 +12,7 @@ newtype Command =
 
 data DiscoverArgs = DiscoverArgs
     { argDiscFile :: FilePath
-    , argDiscFun :: String
+    , argDiscFun :: Maybe String
     } deriving (Show, Eq)
 
 data Flags =
@@ -29,7 +29,7 @@ newtype Dispatch =
 
 data DiscoverSettings = DiscoverSettings
     { setDiscFile :: Path Abs File
-    , setDiscFun :: String
+    , setDiscFun :: Maybe String
     } deriving (Show, Eq)
 
 data Settings =

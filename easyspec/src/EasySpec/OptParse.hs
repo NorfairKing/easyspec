@@ -74,9 +74,11 @@ parseCommandDiscover = info parser modifier
         CommandDiscover <$>
         (DiscoverArgs <$>
          strArgument (mconcat [metavar "FILE", help "The file to look in"]) <*>
-         strArgument
+         option
+             (Just <$> str)
              (mconcat
                   [ metavar "FUNCTION"
+                  , value Nothing
                   , help "The function to discover properties of"
                   ]))
     modifier = fullDesc <> progDesc "Command example."

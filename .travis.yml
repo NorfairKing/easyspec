@@ -20,6 +20,9 @@ before_install:
 install:
   - stack +RTS -N2 -RTS setup
   - stack +RTS -N2 -RTS build --only-snapshot
+  - stack +RTS -N2 -RTS install hindent
+  - stack +RTS -N2 -RTS install cabal-install
+
 
 
 script:

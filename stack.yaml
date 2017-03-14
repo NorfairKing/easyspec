@@ -1,8 +1,10 @@
 flags: {}
 packages:
-- '.'
+- './easyspec'
 extra-deps:
 - optparse-applicative-0.13.2.0
 - validity-containers-0.1.0.2
 - quickspec-0.9.6
-resolver: lts-8.4
+- validity-0.3.2.0
+- validity-path-0.1.0.0
+resolver: lts-8.5

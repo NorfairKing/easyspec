@@ -7,16 +7,12 @@ import Import
 
 import EasySpec.OptParse
 
-import Data.IORef
-
 import System.FilePath
 
 import DynFlags hiding (Settings)
 import GHC
 import GHC.LanguageExtensions
 import GHC.Paths (libdir)
-import HscTypes
-import NameEnv
 import OccName
 import Outputable
 import RdrName
@@ -49,14 +45,14 @@ runEasySpec ds ids =
         let intdfflags =
                 (prepareFlags dflags)
                 {hscTarget = HscInterpreted, ghcLink = LinkInMemory}
-        setSessionDynFlags intdfflags
+        setDFlagsNoLinking intdfflags
             -- This star is necessary so GHC uses the sources instead of the already compiled .o files.
             -- See these:
             -- - https://stackoverflow.com/questions/12790341/haskell-ghc-dynamic-compliation-only-works-on-first-compile
             -- - https://mail.haskell.org/pipermail/glasgow-haskell-users/2011-October/021009.html
         target <- guessTarget ("*" ++ toFilePath (setDiscFile ds)) Nothing
         setTargets [target]
-        load LoadAllTargets
+        loadSuccessfully LoadAllTargets
         let imp = IIDecl . GHC.simpleImportDecl . GHC.mkModuleName
         let qsModules =
                 [ imp "Test.QuickSpec"
@@ -70,6 +66,20 @@ runEasySpec ds ids =
         liftIO $ putStrLn quickspecSig
         void $
             execStmt (unwords ["quickSpec", "(", quickspecSig, ")"]) execOptions
+
+setDFlagsNoLinking
+    :: GhcMonad m
+    => DynFlags -> m ()
+setDFlagsNoLinking = void . setSessionDynFlags
+
+loadSuccessfully
+    :: GhcMonad m
+    => LoadHowMuch -> m ()
+loadSuccessfully hm = do
+    r <- load hm
+    case r of
+        Succeeded -> pure ()
+        Failed -> fail "Loading failed. No idea why."
 
 prepareFlags :: DynFlags -> DynFlags
 prepareFlags dflags = foldl xopt_set dflags [Cpp, ImplicitPrelude, MagicHash]
@@ -86,17 +96,17 @@ getIds ds@DiscoverSettings {..} =
     runGhc (Just libdir) $ do
         dflags <- getSessionDynFlags
         let compdflags = prepareFlags dflags
-        setSessionDynFlags compdflags
+        setDFlagsNoLinking compdflags
         target <- guessTarget (toFilePath setDiscFile) Nothing
         setTargets [target]
-        load LoadAllTargets
+        loadSuccessfully LoadAllTargets
                     -- Doesn't work in a project, only in top-level modules
         let modname = getTargetModName ds
         printO modname
         modSum <- getModSummary modname
         parsedModule <- parseModule modSum
         tmod <- typecheckModule parsedModule
-        let (tcenv, moddets) = tm_internals_ tmod
+        let (tcenv, _) = tm_internals_ tmod
         let names = concatMap (map gre_name) $ occEnvElts $ tcg_rdr_env tcenv
         fmap catMaybes $
             forM names $ \name -> do

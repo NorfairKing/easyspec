@@ -56,7 +56,8 @@ idSigComponent i = do
     let typ = Var.varType i
     let tyS = typeStr typ
     liftIO $ print (name, tyS, typs)
-    pure $ unwords ["constant", show name, "(" ++ name, "::", tyS ++ ")"]
+    pure $
+        unwords ["constant", show name, "((" ++ name ++ ")", "::", tyS ++ ")"]
 
 typeStr :: GHC.Type -> String
 typeStr t =
@@ -70,7 +71,7 @@ typeStr t =
             let cs = map typeStr kots
             in case showName (tyConName tc) of
                    "[]" -> "[" ++ unwords cs ++ "]"
-                   tcn -> unwords $ tcn : cs
+                   tcn -> unwords $ tcn : map (\c -> "(" ++ c ++ ")") cs
         ForAllTy _ t'
                 -- No idea why this is necessary here...
          ->
@@ -79,7 +80,7 @@ typeStr t =
                 Just (tf, tt) ->
                     let vn1 = typeStr tf
                         vn2 = typeStr tt
-                    in unwords [vn1, "->", vn2]
+                    in unwords ["(" ++ vn1, "->", vn2 ++ ")"]
         _ -> error "not implemented yet."
 
 showName :: Name -> String

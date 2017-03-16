@@ -45,7 +45,7 @@ createQuickspecSig
 createQuickspecSig ids = do
     componentExprs <- mapM idSigComponent ids
     let componentList = intercalate ", " componentExprs
-    pure $ "signature [" ++ componentList ++ "]"
+    pure $ "signature { constants = [ " ++ componentList ++ " ] }"
 
 idSigComponent
     :: GhcMonad m
@@ -54,11 +54,9 @@ idSigComponent i = do
     name <- showGHC $ Var.varName i
     typs <- showGHC $ Var.varType i
     let typ = Var.varType i
-    let Comp compar compty = comp typ
+    let Comp _ compty = comp typ
     liftIO $ print (name, compty, typs)
-    pure $
-        unwords
-            ["fun" ++ show compar, show name, "(" ++ name, "::", compty ++ ")"]
+    pure $ unwords ["constant", show name, "(" ++ name, "::", compty ++ ")"]
 
 data Comp = Comp
     { compAr :: Int

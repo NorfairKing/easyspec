@@ -44,8 +44,8 @@ runEasySpec ds ids =
         loadSuccessfully LoadAllTargets
         let imp = IIDecl . GHC.simpleImportDecl . GHC.mkModuleName
         let qsModules =
-                [ imp "Test.QuickSpec"
-                , imp "Test.QuickSpec.Signature"
+                [ imp "QuickSpec"
+                , imp "QuickSpec.Signature"
                 , imp "Prelude"
                 , IIModule $ getTargetModName ds
                 ]

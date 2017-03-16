@@ -1,6 +1,10 @@
 flags: {}
 packages:
 - './easyspec'
+- location:
+      git: git@github.com:NorfairKing/quickspec.git
+      commit: f5f73edc4807b925f36201c5791178171186619b
+  extra-dep: true
 extra-deps:
 - optparse-applicative-0.13.2.0
 - validity-containers-0.1.0.2
@@ -10,4 +14,7 @@ extra-deps:
 - genvalidity-0.3.1.0
 - genvalidity-hspec-0.3.1.0
 - genvalidity-path-0.1.0.0
+- jukebox-0.2.14
+- twee-0.1
+- minisat-0.1.2
 resolver: lts-8.5

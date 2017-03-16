@@ -2,6 +2,7 @@ module Import
     ( module X
     ) where
 
+import Debug.Trace as X
 import Prelude as X hiding (return)
 
 import Control.Monad as X

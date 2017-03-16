@@ -54,38 +54,33 @@ idSigComponent i = do
     name <- showGHC $ Var.varName i
     typs <- showGHC $ Var.varType i
     let typ = Var.varType i
-    let Comp _ compty = comp typ
-    liftIO $ print (name, compty, typs)
-    pure $ unwords ["constant", show name, "(" ++ name, "::", compty ++ ")"]
+    let tyS = typeStr typ
+    liftIO $ print (name, tyS, typs)
+    pure $ unwords ["constant", show name, "(" ++ name, "::", tyS ++ ")"]
 
-data Comp = Comp
-    { compAr :: Int
-    , compNm :: String
-    } deriving (Show, Eq)
-
-comp :: GHC.Type -> Comp
-comp = go
-  where
-    go t =
-        case t of
-            TyVarTy _ -> Comp 0 "A" -- TODO allow for other type variables too.
-            AppTy t1 t2 ->
-                let Comp _ vn1 = go t1
-                    Comp _ vn2 = go t2
-                in Comp 0 $ unwords [vn1, vn2]
-            TyConApp tc kots ->
-                let cs = map go kots
-                in Comp 0 $ unwords $ showName (tyConName tc) : map compNm cs
-            ForAllTy _ t'
+typeStr :: GHC.Type -> String
+typeStr t =
+    case t of
+        TyVarTy _ -> "A" -- TODO allow for other type variables too.
+        AppTy t1 t2 ->
+            let vn1 = typeStr t1
+                vn2 = typeStr t2
+            in unwords [vn1, vn2]
+        TyConApp tc kots ->
+            let cs = map typeStr kots
+            in case showName (tyConName tc) of
+                   "[]" -> "[" ++ unwords cs ++ "]"
+                   tcn -> unwords $ tcn : cs
+        ForAllTy _ t'
                 -- No idea why this is necessary here...
-             ->
-                case splitFunTy_maybe t of
-                    Nothing -> go t'
-                    Just (tf, tt) ->
-                        let Comp _ vn1 = go tf
-                            Comp _ vn2 = go tt
-                        in Comp 1 $ unwords [vn1, "->", vn2]
-            _ -> error "not implemented yet."
+         ->
+            case splitFunTy_maybe t of
+                Nothing -> typeStr t'
+                Just (tf, tt) ->
+                    let vn1 = typeStr tf
+                        vn2 = typeStr tt
+                    in unwords [vn1, "->", vn2]
+        _ -> error "not implemented yet."
 
 showName :: Name -> String
 showName = occNameString . Name.nameOccName

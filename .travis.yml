@@ -23,8 +23,6 @@ install:
   - stack +RTS -N2 -RTS install hindent
   - stack +RTS -N2 -RTS install cabal-install
 
-
-
 script:
   - git --version
   - stack --version

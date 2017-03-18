@@ -54,33 +54,60 @@ idSigComponent i = do
     name <- showGHC $ Var.varName i
     typs <- showGHC $ Var.varType i
     let typ = Var.varType i
-    let tyS = typeStr typ
+    let tvs = typeVars typ
+    let tyS =
+            typeStr
+                (zip
+                     tvs
+                     [ "A"
+                     , "B"
+                     , "C"
+                     , "D"
+                     , "E"
+                     , error "Not enough type variables in quickspec."
+                     ])
+                typ
     liftIO $ print (name, tyS, typs)
     pure $
         unwords ["constant", show name, "((" ++ name ++ ")", "::", tyS ++ ")"]
 
-typeStr :: GHC.Type -> String
-typeStr t =
+typeStr :: [(GHC.Id, String)] -> GHC.Type -> String
+typeStr env = go
+  where
+    go t =
+        case t of
+            TyVarTy i -> fromMaybe (showName $ Var.varName i) (lookup i env)
+            AppTy t1 t2 ->
+                let vn1 = go t1
+                    vn2 = go t2
+                in unwords [vn1, vn2]
+            TyConApp tc kots ->
+                let cs = map go kots
+                in case showName (tyConName tc) of
+                       "[]" -> "[" ++ unwords cs ++ "]"
+                       tcn -> unwords $ tcn : map (\c -> "(" ++ c ++ ")") cs
+            ForAllTy _ t'
+                    -- No idea why this is necessary here...
+             ->
+                case splitFunTy_maybe t of
+                    Nothing -> go t'
+                    Just (tf, tt) ->
+                        let vn1 = go tf
+                            vn2 = go tt
+                        in unwords ["(" ++ vn1, "->", vn2 ++ ")"]
+            _ -> error "not implemented yet."
+
+typeVars :: GHC.Type -> [GHC.Id]
+typeVars t =
+    nub $
     case t of
-        TyVarTy _ -> "A" -- TODO allow for other type variables too.
-        AppTy t1 t2 ->
-            let vn1 = typeStr t1
-                vn2 = typeStr t2
-            in unwords [vn1, vn2]
-        TyConApp tc kots ->
-            let cs = map typeStr kots
-            in case showName (tyConName tc) of
-                   "[]" -> "[" ++ unwords cs ++ "]"
-                   tcn -> unwords $ tcn : map (\c -> "(" ++ c ++ ")") cs
-        ForAllTy _ t'
-                -- No idea why this is necessary here...
-         ->
+        TyVarTy v -> [v]
+        AppTy t1 t2 -> typeVars t1 ++ typeVars t2
+        TyConApp _ kots -> concatMap typeVars kots
+        ForAllTy _ t' ->
             case splitFunTy_maybe t of
-                Nothing -> typeStr t'
-                Just (tf, tt) ->
-                    let vn1 = typeStr tf
-                        vn2 = typeStr tt
-                    in unwords ["(" ++ vn1, "->", vn2 ++ ")"]
+                Nothing -> typeVars t'
+                Just (tf, tt) -> typeVars tf ++ typeVars tt
         _ -> error "not implemented yet."
 
 showName :: Name -> String

@@ -6,6 +6,7 @@ import Import
 
 import DynFlags hiding (Settings)
 import GHC
+import GHC.LanguageExtensions
 import GHC.Paths (libdir)
 
 import EasySpec.OptParse
@@ -32,7 +33,7 @@ runEasySpec ds ids =
         initGhcMonad (Just libdir)
         dflags <- getSessionDynFlags
         let intdfflags =
-                (prepareFlags dflags)
+                (addTypeClassExts $ prepareFlags dflags)
                 {hscTarget = HscInterpreted, ghcLink = LinkInMemory}
         setDFlagsNoLinking intdfflags
             -- This star is necessary so GHC uses the sources instead of the already compiled .o files.
@@ -53,5 +54,23 @@ runEasySpec ds ids =
         getBindings >>= printO
         quickspecSig <- createQuickspecSig ids
         liftIO $ putStrLn quickspecSig
+        let declaretc =
+                unlines
+                    [ "let typeclass :: (c => a) -> Dict c -> a"
+                    , "    typeclass x Dict = x"
+                    ]
+        void $ execStmt declaretc execOptions
         void $
             execStmt (unwords ["quickSpec", "(", quickspecSig, ")"]) execOptions
+
+addTypeClassExts :: DynFlags -> DynFlags
+addTypeClassExts dflags =
+    foldl
+        xopt_set
+        dflags
+        [ ScopedTypeVariables
+        , ConstraintKinds
+        , RankNTypes
+        , ConstraintKinds
+        , FlexibleContexts
+        ]

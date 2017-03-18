@@ -6,6 +6,7 @@ import Import
 
 import System.FilePath
 
+import Class
 import DynFlags hiding (Settings)
 import GHC
 import GHC.LanguageExtensions
@@ -69,7 +70,17 @@ idSigComponent i = do
                 typ
     liftIO $ print (name, tyS, typs)
     pure $
-        unwords ["constant", show name, "((" ++ name ++ ")", "::", tyS ++ ")"]
+        unwords
+            [ "constant"
+            , show name
+            , "((" ++
+              (if "Dict" `isInfixOf` tyS
+                   then "typeclass "
+                   else "") ++
+              name ++ ")"
+            , "::"
+            , tyS ++ ")"
+            ]
 
 typeStr :: [(GHC.Id, String)] -> GHC.Type -> String
 typeStr env = go
@@ -83,9 +94,19 @@ typeStr env = go
                 in unwords [vn1, vn2]
             TyConApp tc kots ->
                 let cs = map go kots
-                in case showName (tyConName tc) of
-                       "[]" -> "[" ++ unwords cs ++ "]"
-                       tcn -> unwords $ tcn : map (\c -> "(" ++ c ++ ")") cs
+                    pars c = "(" ++ c ++ ")"
+                in case tyConClass_maybe tc of
+                       Just cls ->
+                           concat
+                               [ "Dict ("
+                               , unwords $
+                                 showName (Class.className cls) : map pars cs
+                               , ")"
+                               ]
+                       Nothing ->
+                           case showName (tyConName tc) of
+                               "[]" -> "[" ++ unwords cs ++ "]"
+                               tcn -> unwords $ tcn : map pars cs
             ForAllTy _ t'
                     -- No idea why this is necessary here...
              ->

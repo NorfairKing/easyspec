@@ -15,9 +15,7 @@ import EasySpec.OptParse
 
 import EasySpec.Discover.Utils
 
-getIds
-    :: MonadIO m
-    => DiscoverSettings -> m [GHC.Id]
+getIds :: MonadIO m => DiscoverSettings -> m [GHC.Id]
 getIds ds@DiscoverSettings {..} =
     liftIO $
     runGhc (Just libdir) $ do

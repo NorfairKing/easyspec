@@ -24,16 +24,12 @@ easyspec = do
     (disp, sets) <- getInstructions
     runReaderT (dispatch disp) sets
 
-dispatch
-    :: (MonadIO m, MonadReader Settings m)
-    => Dispatch -> m ()
+dispatch :: (MonadIO m, MonadReader Settings m) => Dispatch -> m ()
 dispatch (DispatchDiscover ds) = do
     ids <- getIds ds
     runEasySpec ds ids
 
-runEasySpec
-    :: MonadIO m
-    => DiscoverSettings -> [GHC.Id] -> m ()
+runEasySpec :: MonadIO m => DiscoverSettings -> [GHC.Id] -> m ()
 runEasySpec ds ids =
     liftIO $
     runGhc (Just libdir) $
@@ -67,14 +63,10 @@ runEasySpec ds ids =
         void $
             execStmt (unwords ["quickSpec", "(", quickspecSig, ")"]) execOptions
 
-setDFlagsNoLinking
-    :: GhcMonad m
-    => DynFlags -> m ()
+setDFlagsNoLinking :: GhcMonad m => DynFlags -> m ()
 setDFlagsNoLinking = void . setSessionDynFlags
 
-loadSuccessfully
-    :: GhcMonad m
-    => LoadHowMuch -> m ()
+loadSuccessfully :: GhcMonad m => LoadHowMuch -> m ()
 loadSuccessfully hm = do
     r <- load hm
     case r of
@@ -88,9 +80,7 @@ getTargetModName :: DiscoverSettings -> ModuleName
 getTargetModName =
     mkModuleName . dropExtension . toFilePath . filename . setDiscFile
 
-getIds
-    :: MonadIO m
-    => DiscoverSettings -> m [GHC.Id]
+getIds :: MonadIO m => DiscoverSettings -> m [GHC.Id]
 getIds ds@DiscoverSettings {..} =
     liftIO $
     runGhc (Just libdir) $ do
@@ -117,9 +107,7 @@ getIds ds@DiscoverSettings {..} =
                         Just _ -> Nothing
                         Nothing -> Nothing
 
-createQuickspecSig
-    :: GhcMonad m
-    => [GHC.Id] -> m String
+createQuickspecSig :: GhcMonad m => [GHC.Id] -> m String
 createQuickspecSig ids = do
     constantExprs <- mapM idConstant ids
     let constantList = intercalate ", " constantExprs
@@ -127,21 +115,15 @@ createQuickspecSig ids = do
         "signature [" ++
         constantList ++ ", " ++ "vars [\"a\"] (undefined :: Char)]"
 
-idConstant
-    :: GhcMonad m
-    => GHC.Id -> m String
+idConstant :: GhcMonad m => GHC.Id -> m String
 idConstant i = do
     name <- showGHC $ Var.varName i
     pure $ unwords ["fun1", show name, name]
 
-showGHC
-    :: (GhcMonad m, Outputable a)
-    => a -> m String
+showGHC :: (GhcMonad m, Outputable a) => a -> m String
 showGHC a = do
     dfs <- getProgramDynFlags
     pure $ showPpr dfs a
 
-printO
-    :: (GhcMonad m, Outputable a)
-    => a -> m ()
+printO :: (GhcMonad m, Outputable a) => a -> m ()
 printO a = showGHC a >>= (liftIO . putStrLn)

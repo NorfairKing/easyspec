@@ -14,16 +14,12 @@ import EasySpec.OptParse
 import EasySpec.Discover.Gather
 import EasySpec.Discover.Utils
 
-discover
-    :: (MonadIO m, MonadReader Settings m)
-    => DiscoverSettings -> m ()
+discover :: (MonadIO m, MonadReader Settings m) => DiscoverSettings -> m ()
 discover ds = do
     ids <- getIds ds
     runEasySpec ds ids
 
-runEasySpec
-    :: MonadIO m
-    => DiscoverSettings -> [GHC.Id] -> m ()
+runEasySpec :: MonadIO m => DiscoverSettings -> [GHC.Id] -> m ()
 runEasySpec ds ids =
     liftIO $
     runGhc (Just libdir) $

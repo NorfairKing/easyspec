@@ -19,14 +19,10 @@ import Var
 
 import EasySpec.OptParse
 
-setDFlagsNoLinking
-    :: GhcMonad m
-    => DynFlags -> m ()
+setDFlagsNoLinking :: GhcMonad m => DynFlags -> m ()
 setDFlagsNoLinking = void . setSessionDynFlags
 
-loadSuccessfully
-    :: GhcMonad m
-    => LoadHowMuch -> m ()
+loadSuccessfully :: GhcMonad m => LoadHowMuch -> m ()
 loadSuccessfully hm = do
     r <- load hm
     case r of
@@ -40,17 +36,13 @@ getTargetModName :: DiscoverSettings -> ModuleName
 getTargetModName =
     mkModuleName . dropExtension . toFilePath . filename . setDiscFile
 
-createQuickspecSig
-    :: GhcMonad m
-    => [GHC.Id] -> m String
+createQuickspecSig :: GhcMonad m => [GHC.Id] -> m String
 createQuickspecSig ids = do
     componentExprs <- mapM idSigComponent ids
     let componentList = intercalate ", " componentExprs
     pure $ "signature { constants = [ " ++ componentList ++ " ] }"
 
-idSigComponent
-    :: GhcMonad m
-    => GHC.Id -> m String
+idSigComponent :: GhcMonad m => GHC.Id -> m String
 idSigComponent i = do
     name <- showGHC $ Var.varName i
     typs <- showGHC $ Var.varType i
@@ -134,14 +126,10 @@ typeVars t =
 showName :: Name -> String
 showName = occNameString . Name.nameOccName
 
-showGHC
-    :: (GhcMonad m, Outputable a)
-    => a -> m String
+showGHC :: (GhcMonad m, Outputable a) => a -> m String
 showGHC a = do
     dfs <- getProgramDynFlags
     pure $ showPpr dfs a
 
-printO
-    :: (GhcMonad m, Outputable a)
-    => a -> m ()
+printO :: (GhcMonad m, Outputable a) => a -> m ()
 printO a = showGHC a >>= (liftIO . putStrLn)

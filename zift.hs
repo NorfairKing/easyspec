@@ -23,7 +23,7 @@ main =
     ziftWith $ do
         recursiveZift
         preprocessor $ ziftP [hindentZift, cabalFormatZift]
-        precheck gitAddAllZift
+        prechecker gitAddAllZift
         checker $ do
             hlintZift
             stackBuildZift

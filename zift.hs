@@ -2,12 +2,12 @@
 {- stack
     --install-ghc
     runghc
-    --package zifter-0.0.1.0
-    --package zifter-cabal-0.0.0.0
-    --package zifter-git-0.0.0.0
-    --package zifter-hindent-0.0.0.0
-    --package zifter-hlint-0.0.0.0
-    --package zifter-stack-0.0.0.2
+    --package zifter
+    --package zifter-cabal
+    --package zifter-git
+    --package zifter-hindent
+    --package zifter-hlint
+    --package zifter-stack
 -}
 {-# LANGUAGE OverloadedStrings #-}
 

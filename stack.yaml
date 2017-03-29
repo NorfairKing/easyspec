@@ -17,4 +17,4 @@ extra-deps:
 - jukebox-0.2.14
 - twee-0.1
 - minisat-0.1.2
-resolver: lts-8.5
+resolver: lts-8.6

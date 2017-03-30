@@ -21,6 +21,7 @@ import EasySpec.OptParse
 
 import EasySpec.Discover.Utils
 
+-- TODO use a Path Abs File instead of discoverSettings
 getIds :: MonadIO m => DiscoverSettings -> m [GHC.Id]
 getIds ds@DiscoverSettings {..} =
     liftIO $
@@ -33,7 +34,6 @@ getIds ds@DiscoverSettings {..} =
         loadSuccessfully LoadAllTargets
                     -- Doesn't work in a project, only in top-level modules
         let modname = getTargetModName ds
-        printO modname
         modSum <- getModSummary modname
         parsedModule <- parseModule modSum
         tmod <- typecheckModule parsedModule

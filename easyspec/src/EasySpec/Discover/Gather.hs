@@ -78,9 +78,17 @@ toEasyType ty =
             TyVarTy i -> TyVar mempty $ toEasyName $ Var.varName i
             AppTy t1 t2 -> TyApp mempty (toEasyType t1) (toEasyType t2)
             TyConApp tc kots ->
-                foldl
-                    (TyApp mempty)
-                    (TyCon mempty $ UnQual mempty $ toEasyName $ tyConName tc)
-                    (map toEasyType kots)
+                let dres =
+                        foldl
+                            (TyApp mempty)
+                            (TyCon mempty $
+                             UnQual mempty $ toEasyName $ tyConName tc)
+                            (map toEasyType kots)
+                in case tyConClass_maybe tc of
+                       Just _ -> dres
+                       Nothing ->
+                           case (showName (tyConName tc), kots) of
+                               ("[]", [lt]) -> TyList mempty $ toEasyType lt
+                               _ -> dres
             ForAllTy _ t' -> TyForall mempty Nothing Nothing $ toEasyType t'
             _ -> error "Not implemented yet"

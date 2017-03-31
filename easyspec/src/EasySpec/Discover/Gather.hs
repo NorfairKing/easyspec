@@ -90,5 +90,5 @@ toEasyType ty =
                            case (showName (tyConName tc), kots) of
                                ("[]", [lt]) -> TyList mempty $ toEasyType lt
                                _ -> dres
-            ForAllTy _ t' -> TyForall mempty Nothing Nothing $ toEasyType t'
+            ForAllTy _ t' -> toEasyType t'
             _ -> error "Not implemented yet"

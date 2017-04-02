@@ -67,9 +67,8 @@ idSigComponent i = do
             , show name
             , "((" ++
               (if "Dict" `isInfixOf` tyS
-                   then "typeclass "
-                   else "") ++
-              name ++ ")"
+                   then "typeclass (" ++ name ++ "))"
+                   else name ++ ")")
             , "::"
             , tyS ++ ")"
             ]

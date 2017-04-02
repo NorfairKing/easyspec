@@ -5,6 +5,7 @@ module EasySpec.Discover.Gather where
 
 import Import
 
+import Class
 import GHC
 import GHC.Paths (libdir)
 import OccName
@@ -70,25 +71,36 @@ toEasyName n = Ident mempty $ showName n
 toEasyType :: Monoid a => GHC.Type -> H.Type a
 toEasyType ty =
     case splitFunTy_maybe ty of
-        Nothing -> go ty
-        Just (tf, tt) -> H.TyFun mempty (toEasyType tf) (toEasyType tt)
-  where
-    go t =
-        case t of
-            TyVarTy i -> TyVar mempty $ toEasyName $ Var.varName i
-            AppTy t1 t2 -> TyApp mempty (toEasyType t1) (toEasyType t2)
-            TyConApp tc kots ->
-                let dres =
-                        foldl
-                            (TyApp mempty)
-                            (TyCon mempty $
-                             UnQual mempty $ toEasyName $ tyConName tc)
-                            (map toEasyType kots)
-                in case tyConClass_maybe tc of
-                       Just _ -> dres
-                       Nothing ->
-                           case (showName (tyConName tc), kots) of
-                               ("[]", [lt]) -> TyList mempty $ toEasyType lt
-                               _ -> dres
-            ForAllTy _ t' -> toEasyType t'
-            _ -> error "Not implemented yet"
+        Just (tf, tt) ->
+            case tf of
+                TyConApp tc kots ->
+                    case tyConClass_maybe tc of
+                        Just c ->
+                            TyForall
+                                mempty
+                                Nothing
+                                (Just $
+                                 CxSingle mempty $
+                                 ClassA
+                                     mempty
+                                     (UnQual mempty $ toEasyName $ className c)
+                                     (map toEasyType kots))
+                                (toEasyType tt)
+                        Nothing ->
+                            H.TyFun mempty (toEasyType tf) (toEasyType tt)
+                _ -> H.TyFun mempty (toEasyType tf) (toEasyType tt)
+        Nothing ->
+            case ty of
+                TyVarTy i -> TyVar mempty $ toEasyName $ Var.varName i
+                AppTy t1 t2 -> TyApp mempty (toEasyType t1) (toEasyType t2)
+                TyConApp tc kots ->
+                    case (showName (tyConName tc), kots) of
+                        ("[]", [lt]) -> TyList mempty $ toEasyType lt
+                        _ ->
+                            foldl
+                                (TyApp mempty)
+                                (TyCon mempty $
+                                 UnQual mempty $ toEasyName $ tyConName tc)
+                                (map toEasyType kots)
+                ForAllTy _ t' -> toEasyType t'
+                _ -> error "Not implemented yet"

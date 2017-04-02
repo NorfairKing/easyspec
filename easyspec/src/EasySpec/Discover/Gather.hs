@@ -20,21 +20,25 @@ import Language.Haskell.Exts.Syntax as H
 
 import EasySpec.OptParse
 
+import EasySpec.Discover.Types as E
 import EasySpec.Discover.Utils
 
+getIds :: MonadIO m => Path Abs File -> m [EasyId]
+getIds = fmap (map toEasyId) . getGHCIds
+
 -- TODO use a Path Abs File instead of discoverSettings
-getIds :: MonadIO m => DiscoverSettings -> m [GHC.Id]
-getIds ds@DiscoverSettings {..} =
+getGHCIds :: MonadIO m => Path Abs File -> m [GHC.Id]
+getGHCIds discFile =
     liftIO $
     runGhc (Just libdir) $ do
         dflags <- getSessionDynFlags
         let compdflags = prepareFlags dflags
         setDFlagsNoLinking compdflags
-        target <- guessTarget (toFilePath setDiscFile) Nothing
+        target <- guessTarget (toFilePath discFile) Nothing
         setTargets [target]
         loadSuccessfully LoadAllTargets
-                    -- Doesn't work in a project, only in top-level modules
-        let modname = getTargetModName ds
+        -- Doesn't work in a project, only in top-level modules
+        let modname = getTargetModName discFile
         modSum <- getModSummary modname
         parsedModule <- parseModule modSum
         tmod <- typecheckModule parsedModule
@@ -49,21 +53,10 @@ getIds ds@DiscoverSettings {..} =
                         Just _ -> Nothing
                         Nothing -> Nothing
 
-data EasyId = EasyId
-    { easyName :: EasyName
-    , easyType :: EasyType
-    } deriving (Show, Eq)
-
-type EasyName = H.Name ()
-
-type EasyType = H.Type ()
-
-toEasyId :: GHC.Id -> EasyId
+toEasyId :: Monoid m => GHC.Id -> E.Id m
 toEasyId i =
-    EasyId
-    { easyName = toEasyName $ Var.varName i
-    , easyType = toEasyType $ Var.varType i
-    }
+    Id
+    {idName = toEasyName $ Var.varName i, idType = toEasyType $ Var.varType i}
 
 toEasyName :: Monoid a => GHC.Name -> H.Name a
 toEasyName n = Ident mempty $ showName n

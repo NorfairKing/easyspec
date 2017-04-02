@@ -9,9 +9,10 @@ import GHC.Paths (libdir)
 
 import EasySpec.OptParse
 
+import EasySpec.Discover.Types
 import EasySpec.Discover.Utils
 
-runEasySpec :: MonadIO m => DiscoverSettings -> [GHC.Id] -> m ()
+runEasySpec :: MonadIO m => DiscoverSettings -> [EasyId] -> m ()
 runEasySpec ds ids =
     liftIO $
     runGhc (Just libdir) $
@@ -36,20 +37,22 @@ runEasySpec ds ids =
                 [ imp "QuickSpec"
                 , imp "QuickSpec.Signature"
                 , imp "Prelude"
-                , IIModule $ getTargetModName ds
+                , IIModule $ getTargetModName $ setDiscFile ds
                 ]
         setContext qsModules
-        getBindings >>= printO
-        quickspecSig <- createQuickspecSig ids
-        liftIO $ putStrLn quickspecSig
+        quickspecSigStr <- pure $
+            fromMaybe
+                (error
+                     "Unable to create quickspec signature, not enough type variables in quickspec")
+                (createQuickspecSigExpStr ids)
+        liftIO $ putStrLn quickspecSigStr
         let declaretc =
                 unlines
                     [ "let typeclass :: (c => a) -> Dict c -> a"
                     , "    typeclass x Dict = x"
                     ]
         void $ execStmt declaretc execOptions
-        void $
-            execStmt (unwords ["quickSpec", "(", quickspecSig, ")"]) execOptions
+        void $ execStmt quickspecSigStr execOptions
 
 addTypeClassExts :: DynFlags -> DynFlags
 addTypeClassExts dflags =

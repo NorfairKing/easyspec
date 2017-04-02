@@ -14,8 +14,9 @@ library
     exposed-modules:
         EasySpec
         EasySpec.Discover
-        EasySpec.Discover.Gather
         EasySpec.Discover.GHC
+        EasySpec.Discover.Gather
+        EasySpec.Discover.Types
         EasySpec.Discover.Utils
         EasySpec.OptParse
         EasySpec.OptParse.Types

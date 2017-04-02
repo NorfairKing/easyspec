@@ -9,7 +9,7 @@ import Language.Haskell.Exts
 import Text.Show.Pretty
 
 import EasySpec.Discover.Gather
-import EasySpec.OptParse.Types
+import EasySpec.Discover.Types
 
 spec :: Spec
 spec =
@@ -23,44 +23,39 @@ spec =
                      , "matches what ghc sees with what haskell-src-exts sees"
                      ]) $ \f -> do
             srcExtsEasyIds <- getHSEEasyIds f
-            ghcEasyIds <- getGHCEasyIds f
+            ghcEasyIds <- getIds f
             forM_ srcExtsEasyIds $ \seei ->
-                case find (\geid -> easyName seei == easyName geid) ghcEasyIds of
+                case find (\geid -> idName seei == idName geid) ghcEasyIds of
                     Nothing ->
                         expectationFailure $
                         unwords
                             [ "haskell-src-exts found an id that GHC did not find:"
-                            , prettyPrint $ easyName seei
+                            , prettyPrint $ idName seei
                             ]
                     Just geid ->
                         unless (geid == seei) $
                         expectationFailure $
                         unlines
                             [ "The that ghc and haskell-src-exts found differ for"
-                            , prettyPrint $ easyName seei
+                            , prettyPrint $ idName seei
                             , ""
                             , "as a string:"
                             , unwords
                                   [ "ghcs translation:"
-                                  , prettyPrint $ easyType geid
+                                  , prettyPrint $ idType geid
                                   ]
                             , unwords
                                   [ "haskell-src-exts:"
-                                  , prettyPrint $ easyType seei
+                                  , prettyPrint $ idType seei
                                   ]
                             , ""
                             , "internally:"
                             , "ghc translation:"
-                            , ppShow $ easyType geid
+                            , ppShow $ idType geid
                             , ""
                             , "haskell-src-exts:"
-                            , ppShow $ easyType seei
+                            , ppShow $ idType seei
                             ]
-
-getGHCEasyIds :: Path Abs File -> IO [EasyId]
-getGHCEasyIds f = do
-    ghcIds <- getIds DiscoverSettings {setDiscFile = f, setDiscFun = Nothing}
-    pure $ map toEasyId ghcIds
 
 getHSEEasyIds :: Path Abs File -> IO [EasyId]
 getHSEEasyIds f = do
@@ -85,7 +80,6 @@ getEasyIdsFrom m =
             concat $
             flip map ds $ \d ->
                 case d of
-                    TypeSig _ ns t ->
-                        map (\n -> EasyId {easyName = n, easyType = t}) ns
+                    TypeSig _ ns t -> map (\n -> Id {idName = n, idType = t}) ns
                     _ -> []
         _ -> []

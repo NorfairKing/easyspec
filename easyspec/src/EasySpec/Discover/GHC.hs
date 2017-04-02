@@ -40,7 +40,8 @@ runEasySpec ds ids =
                 , IIModule $ getTargetModName $ setDiscFile ds
                 ]
         setContext qsModules
-        quickspecSigStr <- pure $
+        quickspecSigStr <-
+            pure $
             fromMaybe
                 (error
                      "Unable to create quickspec signature, not enough type variables in quickspec")

@@ -1,5 +1,4 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE RecordWildCards #-}
 
 module EasySpec.Discover.Gather where
 
@@ -17,8 +16,6 @@ import Type
 import Var
 
 import Language.Haskell.Exts.Syntax as H
-
-import EasySpec.OptParse
 
 import EasySpec.Discover.Types as E
 import EasySpec.Discover.Utils
@@ -56,7 +53,9 @@ getGHCIds discFile =
 toEasyId :: Monoid m => GHC.Id -> E.Id m
 toEasyId i =
     Id
-    {idName = toEasyName $ Var.varName i, idType = toEasyType $ Var.varType i}
+    { E.idName = toEasyName $ Var.varName i
+    , E.idType = toEasyType $ Var.varType i
+    }
 
 toEasyName :: Monoid a => GHC.Name -> H.Name a
 toEasyName n = Ident mempty $ showName n

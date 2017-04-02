@@ -9,7 +9,7 @@ type EasyId = Id ()
 data Id m = Id
     { idName :: Name m
     , idType :: Type m
-    } deriving( Show, Eq)
+    } deriving (Show, Eq)
 
 type EasyName = H.Name ()
 

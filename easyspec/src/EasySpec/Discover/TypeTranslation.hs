@@ -1,15 +1,12 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-module EasySpec.Discover.Gather where
+module EasySpec.Discover.TypeTranslation where
 
 import Import
 
 import Class
 import GHC
-import GHC.Paths (libdir)
-import OccName
-import RdrName
-import TcRnTypes
+import qualified Name
 import TyCoRep
 import TyCon
 import Type
@@ -18,36 +15,6 @@ import Var
 import Language.Haskell.Exts.Syntax as H
 
 import EasySpec.Discover.Types as E
-import EasySpec.Discover.Utils
-
-getIds :: MonadIO m => Path Abs File -> m [EasyId]
-getIds = fmap (map toEasyId) . getGHCIds
-
-getGHCIds :: MonadIO m => Path Abs File -> m [GHC.Id]
-getGHCIds discFile =
-    liftIO $
-    runGhc (Just libdir) $ do
-        dflags <- getSessionDynFlags
-        let compdflags = prepareFlags dflags
-        setDFlagsNoLinking compdflags
-        target <- guessTarget (toFilePath discFile) Nothing
-        setTargets [target]
-        loadSuccessfully LoadAllTargets
-        -- Doesn't work in a project, only in top-level modules
-        let modname = getTargetModName discFile
-        modSum <- getModSummary modname
-        parsedModule <- parseModule modSum
-        tmod <- typecheckModule parsedModule
-        let (tcenv, _) = tm_internals_ tmod
-        let names = concatMap (map gre_name) $ occEnvElts $ tcg_rdr_env tcenv
-        fmap catMaybes $
-            forM names $ \name -> do
-                tything <- lookupName name
-                pure $
-                    case tything of
-                        Just (AnId i) -> Just i
-                        Just _ -> Nothing
-                        Nothing -> Nothing
 
 toEasyId :: Monoid m => GHC.Id -> E.Id m
 toEasyId i =
@@ -95,3 +62,6 @@ toEasyType ty =
                                 (map toEasyType kots)
                 ForAllTy _ t' -> toEasyType t'
                 _ -> error "Not implemented yet"
+
+showName :: GHC.Name -> String
+showName = Name.occNameString . Name.nameOccName

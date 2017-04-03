@@ -4,6 +4,10 @@ import Import
 
 import Language.Haskell.Exts.Syntax as H
 
+newtype SignatureExpression =
+    SignatureExpression EasyExp
+    deriving (Show, Eq)
+
 type EasyId = Id ()
 
 data Id m = Id

@@ -1,4 +1,4 @@
-module EasySpec.Discover.GHC where
+module EasySpec.Discover.QuickSpec where
 
 import Import
 
@@ -7,13 +7,15 @@ import GHC
 import GHC.LanguageExtensions
 import GHC.Paths (libdir)
 
+import Language.Haskell.Exts.Pretty
+
 import EasySpec.OptParse
 
 import EasySpec.Discover.Types
 import EasySpec.Discover.Utils
 
-runEasySpec :: MonadIO m => DiscoverSettings -> [EasyId] -> m ()
-runEasySpec ds ids =
+runEasySpec :: MonadIO m => DiscoverSettings -> SignatureExpression -> m ()
+runEasySpec ds sigExp =
     liftIO $
     runGhc (Just libdir) $
             -- Make the quickspec signature code
@@ -41,20 +43,17 @@ runEasySpec ds ids =
                 , IIModule $ getTargetModName $ setDiscFile ds
                 ]
         setContext qsModules
-        quickspecSigStr <-
-            pure $
-            fromMaybe
-                (error
-                     "Unable to create quickspec signature, not enough type variables in quickspec")
-                (createQuickspecSigExpStr ids)
-        liftIO $ putStrLn quickspecSigStr
         let declaretc =
                 unlines
                     [ "let typeclass :: (c => a) -> QuickSpec.Dict c -> a"
                     , "    typeclass x QuickSpec.Dict = x"
                     ]
         void $ execStmt declaretc execOptions
-        void $ execStmt quickspecSigStr execOptions
+        void $ execStmt (prettySigExp sigExp) execOptions
+
+prettySigExp :: SignatureExpression -> String
+prettySigExp (SignatureExpression ee) =
+    prettyPrintStyleMode (style {mode = OneLineMode}) defaultMode ee
 
 addTypeClassExts :: DynFlags -> DynFlags
 addTypeClassExts dflags =

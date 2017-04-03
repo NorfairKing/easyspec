@@ -14,8 +14,10 @@ library
     exposed-modules:
         EasySpec
         EasySpec.Discover
-        EasySpec.Discover.GHC
-        EasySpec.Discover.Gather
+        EasySpec.Discover.GatherFromGHC
+        EasySpec.Discover.SignatureGeneration
+        EasySpec.Discover.TypeTranslation
+        EasySpec.Discover.QuickSpec
         EasySpec.Discover.Types
         EasySpec.Discover.Utils
         EasySpec.OptParse

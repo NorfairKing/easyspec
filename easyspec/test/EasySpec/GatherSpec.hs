@@ -8,7 +8,8 @@ import TestUtils
 import Language.Haskell.Exts
 import Text.Show.Pretty
 
-import EasySpec.Discover.Gather
+import EasySpec.Discover.GatherFromGHC
+import EasySpec.Discover.TypeTranslation
 import EasySpec.Discover.Types
 
 spec :: Spec
@@ -23,7 +24,7 @@ spec =
                      , "matches what ghc sees with what haskell-src-exts sees"
                      ]) $ \f -> do
             srcExtsEasyIds <- getHSEEasyIds f
-            ghcEasyIds <- getIds f
+            ghcEasyIds <- map toEasyId <$> getGHCIds f
             forM_ srcExtsEasyIds $ \seei ->
                 case find (\geid -> idName seei == idName geid) ghcEasyIds of
                     Nothing ->

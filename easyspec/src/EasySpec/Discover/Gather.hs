@@ -23,7 +23,6 @@ import EasySpec.Discover.Utils
 getIds :: MonadIO m => Path Abs File -> m [EasyId]
 getIds = fmap (map toEasyId) . getGHCIds
 
--- TODO use a Path Abs File instead of discoverSettings
 getGHCIds :: MonadIO m => Path Abs File -> m [GHC.Id]
 getGHCIds discFile =
     liftIO $

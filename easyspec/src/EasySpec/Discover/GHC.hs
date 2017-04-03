@@ -32,11 +32,12 @@ runEasySpec ds ids =
         target <- guessTarget ("*" ++ toFilePath (setDiscFile ds)) Nothing
         setTargets [target]
         loadSuccessfully LoadAllTargets
-        let imp = IIDecl . GHC.simpleImportDecl . GHC.mkModuleName
+        let imp = GHC.simpleImportDecl . GHC.mkModuleName
         let qsModules =
-                [ imp "QuickSpec"
-                , imp "QuickSpec.Signature"
-                , imp "Prelude"
+                [ IIDecl $ (imp "QuickSpec") {ideclQualified = True}
+                , IIDecl $ (imp "QuickSpec.Signature") {ideclQualified = True}
+                , IIDecl $ (imp "QuickSpec.Term") {ideclQualified = True}
+                , IIDecl $ imp "Prelude"
                 , IIModule $ getTargetModName $ setDiscFile ds
                 ]
         setContext qsModules
@@ -49,8 +50,8 @@ runEasySpec ds ids =
         liftIO $ putStrLn quickspecSigStr
         let declaretc =
                 unlines
-                    [ "let typeclass :: (c => a) -> Dict c -> a"
-                    , "    typeclass x Dict = x"
+                    [ "let typeclass :: (c => a) -> QuickSpec.Dict c -> a"
+                    , "    typeclass x QuickSpec.Dict = x"
                     ]
         void $ execStmt declaretc execOptions
         void $ execStmt quickspecSigStr execOptions

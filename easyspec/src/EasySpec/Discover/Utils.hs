@@ -10,12 +10,13 @@ import DynFlags hiding (Settings)
 import qualified GHC
 import GHC
        (GhcMonad, SuccessFlag(..), LoadHowMuch, ModuleName,
-        setSessionDynFlags, load, mkModuleName)
+        getProgramDynFlags, setSessionDynFlags, load, mkModuleName)
 import GHC.LanguageExtensions
 import qualified Name
+import Outputable (Outputable(..), showPpr)
 
 import Language.Haskell.Exts.Pretty
-import Language.Haskell.Exts.Syntax hiding (ModuleName)
+import Language.Haskell.Exts.Syntax
 
 import EasySpec.Discover.Types
 
@@ -38,7 +39,7 @@ loadSuccessfully hm = do
 prepareFlags :: DynFlags -> DynFlags
 prepareFlags dflags = foldl xopt_set dflags [Cpp, ImplicitPrelude, MagicHash]
 
-getTargetModName :: Path Abs File -> ModuleName
+getTargetModName :: Path Abs File -> GHC.ModuleName
 getTargetModName = mkModuleName . dropExtension . toFilePath . filename
 
 createQuickspecSigExpStr :: [EasyId] -> Maybe String
@@ -46,10 +47,16 @@ createQuickspecSigExpStr ids =
     prettyPrintStyleMode (style {mode = OneLineMode}) defaultMode <$>
     createQuickspecSigExp ids
 
--- TODO make the names qualified
 createQuickspecSigExp :: (Eq m, Monoid m) => [Id m] -> Maybe (Exp m)
 createQuickspecSigExp ids =
-    App mempty (Var mempty (UnQual mempty (Ident mempty "quickSpec"))) <$>
+    App
+        mempty
+        (Var
+             mempty
+             (Qual
+                  mempty
+                  (ModuleName mempty "QuickSpec")
+                  (Ident mempty "quickSpec"))) <$>
     createQuickspecSig ids
 
 createQuickspecSig :: (Eq m, Monoid m) => [Id m] -> Maybe (Exp m)
@@ -57,10 +64,16 @@ createQuickspecSig ids =
     (\es ->
          RecConstr
              mempty
-             (UnQual mempty (Ident mempty "signature"))
+             (Qual
+                  mempty
+                  (ModuleName mempty "QuickSpec.Signature")
+                  (Ident mempty "signature"))
              [ FieldUpdate
                    mempty
-                   (UnQual mempty (Ident mempty "constants"))
+                   (Qual
+                        mempty
+                        (ModuleName mempty "QuickSpec.Signature")
+                        (Ident mempty "constants"))
                    (List mempty es)
              ]) <$>
     mapM signatureComponent ids
@@ -79,7 +92,12 @@ signatureComponent eid = do
             mempty
             (App
                  mempty
-                 (Var mempty (UnQual mempty (Ident mempty "constant")))
+                 (Var
+                      mempty
+                      (Qual
+                           mempty
+                           (ModuleName mempty "QuickSpec.Term")
+                           (Ident mempty "constant")))
                  funName)
             funExp
   where
@@ -100,7 +118,10 @@ signatureComponent eid = do
                               mempty
                               (TyCon
                                    mempty
-                                   (UnQual mempty (Ident mempty "Dict")))
+                                   (Qual
+                                        mempty
+                                        (ModuleName mempty "QuickSpec")
+                                        (Ident mempty "Dict")))
                               (TyApp mempty (TyCon mempty cn) ct))
                          t')
             _ -> (e, t)
@@ -109,7 +130,13 @@ replaceVarsWithQuickspecVars :: Eq l => Type l -> Maybe (Type l)
 replaceVarsWithQuickspecVars et =
     let tvs = getTyVars et
         funcs =
-            map (\s -> (\l -> TyVar l (Ident l s))) ["A", "B", "C", "D", "E"]
+            map
+                (\s ->
+                     (\l ->
+                          TyCon
+                              l
+                              (Qual l (ModuleName l "QuickSpec") (Ident l s))))
+                ["A", "B", "C", "D", "E"]
     in replaceTyVars (zip tvs funcs) et
 
 replaceTyVars :: Eq l => [(Name l, l -> Type l)] -> Type l -> Maybe (Type l)
@@ -196,11 +223,11 @@ foldType ffa ff ft fl fpa fa fv fc fp fi fk fpr fe fspl fbng fwc fqq = go
 
 showName :: GHC.Name -> String
 showName = Name.occNameString . Name.nameOccName
---
--- showGHC :: (GhcMonad m, Outputable a) => a -> m String
--- showGHC a = do
---     dfs <- getProgramDynFlags
---     pure $ showPpr dfs a
---
--- printO :: (GhcMonad m, Outputable a) => a -> m ()
--- printO a = showGHC a >>= (liftIO . putStrLn)
+
+showGHC :: (GhcMonad m, Outputable a) => a -> m String
+showGHC a = do
+    dfs <- getProgramDynFlags
+    pure $ showPpr dfs a
+
+printO :: (GhcMonad m, Outputable a) => a -> m ()
+printO a = showGHC a >>= (liftIO . putStrLn)

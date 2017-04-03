@@ -1,4 +1,4 @@
-module EasySpec.Discover.GHC where
+module EasySpec.Discover.QuickSpec where
 
 import Import
 
@@ -7,12 +7,15 @@ import GHC
 import GHC.LanguageExtensions
 import GHC.Paths (libdir)
 
+import Language.Haskell.Exts.Pretty
+
 import EasySpec.OptParse
 
+import EasySpec.Discover.Types
 import EasySpec.Discover.Utils
 
-runEasySpec :: MonadIO m => DiscoverSettings -> [GHC.Id] -> m ()
-runEasySpec ds ids =
+runEasySpec :: MonadIO m => DiscoverSettings -> SignatureExpression -> m ()
+runEasySpec ds sigExp =
     liftIO $
     runGhc (Just libdir) $
             -- Make the quickspec signature code
@@ -31,25 +34,26 @@ runEasySpec ds ids =
         target <- guessTarget ("*" ++ toFilePath (setDiscFile ds)) Nothing
         setTargets [target]
         loadSuccessfully LoadAllTargets
-        let imp = IIDecl . GHC.simpleImportDecl . GHC.mkModuleName
+        let imp = GHC.simpleImportDecl . GHC.mkModuleName
         let qsModules =
-                [ imp "QuickSpec"
-                , imp "QuickSpec.Signature"
-                , imp "Prelude"
-                , IIModule $ getTargetModName ds
+                [ IIDecl $ (imp "QuickSpec") {ideclQualified = True}
+                , IIDecl $ (imp "QuickSpec.Signature") {ideclQualified = True}
+                , IIDecl $ (imp "QuickSpec.Term") {ideclQualified = True}
+                , IIDecl $ imp "Prelude"
+                , IIModule $ getTargetModName $ setDiscFile ds
                 ]
         setContext qsModules
-        getBindings >>= printO
-        quickspecSig <- createQuickspecSig ids
-        liftIO $ putStrLn quickspecSig
         let declaretc =
                 unlines
-                    [ "let typeclass :: (c => a) -> Dict c -> a"
-                    , "    typeclass x Dict = x"
+                    [ "let typeclass :: (c => a) -> QuickSpec.Dict c -> a"
+                    , "    typeclass x QuickSpec.Dict = x"
                     ]
         void $ execStmt declaretc execOptions
-        void $
-            execStmt (unwords ["quickSpec", "(", quickspecSig, ")"]) execOptions
+        void $ execStmt (prettySigExp sigExp) execOptions
+
+prettySigExp :: SignatureExpression -> String
+prettySigExp (SignatureExpression ee) =
+    prettyPrintStyleMode (style {mode = OneLineMode}) defaultMode ee
 
 addTypeClassExts :: DynFlags -> DynFlags
 addTypeClassExts dflags =

@@ -5,6 +5,8 @@ module Import
 import Debug.Trace as X
 import Prelude as X hiding (return)
 
+import System.Exit as X
+
 import Control.Monad as X
 import Control.Monad.IO.Class as X
 

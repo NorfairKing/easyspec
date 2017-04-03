@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE RecordWildCards #-}
 
-module EasySpec.Discover.Gather where
+module EasySpec.Discover.GatherFromGHC where
 
 import Import
 
@@ -11,23 +10,20 @@ import OccName
 import RdrName
 import TcRnTypes
 
-import EasySpec.OptParse
-
 import EasySpec.Discover.Utils
 
-getIds :: MonadIO m => DiscoverSettings -> m [GHC.Id]
-getIds ds@DiscoverSettings {..} =
+getGHCIds :: MonadIO m => Path Abs File -> m [GHC.Id]
+getGHCIds discFile =
     liftIO $
     runGhc (Just libdir) $ do
         dflags <- getSessionDynFlags
         let compdflags = prepareFlags dflags
         setDFlagsNoLinking compdflags
-        target <- guessTarget (toFilePath setDiscFile) Nothing
+        target <- guessTarget (toFilePath discFile) Nothing
         setTargets [target]
         loadSuccessfully LoadAllTargets
-                    -- Doesn't work in a project, only in top-level modules
-        let modname = getTargetModName ds
-        printO modname
+        -- Doesn't work in a project, only in top-level modules
+        let modname = getTargetModName discFile
         modSum <- getModSummary modname
         parsedModule <- parseModule modSum
         tmod <- typecheckModule parsedModule

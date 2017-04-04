@@ -16,16 +16,18 @@ import EasySpec.Discover.Types
 {-# ANN module "HLint: ignore Collapse lambdas" #-}
 
 createQuickspecSigExp :: (Eq m, Monoid m) => [Id m] -> Maybe (Exp m)
-createQuickspecSigExp ids =
+createQuickspecSigExp ids = runQuickspecExp <$> createQuickspecSig ids
+
+runQuickspecExp :: Monoid m => Exp m -> Exp m
+runQuickspecExp =
     App
         mempty
         (Var
              mempty
              (Qual
                   mempty
-                  (ModuleName mempty "QuickSpec")
-                  (Ident mempty "quickSpec"))) <$>
-    createQuickspecSig ids
+                  (ModuleName mempty "QuickSpec.Eval")
+                  (Ident mempty "quickSpec")))
 
 createQuickspecSig :: (Eq m, Monoid m) => [Id m] -> Maybe (Exp m)
 createQuickspecSig ids =

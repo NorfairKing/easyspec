@@ -74,7 +74,7 @@ parseCommandDiscover = info parser modifier
         CommandDiscover <$>
         (DiscoverArgs <$>
          strArgument (mconcat [metavar "FILE", help "The file to look in"]) <*>
-         option
+         argument
              (Just <$> str)
              (mconcat
                   [ metavar "FUNCTION"

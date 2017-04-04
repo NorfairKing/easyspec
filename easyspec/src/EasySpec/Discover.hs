@@ -15,11 +15,13 @@ module EasySpec.Discover where
 
 import Import
 
+import Language.Haskell.Exts.Pretty (prettyPrint)
+
 import EasySpec.OptParse
 
 import EasySpec.Discover.GatherFromGHC
 import EasySpec.Discover.QuickSpec
-import EasySpec.Discover.SignatureGeneration
+import EasySpec.Discover.SignatureInference
 import EasySpec.Discover.TypeTranslation
 import EasySpec.Discover.Types
 
@@ -27,11 +29,13 @@ discover :: (MonadIO m, MonadReader Settings m) => DiscoverSettings -> m ()
 discover ds = do
     ghcIds <- getGHCIds $ setDiscFile ds
     let ids = map toEasyId ghcIds
-    se <-
-        case createQuickspecSigExp ids of
-            Nothing ->
-                liftIO $
-                die
-                    "Unable to generate quickspec signature expression: Not enough type variables in quickspec."
-            Just e -> pure $ SignatureExpression e
-    runEasySpec ds se
+    let iSig = uncurry inferFullSignature $ splitFocus ds ids
+    runEasySpec ds iSig
+
+splitFocus :: DiscoverSettings -> [EasyId] -> ([EasyId], [EasyId])
+splitFocus ds ids =
+    let fs =
+            case find (\i -> Just (prettyPrint $ idName i) == setDiscFun ds) ids of
+                Nothing -> []
+                Just i -> [i]
+    in (fs, ids \\ fs)

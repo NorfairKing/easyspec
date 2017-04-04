@@ -15,9 +15,10 @@ library
         EasySpec
         EasySpec.Discover
         EasySpec.Discover.GatherFromGHC
-        EasySpec.Discover.SignatureGeneration
-        EasySpec.Discover.TypeTranslation
         EasySpec.Discover.QuickSpec
+        EasySpec.Discover.SignatureGeneration
+        EasySpec.Discover.SignatureInference
+        EasySpec.Discover.TypeTranslation
         EasySpec.Discover.Types
         EasySpec.Discover.Utils
         EasySpec.OptParse

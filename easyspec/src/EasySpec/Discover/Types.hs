@@ -4,6 +4,11 @@ import Import
 
 import Language.Haskell.Exts.Syntax as H
 
+data InferredSignature = InferredSignature
+    { sigFocusIds :: [EasyId]
+    , sigBackgroundIds :: [EasyId]
+    } deriving (Show, Eq)
+
 newtype SignatureExpression =
     SignatureExpression EasyExp
     deriving (Show, Eq)

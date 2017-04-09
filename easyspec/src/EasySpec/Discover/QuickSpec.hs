@@ -54,22 +54,10 @@ runEasySpec ds iSig =
                         , "    typeclass x QuickSpec.Dict = x"
                         ]
             void $ execStmt declaretc execOptions
-            let backgroundSigName = Ident mempty "bgSig"
             void $
                 execStmt
-                    (prettyPrintOneLine $
-                     Generator
-                         mempty
-                         (PVar mempty backgroundSigName)
-                         (runQuickspecExp bgSig))
-                    execOptions
-            void $
-                execStmt
-                    (prettyPrintOneLine $
-                     runQuickspecExp $
-                     mappendSigsExp
-                         (Var mempty (UnQual mempty backgroundSigName))
-                         focusSig)
+                    (prettyPrintOneLine
+                         (runQuickspecWithBackgroundExp bgSig focusSig))
                     execOptions
 
 mappendSigsExp :: EasyExp -> EasyExp -> EasyExp

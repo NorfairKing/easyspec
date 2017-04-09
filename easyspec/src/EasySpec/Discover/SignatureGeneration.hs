@@ -29,6 +29,20 @@ runQuickspecExp =
                   (ModuleName mempty "QuickSpec.Eval")
                   (Ident mempty "quickSpec")))
 
+runQuickspecWithBackgroundExp :: Monoid m => Exp m -> Exp m -> Exp m
+runQuickspecWithBackgroundExp bgsig =
+    App
+        mempty
+        (App
+             mempty
+             (Var
+                  mempty
+                  (Qual
+                       mempty
+                       (ModuleName mempty "QuickSpec.Eval")
+                       (Ident mempty "quickSpecWithBackground")))
+             bgsig)
+
 createQuickspecSig :: (Eq m, Monoid m) => [Id m] -> Maybe (Exp m)
 createQuickspecSig ids =
     (\es ->

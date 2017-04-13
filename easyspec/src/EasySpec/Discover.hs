@@ -11,13 +11,19 @@ Property discovery happens in multiple steps:
 - Quickspec is run interactively
 
 -}
-module EasySpec.Discover where
+module EasySpec.Discover
+    ( discover
+    , discoverEquations
+    , inferenceStrategies
+    , inferEmptySignature
+    , inferFullSignature
+    ) where
 
 import Import
 
 import Language.Haskell.Exts.Pretty (prettyPrint)
 
-import EasySpec.OptParse
+import EasySpec.OptParse.Types
 
 import EasySpec.Discover.GatherFromGHC
 import EasySpec.Discover.QuickSpec
@@ -27,15 +33,21 @@ import EasySpec.Discover.Types
 
 discover :: (MonadIO m, MonadReader Settings m) => DiscoverSettings -> m ()
 discover ds = do
-    ghcIds <- getGHCIds $ setDiscFile ds
-    let ids = map toEasyId ghcIds
-    let iSig = uncurry inferFullSignature $ splitFocus ds ids
-    res <- runEasySpec ds iSig
+    res <- discoverEquations ds
     liftIO $
         mapM_
             (\(EasyEq lh rh) ->
                  putStrLn $ prettyPrint lh ++ " = " ++ prettyPrint rh)
             res
+
+discoverEquations ::
+       (MonadIO m, MonadReader Settings m) => DiscoverSettings -> m [EasyEq]
+discoverEquations ds = do
+    ghcIds <- getGHCIds $ setDiscFile ds
+    let ids = map toEasyId ghcIds
+    let SignatureInferenceStrategy inferStrat = setDiscInfStrat ds
+    let iSig = uncurry inferStrat $ splitFocus ds ids
+    runEasySpec ds iSig
 
 splitFocus :: DiscoverSettings -> [EasyId] -> ([EasyId], [EasyId])
 splitFocus ds ids =
@@ -44,3 +56,9 @@ splitFocus ds ids =
                 Nothing -> []
                 Just i -> [i]
     in (fs, ids \\ fs)
+
+inferenceStrategies :: [(String, SignatureInferenceStrategy)]
+inferenceStrategies =
+    [ ("empty-signature", inferEmptySignature)
+    , ("full-signature", inferFullSignature)
+    ]

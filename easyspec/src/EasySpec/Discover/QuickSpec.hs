@@ -16,7 +16,7 @@ import Language.Haskell.Exts.Parser
 import Language.Haskell.Exts.Pretty
 import Language.Haskell.Exts.Syntax
 
-import EasySpec.OptParse
+import EasySpec.OptParse.Types
 
 import EasySpec.Discover.SignatureGeneration
 import EasySpec.Discover.Types

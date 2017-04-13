@@ -4,6 +4,10 @@ import Import
 
 import Language.Haskell.Exts.Syntax as H
 
+newtype SignatureInferenceStrategy = SignatureInferenceStrategy
+    { inferSignature :: [EasyId] -> [EasyId] -> InferredSignature
+    }
+
 data InferredSignature = InferredSignature
     { sigFocusIds :: [EasyId]
     , sigBackgroundIds :: [EasyId]

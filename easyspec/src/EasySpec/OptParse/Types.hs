@@ -2,6 +2,8 @@ module EasySpec.OptParse.Types where
 
 import Import
 
+import EasySpec.Discover.Types
+
 type Arguments = (Command, Flags)
 
 type Instructions = (Dispatch, Settings)
@@ -13,6 +15,7 @@ newtype Command =
 data DiscoverArgs = DiscoverArgs
     { argDiscFile :: FilePath
     , argDiscFun :: Maybe String
+    , argDiscInfStratName :: Maybe String
     } deriving (Show, Eq)
 
 data Flags =
@@ -25,12 +28,12 @@ data Configuration =
 
 newtype Dispatch =
     DispatchDiscover DiscoverSettings
-    deriving (Show, Eq)
 
 data DiscoverSettings = DiscoverSettings
     { setDiscFile :: Path Abs File
     , setDiscFun :: Maybe String
-    } deriving (Show, Eq)
+    , setDiscInfStrat :: SignatureInferenceStrategy
+    }
 
 data Settings =
     Settings

@@ -13,6 +13,7 @@ import System.Environment (getArgs)
 
 import Options.Applicative
 
+import EasySpec.Discover
 import EasySpec.OptParse.Types
 
 getInstructions :: IO Instructions
@@ -29,9 +30,16 @@ combineToInstructions cmd Flags Configuration = (,) <$> disp <*> pure Settings
             CommandDiscover DiscoverArgs {..} ->
                 DispatchDiscover <$> do
                     file <- resolveFile' argDiscFile
+                    let infStrat =
+                            fromMaybe inferFullSignature $
+                            argDiscInfStratName >>=
+                            (`lookup` inferenceStrategies)
                     pure
                         DiscoverSettings
-                        {setDiscFile = file, setDiscFun = argDiscFun}
+                        { setDiscFile = file
+                        , setDiscFun = argDiscFun
+                        , setDiscInfStrat = infStrat
+                        }
 
 getConfiguration :: Command -> Flags -> IO Configuration
 getConfiguration _ _ = pure Configuration
@@ -80,6 +88,13 @@ parseCommandDiscover = info parser modifier
                   [ metavar "FUNCTION"
                   , value Nothing
                   , help "The function to discover properties of"
+                  ]) <*>
+         option
+             (Just <$> str)
+             (mconcat
+                  [ metavar "SIGINFALG"
+                  , value Nothing
+                  , help "The name of the signature inference algorithm to use"
                   ]))
     modifier = fullDesc <> progDesc "Command example."
 

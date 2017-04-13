@@ -1,6 +1,11 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module EasySpec.Evaluate where
 
 import Import
+
+import System.TimeIt
+import Text.Printf
 
 import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.Types as ES
@@ -30,21 +35,28 @@ getEvaluationInputPoint f strat = do
             , ES.setDiscFun = Nothing
             , ES.setDiscInfStrat = strat
             }
-    eqs <- runReaderT (ES.discoverEquations ds) sets
+    (runtime, eqs) <- timeItT $ runReaderT (ES.discoverEquations ds) sets
     pure
         EvaluationInputPoint
-        {eipFile = f, eipStrat = strat, eipDiscoveredEqs = eqs}
+        { eipFile = f
+        , eipStrat = strat
+        , eipDiscoveredEqs = eqs
+        , eipRuntime = runtime
+        }
 
 showEvaluationReport :: [[EvaluationInputPoint]] -> String
-showEvaluationReport pointss = showTable $ map go $ concat pointss
+showEvaluationReport pointss = showTable $ concatMap go $ concat pointss
   where
-    go :: EvaluationInputPoint -> [String]
-    go eip =
-        [ toFilePath $ eipFile eip
-        , ES.sigInfStratName $ eipStrat eip
-        , evaluatorName lengthEvaluator
-        , evaluate (pointToInput eip) lengthEvaluator
-        ]
+    go :: EvaluationInputPoint -> [[String]]
+    go eip = [line lengthEvaluator, line runtimeEvaluator]
+      where
+        ip = pointToInput eip
+        line ev =
+            [ toFilePath $ eipFile eip
+            , ES.sigInfStratName $ eipStrat eip
+            , evaluatorName ev
+            , evaluate ip ev
+            ]
 
 showTable :: [[String]] -> String
 showTable = unlines . map unwords . formatTable
@@ -65,7 +77,11 @@ evaluate :: EvaluationInput -> Evaluator a -> String
 evaluate ei e = evaluatorPretty e $ evaluatorGather e ei
 
 pointToInput :: EvaluationInputPoint -> EvaluationInput
-pointToInput eip = EvaluationInput {eiDiscoveredEqs = eipDiscoveredEqs eip}
+pointToInput EvaluationInputPoint {..} =
+    EvaluationInput {eiDiscoveredEqs = eipDiscoveredEqs, eiRuntime = eipRuntime}
 
 lengthEvaluator :: Evaluator Int
 lengthEvaluator = Evaluator "length" (length . eiDiscoveredEqs) show
+
+runtimeEvaluator :: Evaluator Double
+runtimeEvaluator = Evaluator "runtime" eiRuntime (printf "%.2fs")

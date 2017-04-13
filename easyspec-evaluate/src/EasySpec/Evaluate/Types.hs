@@ -8,10 +8,12 @@ data EvaluationInputPoint = EvaluationInputPoint
     { eipFile :: Path Abs File
     , eipStrat :: ES.SignatureInferenceStrategy
     , eipDiscoveredEqs :: [ES.EasyEq]
+    , eipRuntime :: Double
     } deriving (Show, Eq)
 
-newtype EvaluationInput = EvaluationInput
+data EvaluationInput = EvaluationInput
     { eiDiscoveredEqs :: [ES.EasyEq]
+    , eiRuntime :: Double
     } deriving (Show, Eq)
 
 data Evaluator a = Evaluator

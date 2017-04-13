@@ -25,3 +25,7 @@ type EasyName = H.Name ()
 type EasyType = H.Type ()
 
 type EasyExp = H.Exp ()
+
+type EasyStmt = H.Stmt ()
+
+type EasyPat = H.Pat ()

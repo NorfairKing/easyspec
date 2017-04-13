@@ -17,11 +17,18 @@ import EasySpec.Discover.Types
 
 {-# ANN module "HLint: ignore Collapse lambdas" #-}
 
-createQuickspecSigExp :: [Id ()] -> Maybe (Exp ())
+createQuickspecSigExp :: [EasyId] -> Maybe EasyExp
 createQuickspecSigExp ids = runQuickspecExp <$> createQuickspecSig ids
 
-runQuickspecExp :: Exp () -> Exp ()
+runQuickspecExp :: EasyExp -> EasyExp
 runQuickspecExp = App () $(easyExp "QuickSpec.Eval.quickSpec")
+
+showPrettyBackgroundExp :: EasyExp -> EasyExp
+showPrettyBackgroundExp =
+    App
+        mempty
+        $(easyExp
+              "\\sig -> map Text.PrettyPrint.HughesPJClass.prettyShow (map (QuickSpec.Signature.prettyRename sig) (QuickSpec.Signature.background sig))")
 
 runQuickspecWithBackgroundExp :: Monoid m => Exp m -> Exp m -> Exp m
 runQuickspecWithBackgroundExp bgsig =
@@ -36,6 +43,20 @@ runQuickspecWithBackgroundExp bgsig =
                        (ModuleName mempty "QuickSpec.Eval")
                        (Ident mempty "quickSpecWithBackground")))
              bgsig)
+
+mappendSigsExp :: EasyExp -> EasyExp -> EasyExp
+mappendSigsExp a =
+    App
+        mempty
+        (App
+             mempty
+             (Var
+                  mempty
+                  (Qual
+                       mempty
+                       (ModuleName mempty "Data.Monoid")
+                       (Ident mempty "mappend")))
+             a)
 
 createQuickspecSig :: (Eq m, Monoid m) => [Id m] -> Maybe (Exp m)
 createQuickspecSig ids =

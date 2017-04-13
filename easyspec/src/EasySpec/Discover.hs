@@ -30,7 +30,8 @@ discover ds = do
     ghcIds <- getGHCIds $ setDiscFile ds
     let ids = map toEasyId ghcIds
     let iSig = uncurry inferFullSignature $ splitFocus ds ids
-    runEasySpec ds iSig
+    res <- runEasySpec ds iSig
+    liftIO $ mapM_ putStrLn res
 
 splitFocus :: DiscoverSettings -> [EasyId] -> ([EasyId], [EasyId])
 splitFocus ds ids =

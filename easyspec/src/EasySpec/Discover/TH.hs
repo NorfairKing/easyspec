@@ -20,8 +20,8 @@ easyExp :: String -> Q TH.Exp
 easyExp s =
     case HSE.parseExp s of
         ParseOk a ->
-            let b = () <$ a
-            in [|b :: EasyExp|]
+            let b = () <$ a :: EasyExp
+            in [|b|]
         ParseFailed srcLoc err ->
             fail $
             unwords

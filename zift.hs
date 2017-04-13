@@ -8,6 +8,7 @@
     --package zifter-hindent
     --package zifter-hlint
     --package zifter-stack
+    --package hlint-1.9.40
 -}
 {-# LANGUAGE OverloadedStrings #-}
 

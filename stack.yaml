@@ -1,6 +1,7 @@
 flags: {}
 packages:
 - './easyspec'
+- './easyspec-evaluate'
 - location:
       git: git@github.com:NorfairKing/quickspec.git
       commit: f5f73edc4807b925f36201c5791178171186619b

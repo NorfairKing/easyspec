@@ -31,7 +31,11 @@ discover ds = do
     let ids = map toEasyId ghcIds
     let iSig = uncurry inferFullSignature $ splitFocus ds ids
     res <- runEasySpec ds iSig
-    liftIO $ mapM_ putStrLn res
+    liftIO $
+        mapM_
+            (\(lh :=: rh) ->
+                 putStrLn $ prettyPrint lh ++ " = " ++ prettyPrint rh)
+            res
 
 splitFocus :: DiscoverSettings -> [EasyId] -> ([EasyId], [EasyId])
 splitFocus ds ids =

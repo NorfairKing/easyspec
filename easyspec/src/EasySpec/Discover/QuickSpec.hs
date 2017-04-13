@@ -5,12 +5,14 @@ module EasySpec.Discover.QuickSpec where
 import Import
 
 import Data.Dynamic
+import Data.List.Split
 
 import DynFlags hiding (Settings)
 import GHC hiding (Qual, Name)
 import GHC.LanguageExtensions
 import GHC.Paths (libdir)
 
+import Language.Haskell.Exts.Parser
 import Language.Haskell.Exts.Pretty
 import Language.Haskell.Exts.Syntax
 
@@ -20,7 +22,7 @@ import EasySpec.Discover.SignatureGeneration
 import EasySpec.Discover.Types
 import EasySpec.Discover.Utils
 
-runEasySpec :: MonadIO m => DiscoverSettings -> InferredSignature -> m [String]
+runEasySpec :: MonadIO m => DiscoverSettings -> InferredSignature -> m [EasyEq]
 runEasySpec ds iSig =
     liftIO $
     runGhc (Just libdir) $ do
@@ -45,6 +47,8 @@ runEasySpec ds iSig =
                 , IIDecl $ (imp "QuickSpec.Term") {ideclQualified = True}
                 , IIDecl $
                   (imp "Text.PrettyPrint.HughesPJClass") {ideclQualified = True}
+                , IIDecl $
+                  (imp "Text.PrettyPrint.HughesPJ") {ideclQualified = True}
                 , IIDecl $ (imp "Data.Monoid") {ideclQualified = True}
                 , IIDecl $ imp "Prelude"
                 , IIModule $ getTargetModName $ setDiscFile ds
@@ -58,7 +62,7 @@ runEasySpec ds iSig =
         void $ execStmt declaretc execOptions
         runQuickspecOn iSig
 
-runQuickspecOn :: GhcMonad m => InferredSignature -> m [String]
+runQuickspecOn :: GhcMonad m => InferredSignature -> m [EasyEq]
 runQuickspecOn iSig = do
     (bgSig, focusSig) <- liftIO $ makeSignatureExpressions iSig
     let s1name = Ident mempty "s1"
@@ -82,7 +86,38 @@ runQuickspecOn iSig = do
         Nothing ->
             liftIO $
             die $ unwords ["failed to coerce the string result of", expStr]
-        Just res -> pure res
+        Just res ->
+            forM res $ \s ->
+                case splitOn " = " s of
+                    [lhs, rhs] ->
+                        case (,) <$> parseExp lhs <*> parseExp rhs of
+                            ParseFailed srcloc err ->
+                                liftIO $
+                                die $
+                                unwords
+                                    [ "Failed to parse one of two expressions:"
+                                    , show lhs
+                                    , "and"
+                                    , show rhs
+                                    , "at"
+                                    , show srcloc
+                                    , "with error:"
+                                    , err
+                                    ]
+                            ParseOk (lh, rh) -> pure $ (() <$ lh) :=: (() <$ rh)
+                    ss ->
+                        liftIO $
+                        die $
+                        unwords
+                            [ "failed to split an equation"
+                            , s
+                            , "into two pieces"
+                            , s
+                            , "on \" = \""
+                            , "got"
+                            , show ss
+                            , "instead."
+                            ]
 
 bindTo :: EasyName -> EasyExp -> EasyStmt
 bindTo n = Generator mempty (PVar mempty n)

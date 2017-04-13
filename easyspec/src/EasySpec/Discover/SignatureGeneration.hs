@@ -27,8 +27,18 @@ showPrettyBackgroundExp :: EasyExp -> EasyExp
 showPrettyBackgroundExp =
     App
         mempty
-        $(easyExp
-              "\\sig -> map Text.PrettyPrint.HughesPJClass.prettyShow (map (QuickSpec.Signature.prettyRename sig) (QuickSpec.Signature.background sig))")
+        $(easyExp $
+          unwords
+              [ "\\sig ->"
+              , "map"
+              , "(Text.PrettyPrint.HughesPJ.renderStyle"
+              , "(Text.PrettyPrint.HughesPJ.style {Text.PrettyPrint.HughesPJ.mode = Text.PrettyPrint.HughesPJ.OneLineMode})"
+              , "."
+              , "Text.PrettyPrint.HughesPJClass.pPrint) $"
+              , "map"
+              , "(QuickSpec.Signature.prettyRename sig)"
+              , "(QuickSpec.Signature.background sig)"
+              ])
 
 runQuickspecWithBackgroundExp :: Monoid m => Exp m -> Exp m -> Exp m
 runQuickspecWithBackgroundExp bgsig =

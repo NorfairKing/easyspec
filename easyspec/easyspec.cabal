@@ -38,7 +38,8 @@ library
         quickspec >=2 && <3,
         jukebox ==0.2.14,
         haskell-src-exts >=1.18 && <1.19,
-        template-haskell >=2.11 && <2.12
+        template-haskell >=2.11 && <2.12,
+        split >=0.2 && <0.3
     default-language: Haskell2010
     default-extensions: NoImplicitPrelude
     hs-source-dirs: src/

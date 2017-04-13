@@ -49,6 +49,7 @@ runEasySpec ds iSig =
                   (imp "Text.PrettyPrint.HughesPJClass") {ideclQualified = True}
                 , IIDecl $
                   (imp "Text.PrettyPrint.HughesPJ") {ideclQualified = True}
+                , IIDecl $ (imp "Data.Maybe") {ideclQualified = True}
                 , IIDecl $ (imp "Data.Monoid") {ideclQualified = True}
                 , IIDecl $ imp "Prelude"
                 , IIModule $ getTargetModName $ setDiscFile ds

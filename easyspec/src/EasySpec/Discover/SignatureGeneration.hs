@@ -84,6 +84,21 @@ createQuickspecSig ids =
                         (ModuleName mempty "QuickSpec.Signature")
                         (Ident mempty "constants"))
                    (List mempty es)
+             , FieldUpdate -- Just to make tests go a bit quicker
+                   mempty
+                   (Qual
+                        mempty
+                        (ModuleName mempty "QuickSpec.Signature")
+                        (Ident mempty "maxTests"))
+                   (App
+                        mempty
+                        (Con
+                             mempty
+                             (Qual
+                                  mempty
+                                  (ModuleName mempty "Data.Maybe")
+                                  (Ident mempty "Just")))
+                        (Lit mempty (Int mempty 100 "100")))
              ]) <$>
     mapM signatureComponent ids
 

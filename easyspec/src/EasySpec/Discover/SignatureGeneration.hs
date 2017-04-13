@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module EasySpec.Discover.SignatureGeneration where
 
@@ -7,6 +8,7 @@ import Import
 import Language.Haskell.Exts.Pretty
 import Language.Haskell.Exts.Syntax
 
+import EasySpec.Discover.TH
 import EasySpec.Discover.Types
 
 {-# ANN module "HLint: ignore Use const" #-}
@@ -15,19 +17,11 @@ import EasySpec.Discover.Types
 
 {-# ANN module "HLint: ignore Collapse lambdas" #-}
 
-createQuickspecSigExp :: (Eq m, Monoid m) => [Id m] -> Maybe (Exp m)
+createQuickspecSigExp :: [Id ()] -> Maybe (Exp ())
 createQuickspecSigExp ids = runQuickspecExp <$> createQuickspecSig ids
 
-runQuickspecExp :: Monoid m => Exp m -> Exp m
-runQuickspecExp =
-    App
-        mempty
-        (Var
-             mempty
-             (Qual
-                  mempty
-                  (ModuleName mempty "QuickSpec.Eval")
-                  (Ident mempty "quickSpec")))
+runQuickspecExp :: Exp () -> Exp ()
+runQuickspecExp = App () $(easyExp "QuickSpec.Eval.quickSpec")
 
 runQuickspecWithBackgroundExp :: Monoid m => Exp m -> Exp m -> Exp m
 runQuickspecWithBackgroundExp bgsig =
@@ -132,7 +126,7 @@ replaceTyVars repls =
         (\l -> fmap (TyList l))
         (\l -> fmap (TyParArray l))
         (\l -> liftM2 (TyApp l))
-        (\l n -> ($l) <$> lookup n repls)
+        (\l n -> ($ l) <$> lookup n repls)
         (\l qn -> pure $ TyCon l qn)
         (\l -> fmap (TyParen l))
         (\l mt qn mv -> TyInfix l <$> mt <*> pure qn <*> mv)

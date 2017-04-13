@@ -2,7 +2,7 @@
 
 module EasySpec.Discover.TypeTranslation where
 
-import Import
+import Import hiding (tyConName)
 
 import Class
 import GHC

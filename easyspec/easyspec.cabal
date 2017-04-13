@@ -18,6 +18,7 @@ library
         EasySpec.Discover.QuickSpec
         EasySpec.Discover.SignatureGeneration
         EasySpec.Discover.SignatureInference
+        EasySpec.Discover.TH
         EasySpec.Discover.TypeTranslation
         EasySpec.Discover.Types
         EasySpec.Discover.Utils
@@ -36,7 +37,8 @@ library
         filepath >=1.4 && <1.5,
         quickspec >=2 && <3,
         jukebox ==0.2.14,
-        haskell-src-exts >=1.18 && <1.19
+        haskell-src-exts >=1.18 && <1.19,
+        template-haskell >=2.11 && <2.12
     default-language: Haskell2010
     default-extensions: NoImplicitPrelude
     hs-source-dirs: src/

@@ -6,6 +6,7 @@ import qualified EasySpec.Discover.Types as ES
 
 data EvaluationInputPoint = EvaluationInputPoint
     { eipFile :: Path Abs File
+    , eipFunc :: ES.EasyName
     , eipStrat :: ES.SignatureInferenceStrategy
     , eipDiscoveredEqs :: [ES.EasyEq]
     , eipRuntime :: Double

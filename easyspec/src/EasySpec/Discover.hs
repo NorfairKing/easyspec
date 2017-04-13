@@ -14,6 +14,7 @@ Property discovery happens in multiple steps:
 module EasySpec.Discover
     ( discover
     , discoverEquations
+    , getEasyIds
     , inferenceStrategies
     , inferEmptySignature
     , inferFullSignature
@@ -44,8 +45,7 @@ discover ds = do
 discoverEquations ::
        (MonadIO m, MonadReader Settings m) => DiscoverSettings -> m [EasyEq]
 discoverEquations ds = do
-    ghcIds <- getGHCIds $ setDiscFile ds
-    let ids = map toEasyId ghcIds
+    ids <- getEasyIds $ setDiscFile ds
     let SignatureInferenceStrategy _ inferStrat = setDiscInfStrat ds
     let (focusIds, bgIds) = splitFocus ds ids
     let iSig = inferStrat focusIds bgIds
@@ -55,10 +55,13 @@ discoverEquations ds = do
     allEqs <- runEasySpec ds iSig
     pure $ filter relevant allEqs
 
+getEasyIds :: MonadIO m => Path Abs File -> m [EasyId]
+getEasyIds = fmap (map toEasyId) . getGHCIds
+
 splitFocus :: DiscoverSettings -> [EasyId] -> ([EasyId], [EasyId])
 splitFocus ds ids =
     let fs =
-            case find (\i -> Just (prettyPrint $ idName i) == setDiscFun ds) ids of
+            case find (\i -> Just (idName i) == setDiscFun ds) ids of
                 Nothing -> []
                 Just i -> [i]
     in (fs, ids \\ fs)

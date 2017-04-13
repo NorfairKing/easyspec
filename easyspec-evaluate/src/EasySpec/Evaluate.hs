@@ -7,6 +7,8 @@ import Import
 import System.TimeIt
 import Text.Printf
 
+import Language.Haskell.Exts.Pretty (prettyPrint)
+
 import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.Types as ES
 import qualified EasySpec.OptParse as ES
@@ -22,23 +24,30 @@ easyspecEvaluate = do
     putStrLn $ showEvaluationReport epointss
 
 getEvaluationInputPointsFor :: Path Abs File -> IO [EvaluationInputPoint]
-getEvaluationInputPointsFor f =
-    forM ES.inferenceStrategies $ getEvaluationInputPoint f
+getEvaluationInputPointsFor f = do
+    eids <- ES.getEasyIds f
+    fmap concat $
+        forM (map ES.idName eids) $ \funcname ->
+            forM ES.inferenceStrategies $ getEvaluationInputPoint f funcname
 
 getEvaluationInputPoint ::
-       Path Abs File -> ES.SignatureInferenceStrategy -> IO EvaluationInputPoint
-getEvaluationInputPoint f strat = do
+       Path Abs File
+    -> ES.EasyName
+    -> ES.SignatureInferenceStrategy
+    -> IO EvaluationInputPoint
+getEvaluationInputPoint f funcname strat = do
     let sets = ES.Settings
         ds =
             ES.DiscoverSettings
             { ES.setDiscFile = f
-            , ES.setDiscFun = Nothing
+            , ES.setDiscFun = Just funcname
             , ES.setDiscInfStrat = strat
             }
     (runtime, eqs) <- timeItT $ runReaderT (ES.discoverEquations ds) sets
     pure
         EvaluationInputPoint
         { eipFile = f
+        , eipFunc = funcname
         , eipStrat = strat
         , eipDiscoveredEqs = eqs
         , eipRuntime = runtime
@@ -54,6 +63,7 @@ showEvaluationReport pointss = showTable $ concatMap go $ concat pointss
         line ev =
             [ toFilePath $ eipFile eip
             , ES.sigInfStratName $ eipStrat eip
+            , prettyPrint $ eipFunc eip
             , evaluatorName ev
             , evaluate ip ev
             ]

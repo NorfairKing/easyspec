@@ -13,6 +13,8 @@ import System.Environment (getArgs)
 
 import Options.Applicative
 
+import Language.Haskell.Exts (Name(Ident))
+
 import EasySpec.Discover
 import EasySpec.Discover.Types
 import EasySpec.OptParse.Types
@@ -41,7 +43,7 @@ combineToInstructions cmd Flags Configuration = (,) <$> disp <*> pure Settings
                     pure
                         DiscoverSettings
                         { setDiscFile = file
-                        , setDiscFun = argDiscFun
+                        , setDiscFun = Ident mempty <$> argDiscFun
                         , setDiscInfStrat = infStrat
                         }
 

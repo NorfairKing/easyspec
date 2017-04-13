@@ -31,7 +31,7 @@ newtype Dispatch =
 
 data DiscoverSettings = DiscoverSettings
     { setDiscFile :: Path Abs File
-    , setDiscFun :: Maybe String
+    , setDiscFun :: Maybe EasyName
     , setDiscInfStrat :: SignatureInferenceStrategy
     }
 

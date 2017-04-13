@@ -1,6 +1,8 @@
 module EasySpec.Evaluate.OptParse
     ( module EasySpec.Evaluate.OptParse
-    , module EasySpec.Evaluate.OptParse.Types
+    , Instructions
+    , Dispatch(..)
+    , Settings(..)
     ) where
 
 import Import
@@ -18,7 +20,13 @@ getInstructions = do
     combineToInstructions cmd flags config
 
 combineToInstructions :: Command -> Flags -> Configuration -> IO Instructions
-combineToInstructions Command Flags Configuration = pure (Dispatch, Settings)
+combineToInstructions cmd Flags Configuration = (,) <$> disp <*> pure Settings
+  where
+    disp =
+        case cmd of
+            CommandEvaluate mdirpath -> do
+                dir <- resolveDir' $ fromMaybe "examples" mdirpath
+                pure $ DispatchEvaluate dir
 
 getConfiguration :: Command -> Flags -> IO Configuration
 getConfiguration _ _ = pure Configuration
@@ -52,12 +60,21 @@ parseArgs :: Parser Arguments
 parseArgs = (,) <$> parseCommand <*> parseFlags
 
 parseCommand :: Parser Command
-parseCommand = hsubparser $ mconcat [command "command" parseCommandCommand]
+parseCommand = hsubparser $ mconcat [command "evaluate" parseCommandEvaluate]
 
-parseCommandCommand :: ParserInfo Command
-parseCommandCommand = info parser modifier
+parseCommandEvaluate :: ParserInfo Command
+parseCommandEvaluate = info parser modifier
   where
-    parser = pure Command
+    parser =
+        CommandEvaluate <$>
+        option
+            (Just <$> str)
+            (mconcat
+                 [ metavar "DIR"
+                 , long "examples-dir"
+                 , value Nothing
+                 , help "the directory to look for code to evaluate in"
+                 ])
     modifier = fullDesc <> progDesc "Command example."
 
 parseFlags :: Parser Flags

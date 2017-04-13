@@ -6,8 +6,8 @@ type Arguments = (Command, Flags)
 
 type Instructions = (Dispatch, Settings)
 
-data Command =
-    Command
+newtype Command =
+    CommandEvaluate (Maybe FilePath)
     deriving (Show, Eq)
 
 data Flags =
@@ -18,8 +18,8 @@ data Configuration =
     Configuration
     deriving (Show, Eq)
 
-data Dispatch =
-    Dispatch
+newtype Dispatch =
+    DispatchEvaluate (Path Abs Dir)
     deriving (Show, Eq)
 
 data Settings =

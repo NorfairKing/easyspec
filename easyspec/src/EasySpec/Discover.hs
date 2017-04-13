@@ -27,6 +27,7 @@ import EasySpec.OptParse.Types
 
 import EasySpec.Discover.GatherFromGHC
 import EasySpec.Discover.QuickSpec
+import EasySpec.Discover.SignatureGeneration
 import EasySpec.Discover.SignatureInference
 import EasySpec.Discover.TypeTranslation
 import EasySpec.Discover.Types
@@ -46,8 +47,13 @@ discoverEquations ds = do
     ghcIds <- getGHCIds $ setDiscFile ds
     let ids = map toEasyId ghcIds
     let SignatureInferenceStrategy _ inferStrat = setDiscInfStrat ds
-    let iSig = uncurry inferStrat $ splitFocus ds ids
-    runEasySpec ds iSig
+    let (focusIds, bgIds) = splitFocus ds ids
+    let iSig = inferStrat focusIds bgIds
+    let focusNames = map idName focusIds
+    let relevant (EasyEq lhs rhs) =
+            any (`mentions` lhs) focusNames || any (`mentions` rhs) focusNames
+    allEqs <- runEasySpec ds iSig
+    pure $ filter relevant allEqs
 
 splitFocus :: DiscoverSettings -> [EasyId] -> ([EasyId], [EasyId])
 splitFocus ds ids =

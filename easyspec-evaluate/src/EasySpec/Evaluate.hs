@@ -36,17 +36,30 @@ getEvaluationInputPoint f strat = do
         {eipFile = f, eipStrat = strat, eipDiscoveredEqs = eqs}
 
 showEvaluationReport :: [[EvaluationInputPoint]] -> String
-showEvaluationReport pointss = unlines $ concatMap go $ concat pointss
+showEvaluationReport pointss = showTable $ map go $ concat pointss
   where
     go :: EvaluationInputPoint -> [String]
     go eip =
-        [ unwords
-              [ toFilePath $ eipFile eip
-              , ES.sigInfStratName $ eipStrat eip
-              , evaluatorName lengthEvaluator
-              , evaluate (pointToInput eip) lengthEvaluator
-              ]
+        [ toFilePath $ eipFile eip
+        , ES.sigInfStratName $ eipStrat eip
+        , evaluatorName lengthEvaluator
+        , evaluate (pointToInput eip) lengthEvaluator
         ]
+
+showTable :: [[String]] -> String
+showTable = unlines . map unwords . formatTable
+
+formatTable :: [[String]] -> [[String]]
+formatTable sss =
+    transpose $
+    flip map (transpose sss) $ \ss ->
+        let padL = maximum $ map length ss
+        in map (pad ' ' $ padL + 1) ss
+
+pad :: Char -> Int -> String -> String
+pad c i s
+    | length s < i = s ++ replicate (i - length s) c
+    | otherwise = s
 
 evaluate :: EvaluationInput -> Evaluator a -> String
 evaluate ei e = evaluatorPretty e $ evaluatorGather e ei

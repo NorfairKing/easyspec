@@ -31,5 +31,6 @@ type EasyStmt = H.Stmt ()
 type EasyPat = H.Pat ()
 
 data EasyEq =
-    EasyExp :=: EasyExp
+    EasyEq EasyExp
+           EasyExp
     deriving (Show, Eq)

@@ -104,7 +104,8 @@ runQuickspecOn iSig = do
                                     , "with error:"
                                     , err
                                     ]
-                            ParseOk (lh, rh) -> pure $ (() <$ lh) :=: (() <$ rh)
+                            ParseOk (lh, rh) ->
+                                pure $ EasyEq (() <$ lh) (() <$ rh)
                     ss ->
                         liftIO $
                         die $

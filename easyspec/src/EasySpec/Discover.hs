@@ -33,7 +33,7 @@ discover ds = do
     res <- runEasySpec ds iSig
     liftIO $
         mapM_
-            (\(lh :=: rh) ->
+            (\(EasyEq lh rh) ->
                  putStrLn $ prettyPrint lh ++ " = " ++ prettyPrint rh)
             res
 

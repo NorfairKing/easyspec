@@ -4,9 +4,16 @@ import Import
 
 import Language.Haskell.Exts.Syntax as H
 
-newtype SignatureInferenceStrategy = SignatureInferenceStrategy
-    { inferSignature :: [EasyId] -> [EasyId] -> InferredSignature
+data SignatureInferenceStrategy = SignatureInferenceStrategy
+    { sigInfStratName :: String
+    , inferSignature :: [EasyId] -> [EasyId] -> InferredSignature
     }
+
+instance Show SignatureInferenceStrategy where
+    show = sigInfStratName
+
+instance Eq SignatureInferenceStrategy where
+    s1 == s2 = sigInfStratName s1 == sigInfStratName s2
 
 data InferredSignature = InferredSignature
     { sigFocusIds :: [EasyId]

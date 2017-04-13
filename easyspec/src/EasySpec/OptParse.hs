@@ -14,6 +14,7 @@ import System.Environment (getArgs)
 import Options.Applicative
 
 import EasySpec.Discover
+import EasySpec.Discover.Types
 import EasySpec.OptParse.Types
 
 getInstructions :: IO Instructions
@@ -33,7 +34,10 @@ combineToInstructions cmd Flags Configuration = (,) <$> disp <*> pure Settings
                     let infStrat =
                             fromMaybe inferFullSignature $
                             argDiscInfStratName >>=
-                            (`lookup` inferenceStrategies)
+                            (\n ->
+                                 find
+                                     ((== n) . sigInfStratName)
+                                     inferenceStrategies)
                     pure
                         DiscoverSettings
                         { setDiscFile = file

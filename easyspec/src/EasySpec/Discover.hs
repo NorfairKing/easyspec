@@ -45,7 +45,7 @@ discoverEquations ::
 discoverEquations ds = do
     ghcIds <- getGHCIds $ setDiscFile ds
     let ids = map toEasyId ghcIds
-    let SignatureInferenceStrategy inferStrat = setDiscInfStrat ds
+    let SignatureInferenceStrategy _ inferStrat = setDiscInfStrat ds
     let iSig = uncurry inferStrat $ splitFocus ds ids
     runEasySpec ds iSig
 
@@ -57,8 +57,5 @@ splitFocus ds ids =
                 Just i -> [i]
     in (fs, ids \\ fs)
 
-inferenceStrategies :: [(String, SignatureInferenceStrategy)]
-inferenceStrategies =
-    [ ("empty-signature", inferEmptySignature)
-    , ("full-signature", inferFullSignature)
-    ]
+inferenceStrategies :: [SignatureInferenceStrategy]
+inferenceStrategies = [inferEmptySignature, inferFullSignature]

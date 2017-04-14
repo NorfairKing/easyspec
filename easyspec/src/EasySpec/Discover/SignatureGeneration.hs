@@ -68,6 +68,18 @@ mappendSigsExp a =
                        (Ident mempty "mappend")))
              a)
 
+mconcatSigsExp :: [EasyExp] -> EasyExp
+mconcatSigsExp es =
+    App
+        mempty
+        (Var
+             mempty
+             (Qual
+                  mempty
+                  (ModuleName mempty "Data.Monoid")
+                  (Ident mempty "mconcat")))
+        (List mempty es)
+
 createQuickspecSig :: (Eq m, Monoid m) => [Id m] -> Maybe (Exp m)
 createQuickspecSig ids =
     (\es ->

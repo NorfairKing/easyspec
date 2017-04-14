@@ -1,11 +1,12 @@
-{-# LANGUAGE RecordWildCards #-}
-
 module EasySpec.Discover.QuickSpec where
 
 import Import
 
+import Control.Monad.State
+import Control.Monad.Writer
 import Data.Dynamic
 import Data.List.Split
+import Data.Tree
 
 import DynFlags hiding (Settings)
 import GHC hiding (Qual, Name)
@@ -65,68 +66,73 @@ runEasySpec ds iSig =
 
 runQuickspecOn :: GhcMonad m => InferredSignature -> m [EasyEq]
 runQuickspecOn iSig = do
-    (bgSig, focusSig) <- liftIO $ makeSignatureExpressions iSig
-    let s1name = Ident mempty "s1"
-    void $
-        execStmt
-            (prettyPrintOneLine $ bindTo s1name $ runQuickspecExp bgSig)
-            execOptions
-    let s1exp = Var mempty (UnQual mempty s1name)
-    let s2name = Ident mempty "s2"
-    void $
-        execStmt
-            (prettyPrintOneLine $
-             bindTo s2name $ runQuickspecExp $ mappendSigsExp s1exp focusSig)
-            execOptions
-    let s2exp = Var mempty (UnQual mempty s2name)
-    -- compiledExpr <- compileExprRemote $ showPrettyBackgroundExp s2exp
-    -- evalString env compiledExpr
-    let expStr = prettyPrintOneLine $ showPrettyBackgroundExp s2exp
-    dyn <- dynCompileExpr expStr
-    case fromDynamic dyn of
-        Nothing ->
-            liftIO $
-            die $ unwords ["failed to coerce the string result of", expStr]
-        Just res ->
-            forM res $ \s ->
-                case splitOn " = " s of
-                    [lhs, rhs] ->
-                        case (,) <$> parseExp lhs <*> parseExp rhs of
-                            ParseFailed srcloc err ->
-                                liftIO $
-                                die $
-                                unwords
-                                    [ "Failed to parse one of two expressions:"
-                                    , show lhs
-                                    , "and"
-                                    , show rhs
-                                    , "at"
-                                    , show srcloc
-                                    , "with error:"
-                                    , err
-                                    ]
-                            ParseOk (lh, rh) ->
-                                pure $ EasyEq (() <$ lh) (() <$ rh)
-                    ss ->
-                        liftIO $
-                        die $
-                        unwords
-                            [ "failed to split an equation"
-                            , s
-                            , "into two pieces"
-                            , s
-                            , "on \" = \""
-                            , "got"
-                            , show ss
-                            , "instead."
-                            ]
+    expTree <- liftIO $ makeSignatureExpressions iSig
+    execWriterT $ evalStateT (go expTree) (0 :: Int)
+  where
+    liftGHC = lift . lift
+    nextSigExpName = do
+        num <- get
+        modify (+ 1)
+        pure $ Ident mempty $ "s" ++ show num
+    -- go :: GhcMonad m => Tree EasyExp -> StateT Int (WriterT [EasyEq] m) EasyExp
+    go (Node curSigExp others) = do
+        bgExps <- mapM go others
+        let sigExp = mconcatSigsExp $ curSigExp : bgExps
+        let quickSpecExp = runQuickspecExp sigExp
+        resName <- nextSigExpName
+        let stmt = bindTo resName quickSpecExp
+        void $ liftGHC $ execStmt (prettyPrintOneLine stmt) execOptions
+        let resExp = Var mempty (UnQual mempty resName)
+        eqs <- getEqs resExp
+        tell eqs
+        pure resExp
+    getEqs resExp = do
+        let showBackgroundExp = showPrettyBackgroundExp resExp
+        let expStr = prettyPrintOneLine showBackgroundExp
+        dyn <- liftGHC $ dynCompileExpr expStr
+        case fromDynamic dyn of
+            Nothing ->
+                liftIO $
+                die $ unwords ["failed to coerce the string result of", expStr]
+            Just res ->
+                forM res $ \s ->
+                    case splitOn " = " s of
+                        [lhs, rhs] ->
+                            case (,) <$> parseExp lhs <*> parseExp rhs of
+                                ParseFailed srcloc err ->
+                                    liftIO $
+                                    die $
+                                    unwords
+                                        [ "Failed to parse one of two expressions:"
+                                        , show lhs
+                                        , "and"
+                                        , show rhs
+                                        , "at"
+                                        , show srcloc
+                                        , "with error:"
+                                        , err
+                                        ]
+                                ParseOk (lh, rh) ->
+                                    pure $ EasyEq (() <$ lh) (() <$ rh)
+                        ss ->
+                            liftIO $
+                            die $
+                            unwords
+                                [ "failed to split an equation"
+                                , s
+                                , "into two pieces"
+                                , s
+                                , "on \" = \""
+                                , "got"
+                                , show ss
+                                , "instead."
+                                ]
 
 bindTo :: EasyName -> EasyExp -> EasyStmt
 bindTo n = Generator mempty (PVar mempty n)
 
-makeSignatureExpressions :: InferredSignature -> IO (EasyExp, EasyExp)
-makeSignatureExpressions InferredSignature {..} =
-    (,) <$> m sigBackgroundIds <*> m sigFocusIds
+makeSignatureExpressions :: InferredSignature -> IO (Tree EasyExp)
+makeSignatureExpressions (InferredSignature t) = mapM m t
   where
     m is =
         case createQuickspecSig is of

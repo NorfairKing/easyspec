@@ -2,6 +2,8 @@ module EasySpec.Discover.Types where
 
 import Import
 
+import Data.Tree
+
 import Language.Haskell.Exts.Syntax as H
 
 data SignatureInferenceStrategy = SignatureInferenceStrategy
@@ -15,10 +17,9 @@ instance Show SignatureInferenceStrategy where
 instance Eq SignatureInferenceStrategy where
     s1 == s2 = sigInfStratName s1 == sigInfStratName s2
 
-data InferredSignature = InferredSignature
-    { sigFocusIds :: [EasyId]
-    , sigBackgroundIds :: [EasyId]
-    } deriving (Show, Eq)
+newtype InferredSignature =
+    InferredSignature (Tree [EasyId])
+    deriving (Show, Eq)
 
 newtype SignatureExpression =
     SignatureExpression EasyExp

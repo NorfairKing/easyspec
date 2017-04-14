@@ -4,11 +4,13 @@ module EasySpec.Discover.GatherFromGHC where
 
 import Import
 
+import DataCon
 import GHC
 import GHC.Paths (libdir)
 import OccName
 import RdrName
 import TcRnTypes
+import TyCon
 
 import EasySpec.Discover.Utils
 
@@ -29,11 +31,18 @@ getGHCIds discFile =
         tmod <- typecheckModule parsedModule
         let (tcenv, _) = tm_internals_ tmod
         let names = concatMap (map gre_name) $ occEnvElts $ tcg_rdr_env tcenv
-        fmap catMaybes $
+        fmap concat $
             forM names $ \name -> do
                 tything <- lookupName name
                 pure $
                     case tything of
-                        Just (AnId i) -> Just i
-                        Just _ -> Nothing
-                        Nothing -> Nothing
+                        Nothing -> []
+                        -- If it's a function, return it
+                        Just (AnId i) -> [i]
+                        -- If it's a data declaration, get its constructors as functions
+                        Just (ATyCon tc) ->
+                            if isVanillaAlgTyCon tc
+                                then flip map (tyConDataCons tc) $ \dc ->
+                                         dataConWorkId dc
+                                else []
+                        Just _ -> []

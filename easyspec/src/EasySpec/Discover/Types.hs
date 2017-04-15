@@ -1,9 +1,12 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module EasySpec.Discover.Types where
 
 import Import
 
 import Data.Tree
 
+import Language.Haskell.Exts.Pretty as H
 import Language.Haskell.Exts.Syntax as H
 
 data SignatureInferenceStrategy = SignatureInferenceStrategy
@@ -26,6 +29,10 @@ newtype SignatureExpression =
     deriving (Show, Eq)
 
 type EasyId = Id ()
+
+prettyEasyId :: EasyId -> String
+prettyEasyId Id {..} =
+    unwords [H.prettyPrint idName, "::", H.prettyPrint idType]
 
 data Id m = Id
     { idName :: Name m

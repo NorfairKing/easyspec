@@ -32,6 +32,7 @@ import EasySpec.Discover.SignatureGeneration
 import EasySpec.Discover.SignatureInference
 import EasySpec.Discover.TypeTranslation
 import EasySpec.Discover.Types
+import EasySpec.Utils
 
 discover :: (MonadIO m, MonadReader Settings m) => DiscoverSettings -> m ()
 discover ds = do
@@ -46,6 +47,10 @@ discoverEquations ::
        (MonadIO m, MonadReader Settings m) => DiscoverSettings -> m [EasyEq]
 discoverEquations ds = do
     ids <- getEasyIds $ setDiscFile ds
+    whenDebug1 $
+        liftIO $ do
+            putStrLn "Gathered signature:"
+            mapM_ (putStrLn . prettyEasyId) ids
     let SignatureInferenceStrategy _ inferStrat = setDiscInfStrat ds
     let (focusIds, bgIds) = splitFocus ds ids
     let iSig = inferStrat focusIds bgIds

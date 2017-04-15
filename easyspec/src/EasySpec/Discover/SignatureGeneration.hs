@@ -17,7 +17,7 @@ import EasySpec.Discover.Types
 
 {-# ANN module "HLint: ignore Collapse lambdas" #-}
 
-createQuickspecSigExp :: [EasyId] -> Maybe EasyExp
+createQuickspecSigExp :: [EasyId] -> Either String EasyExp
 createQuickspecSigExp ids = runQuickspecExp <$> createQuickspecSig ids
 
 runQuickspecExp :: EasyExp -> EasyExp
@@ -69,6 +69,7 @@ mappendSigsExp a =
              a)
 
 mconcatSigsExp :: [EasyExp] -> EasyExp
+mconcatSigsExp [e] = e
 mconcatSigsExp es =
     App
         mempty
@@ -80,7 +81,7 @@ mconcatSigsExp es =
                   (Ident mempty "mconcat")))
         (List mempty es)
 
-createQuickspecSig :: (Eq m, Monoid m) => [Id m] -> Maybe (Exp m)
+createQuickspecSig :: (Eq m, Monoid m) => [Id m] -> Either String (Exp m)
 createQuickspecSig ids =
     (\es ->
          RecConstr
@@ -114,7 +115,7 @@ createQuickspecSig ids =
              ]) <$>
     mapM signatureComponent ids
 
-signatureComponent :: (Eq m, Monoid m) => Id m -> Maybe (Exp m)
+signatureComponent :: (Eq m, Monoid m) => Id m -> Either String (Exp m)
 signatureComponent eid = do
     let (re, rt) = go (expr, idType eid)
     rt' <- replaceVarsWithQuickspecVars rt
@@ -162,7 +163,7 @@ signatureComponent eid = do
                          t')
             _ -> (e, t)
 
-replaceVarsWithQuickspecVars :: Eq l => Type l -> Maybe (Type l)
+replaceVarsWithQuickspecVars :: Eq l => Type l -> Either String (Type l)
 replaceVarsWithQuickspecVars et =
     let tvs = getTyVars et
         funcs =
@@ -175,7 +176,8 @@ replaceVarsWithQuickspecVars et =
                 ["A", "B", "C", "D", "E"]
     in replaceTyVars (zip tvs funcs) et
 
-replaceTyVars :: Eq l => [(Name l, l -> Type l)] -> Type l -> Maybe (Type l)
+replaceTyVars ::
+       Eq l => [(Name l, l -> Type l)] -> Type l -> Either String (Type l)
 replaceTyVars repls =
     foldType
         (\l mtvbs mctx -> fmap (TyForall l mtvbs mctx))
@@ -184,7 +186,10 @@ replaceTyVars repls =
         (\l -> fmap (TyList l))
         (\l -> fmap (TyParArray l))
         (\l -> liftM2 (TyApp l))
-        (\l n -> ($ l) <$> lookup n repls)
+        (\l n ->
+             case ($ l) <$> lookup n repls of
+                 Nothing -> Left "Not enough type variables in QuickSpec"
+                 Just r -> pure r)
         (\l qn -> pure $ TyCon l qn)
         (\l -> fmap (TyParen l))
         (\l mt qn mv -> TyInfix l <$> mt <*> pure qn <*> mv)

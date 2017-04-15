@@ -26,7 +26,7 @@ getInstructions = do
     combineToInstructions cmd flags config
 
 combineToInstructions :: Command -> Flags -> Configuration -> IO Instructions
-combineToInstructions cmd Flags Configuration = (,) <$> disp <*> pure Settings
+combineToInstructions cmd Flags {..} Configuration = (,) <$> disp <*> sets
   where
     disp =
         case cmd of
@@ -46,6 +46,7 @@ combineToInstructions cmd Flags Configuration = (,) <$> disp <*> pure Settings
                         , setDiscFun = Ident mempty <$> argDiscFun
                         , setDiscInfStrat = infStrat
                         }
+    sets = pure Settings {setsDebugLevel = fromMaybe 0 flagsDebugLevel}
 
 getConfiguration :: Command -> Flags -> IO Configuration
 getConfiguration _ _ = pure Configuration
@@ -105,4 +106,13 @@ parseCommandDiscover = info parser modifier
     modifier = fullDesc <> progDesc "Command example."
 
 parseFlags :: Parser Flags
-parseFlags = pure Flags
+parseFlags =
+    Flags <$>
+    option
+        (Just <$> auto)
+        (mconcat
+             [ metavar "INT"
+             , value Nothing
+             , long "debug"
+             , help "The debug level, 0 means no debug printing at all"
+             ])

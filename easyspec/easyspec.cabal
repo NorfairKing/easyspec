@@ -25,6 +25,7 @@ library
         EasySpec.OptParse
         EasySpec.OptParse.Types
         EasySpec.Types
+        EasySpec.Utils
     build-depends:
         base >=4.9 && <=5,
         containers >=0.5 && <0.6,

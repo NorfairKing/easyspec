@@ -1,0 +1,18 @@
+{-# LANGUAGE FlexibleContexts #-}
+
+module EasySpec.Utils where
+
+import Import
+
+import EasySpec.OptParse.Types
+
+debugLvl :: MonadReader Settings m => m Int
+debugLvl = asks setsDebugLevel
+
+whenDebugGE :: MonadReader Settings m => Int -> m a -> m ()
+whenDebugGE i func = do
+    l <- debugLvl
+    when (l >= i) $ void func
+
+whenDebug1 :: MonadReader Settings m => m a -> m ()
+whenDebug1 = whenDebugGE 1

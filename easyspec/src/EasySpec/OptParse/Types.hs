@@ -18,9 +18,9 @@ data DiscoverArgs = DiscoverArgs
     , argDiscInfStratName :: Maybe String
     } deriving (Show, Eq)
 
-data Flags =
-    Flags
-    deriving (Show, Eq)
+newtype Flags = Flags
+    { flagsDebugLevel :: Maybe Int
+    } deriving (Show, Eq)
 
 data Configuration =
     Configuration
@@ -35,6 +35,6 @@ data DiscoverSettings = DiscoverSettings
     , setDiscInfStrat :: SignatureInferenceStrategy
     }
 
-data Settings =
-    Settings
-    deriving (Show, Eq)
+newtype Settings = Settings
+    { setsDebugLevel :: Int
+    } deriving (Show, Eq)

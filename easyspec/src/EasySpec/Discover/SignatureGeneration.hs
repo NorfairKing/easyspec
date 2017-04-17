@@ -117,7 +117,7 @@ createQuickspecSig ids =
 
 signatureComponent :: (Eq m, Monoid m) => Id m -> Either String (Exp m)
 signatureComponent eid = do
-    let (re, rt) = go (expr, idType eid)
+    let (re, rt) = addTypeClassTrickery eid
     rt' <- replaceVarsWithQuickspecVars rt
     let funExp = ExpTypeSig mempty re rt'
     let funStr =
@@ -137,6 +137,9 @@ signatureComponent eid = do
                            (Ident mempty "constant")))
                  funName)
             funExp
+
+addTypeClassTrickery :: Monoid m => Id m -> (Exp m, Type m)
+addTypeClassTrickery eid = go (expr, idType eid)
   where
     expr = Paren mempty $ Var mempty (UnQual mempty (idName eid))
     go (e, t) =

@@ -12,8 +12,8 @@ import EasySpec.Discover.Types
 
 {-# ANN module "HLint: ignore Avoid lambda" #-}
 
-createQuickspecSigExp :: [EasyNamedExp] -> Either String EasyExp
-createQuickspecSigExp exps = runQuickspecExp <$> createQuickspecSig exps
+createQuickspecSigExp :: [EasyNamedExp] -> EasyExp
+createQuickspecSigExp = runQuickspecExp . createQuickspecSig
 
 runQuickspecExp :: EasyExp -> EasyExp
 runQuickspecExp = App () $(easyExp "QuickSpec.Eval.quickSpec")
@@ -76,43 +76,40 @@ mconcatSigsExp es =
                   (Ident mempty "mconcat")))
         (List mempty es)
 
-createQuickspecSig :: (Eq m, Monoid m) => [NamedExp m] -> Either String (Exp m)
+createQuickspecSig :: (Eq m, Monoid m) => [NamedExp m] -> Exp m
 createQuickspecSig nexps =
-    (\es ->
-         RecConstr
+    RecConstr
+        mempty
+        (Qual
              mempty
-             (Qual
-                  mempty
-                  (ModuleName mempty "QuickSpec.Signature")
-                  (Ident mempty "signature"))
-             [ FieldUpdate
+             (ModuleName mempty "QuickSpec.Signature")
+             (Ident mempty "signature"))
+        [ FieldUpdate
+              mempty
+              (Qual
                    mempty
-                   (Qual
-                        mempty
-                        (ModuleName mempty "QuickSpec.Signature")
-                        (Ident mempty "constants"))
-                   (List mempty es)
-             , FieldUpdate -- Just to make tests go a bit quicker
+                   (ModuleName mempty "QuickSpec.Signature")
+                   (Ident mempty "constants"))
+              (List mempty $ map signatureComponent nexps)
+        , FieldUpdate -- Just to make tests go a bit quicker
+              mempty
+              (Qual
                    mempty
-                   (Qual
+                   (ModuleName mempty "QuickSpec.Signature")
+                   (Ident mempty "maxTests"))
+              (App
+                   mempty
+                   (Con
                         mempty
-                        (ModuleName mempty "QuickSpec.Signature")
-                        (Ident mempty "maxTests"))
-                   (App
-                        mempty
-                        (Con
+                        (Qual
                              mempty
-                             (Qual
-                                  mempty
-                                  (ModuleName mempty "Data.Maybe")
-                                  (Ident mempty "Just")))
-                        (Lit mempty (Int mempty 100 "100")))
-             ]) <$>
-    mapM signatureComponent nexps
+                             (ModuleName mempty "Data.Maybe")
+                             (Ident mempty "Just")))
+                   (Lit mempty (Int mempty 100 "100")))
+        ]
 
-signatureComponent :: (Eq m, Monoid m) => NamedExp m -> Either String (Exp m)
+signatureComponent :: (Eq m, Monoid m) => NamedExp m -> Exp m
 signatureComponent (NamedExp funNameStr funExp) =
-    pure $
     App
         mempty
         (App

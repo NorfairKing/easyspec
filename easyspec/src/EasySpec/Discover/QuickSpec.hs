@@ -77,7 +77,7 @@ runEasySpec ds iSig = do
 
 runQuickspecOn :: GhcMonad m => InferredSignature -> ReaderT Settings m [EasyEq]
 runQuickspecOn iSig = do
-    expTree <- liftIO $ makeSignatureExpressions iSig
+    let expTree = makeSignatureExpressions iSig
     execWriterT $ evalStateT (go expTree) (0 :: Int)
   where
     liftGHC = lift . lift . lift
@@ -150,17 +150,8 @@ runQuickspecOn iSig = do
 bindTo :: EasyName -> EasyExp -> EasyStmt
 bindTo n = Generator mempty (PVar mempty n)
 
-makeSignatureExpressions :: InferredSignature -> IO (Tree EasyExp)
-makeSignatureExpressions (InferredSignature t) = mapM m t
-  where
-    m is =
-        case createQuickspecSig is of
-            Left err ->
-                liftIO $
-                die $
-                unwords
-                    ["Unable to generate quickspec signature expression:", err]
-            Right e -> pure e
+makeSignatureExpressions :: InferredSignature -> Tree EasyExp
+makeSignatureExpressions (InferredSignature t) = fmap createQuickspecSig t
 
 addTypeClassExts :: DynFlags -> DynFlags
 addTypeClassExts dflags =

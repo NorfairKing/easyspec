@@ -14,6 +14,7 @@ library
     exposed-modules:
         EasySpec
         EasySpec.Discover
+        EasySpec.Discover.CodeUtils
         EasySpec.Discover.GatherFromGHC
         EasySpec.Discover.QuickSpec
         EasySpec.Discover.SignatureGeneration

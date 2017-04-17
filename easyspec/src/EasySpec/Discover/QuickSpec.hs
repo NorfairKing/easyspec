@@ -22,6 +22,7 @@ import Language.Haskell.Exts.Syntax
 import EasySpec.OptParse.Types
 import EasySpec.Utils
 
+import EasySpec.Discover.CodeUtils
 import EasySpec.Discover.SignatureGeneration
 import EasySpec.Discover.Types
 import EasySpec.Discover.Utils
@@ -89,7 +90,9 @@ runQuickspecOn iSig = do
         bgExps <- mapM go others
         let sigExp = mconcatSigsExp $ curSigExp : bgExps
         debug1 "Running quickspec with signature:"
+        debug1 "==[Start of Signature Expression]=="
         debug1 $ prettyPrint sigExp
+        debug1 "==[End of Signature Expression]=="
         let quickSpecExp = runQuickspecExp sigExp
         resName <- nextSigExpName
         let stmt = bindTo resName quickSpecExp
@@ -97,6 +100,10 @@ runQuickspecOn iSig = do
         let resExp = Var mempty (UnQual mempty resName)
         eqs <- getEqs resExp
         tell eqs
+        debug1 "Found these equations:"
+        debug1 "==[Start of Equations]=="
+        debug1 $ unlines $ map prettyEasyEq eqs
+        debug1 "==[End of Equations]=="
         pure resExp
     getEqs resExp = do
         let showBackgroundExp = showPrettyBackgroundExp resExp
@@ -154,11 +161,6 @@ makeSignatureExpressions (InferredSignature t) = mapM m t
                 unwords
                     ["Unable to generate quickspec signature expression:", err]
             Right e -> pure e
-
--- prettyPrintOneLine :: _ -> String
-prettyPrintOneLine :: Pretty a => a -> String
-prettyPrintOneLine =
-    prettyPrintStyleMode (style {mode = OneLineMode}) defaultMode
 
 addTypeClassExts :: DynFlags -> DynFlags
 addTypeClassExts dflags =

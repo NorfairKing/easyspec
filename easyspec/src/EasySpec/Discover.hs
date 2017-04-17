@@ -28,7 +28,6 @@ import EasySpec.OptParse.Types
 
 import EasySpec.Discover.GatherFromGHC
 import EasySpec.Discover.QuickSpec
-import EasySpec.Discover.SignatureGeneration
 import EasySpec.Discover.SignatureInference
 import EasySpec.Discover.TypeTranslation
 import EasySpec.Discover.Types
@@ -52,11 +51,8 @@ discoverEquations ds = do
     let SignatureInferenceStrategy _ inferStrat = setDiscInfStrat ds
     let (focusIds, bgIds) = splitFocus ds ids
     let iSig = inferStrat focusIds bgIds
-    let focusNames = map idName focusIds
-    let relevant (EasyEq lhs rhs) =
-            any (`mentions` lhs) focusNames || any (`mentions` rhs) focusNames
     allEqs <- runEasySpec ds iSig
-    pure $ filter relevant allEqs
+    pure allEqs
 
 getEasyIds :: MonadIO m => Path Abs File -> m [EasyId]
 getEasyIds = fmap (map toEasyId) . getGHCIds

@@ -36,7 +36,7 @@ getEvaluationInputPoint ::
     -> ES.SignatureInferenceStrategy
     -> IO EvaluationInputPoint
 getEvaluationInputPoint f funcname strat = do
-    let sets = ES.Settings
+    let sets = ES.Settings {ES.setsDebugLevel = 0}
         ds =
             ES.DiscoverSettings
             { ES.setDiscFile = f

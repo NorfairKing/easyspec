@@ -181,18 +181,29 @@ replaceVarsWithQuickspecVars et =
 
 replaceTyVars ::
        Eq l => [(Name l, l -> Type l)] -> Type l -> Either String (Type l)
-replaceTyVars repls =
+replaceTyVars repls t =
+    flip runReaderT False $
+    -- Bool says 'whether it's higher-order'
     foldType
         (\l mtvbs mctx -> fmap (TyForall l mtvbs mctx))
         (\l -> liftM2 (TyFun l))
         (\l b -> fmap (TyTuple l b) . sequence)
         (\l -> fmap (TyList l))
         (\l -> fmap (TyParArray l))
-        (\l -> liftM2 (TyApp l))
-        (\l n ->
-             case ($ l) <$> lookup n repls of
-                 Nothing -> Left "Not enough type variables in QuickSpec"
-                 Just r -> pure r)
+        (\l et1 et2 -> do
+             t1 <- local (const True) et1
+             t2 <- et2
+             pure $ TyApp l t1 t2)
+        (\l n -> do
+             b <- ask
+             lift $
+                 if b
+                     then Left
+                              "Higher-order type variables aren't supported yet."
+                     else case ($ l) <$> lookup n repls of
+                              Nothing ->
+                                  Left "Not enough type variables in QuickSpec"
+                              Just r -> pure r)
         (\l qn -> pure $ TyCon l qn)
         (\l -> fmap (TyParen l))
         (\l mt qn mv -> TyInfix l <$> mt <*> pure qn <*> mv)
@@ -203,6 +214,7 @@ replaceTyVars repls =
         (\l bt up mt -> TyBang l bt up <$> mt)
         (\l mn -> pure $ TyWildCard l mn)
         (\l s1 s2 -> pure $ TyQuasiQuote l s1 s2)
+        t
 
 getTyVars :: Type t -> [Name t]
 getTyVars =

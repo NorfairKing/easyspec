@@ -16,3 +16,8 @@ whenDebugGE i func = do
 
 whenDebug1 :: MonadReader Settings m => m a -> m ()
 whenDebug1 = whenDebugGE 1
+
+debug1 :: (MonadIO m, MonadReader Settings m) => String -> m ()
+debug1 s =
+    whenDebug1 $
+    liftIO $ forM (lines s) $ \l -> putStrLn $ unwords ["[DEBUG]", l]

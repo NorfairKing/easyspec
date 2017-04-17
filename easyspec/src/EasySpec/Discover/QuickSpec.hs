@@ -88,10 +88,8 @@ runQuickspecOn iSig = do
     go (Node curSigExp others) = do
         bgExps <- mapM go others
         let sigExp = mconcatSigsExp $ curSigExp : bgExps
-        whenDebug1 $
-            liftIO $ do
-                putStrLn "Running quickspec with signature:"
-                putStrLn $ prettyPrint sigExp
+        debug1 "Running quickspec with signature:"
+        debug1 $ prettyPrint sigExp
         let quickSpecExp = runQuickspecExp sigExp
         resName <- nextSigExpName
         let stmt = bindTo resName quickSpecExp

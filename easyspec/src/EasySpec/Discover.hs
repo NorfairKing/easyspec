@@ -47,10 +47,8 @@ discoverEquations ::
        (MonadIO m, MonadReader Settings m) => DiscoverSettings -> m [EasyEq]
 discoverEquations ds = do
     ids <- getEasyIds $ setDiscFile ds
-    whenDebug1 $
-        liftIO $ do
-            putStrLn "Gathered signature:"
-            mapM_ (putStrLn . prettyEasyId) ids
+    debug1 "Gathered signature:"
+    debug1 $ unlines $ map prettyEasyId ids
     let SignatureInferenceStrategy _ inferStrat = setDiscInfStrat ds
     let (focusIds, bgIds) = splitFocus ds ids
     let iSig = inferStrat focusIds bgIds

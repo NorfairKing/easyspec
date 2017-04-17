@@ -10,6 +10,7 @@ import Text.Printf
 import Language.Haskell.Exts.Pretty (prettyPrint)
 
 import qualified EasySpec.Discover as ES
+import qualified EasySpec.Discover.CodeUtils as ES
 import qualified EasySpec.Discover.Types as ES
 import qualified EasySpec.OptParse as ES
 
@@ -57,7 +58,12 @@ showEvaluationReport :: [[EvaluationInputPoint]] -> String
 showEvaluationReport pointss = showTable $ concatMap go $ concat pointss
   where
     go :: EvaluationInputPoint -> [[String]]
-    go eip = [line lengthEvaluator, line runtimeEvaluator]
+    go eip =
+        [ line lengthEvaluator
+        , line runtimeEvaluator
+        , line relevantEquationsEvaluator
+        , line irrelevantEquationsEvaluator
+        ]
       where
         ip = pointToInput eip
         line ev =
@@ -88,10 +94,30 @@ evaluate ei e = evaluatorPretty e $ evaluatorGather e ei
 
 pointToInput :: EvaluationInputPoint -> EvaluationInput
 pointToInput EvaluationInputPoint {..} =
-    EvaluationInput {eiDiscoveredEqs = eipDiscoveredEqs, eiRuntime = eipRuntime}
+    EvaluationInput
+    { eiDiscoveredEqs = eipDiscoveredEqs
+    , eiRuntime = eipRuntime
+    , eiFocusFuncName = eipFunc
+    }
 
 lengthEvaluator :: Evaluator Int
 lengthEvaluator = Evaluator "length" (length . eiDiscoveredEqs) show
 
 runtimeEvaluator :: Evaluator Double
 runtimeEvaluator = Evaluator "runtime" eiRuntime (printf "%.2fs")
+
+relevantEquationsEvaluator :: Evaluator Int
+relevantEquationsEvaluator = Evaluator "relevant-equations" go show
+  where
+    go ei =
+        length $ filter (mentionsEq $ eiFocusFuncName ei) (eiDiscoveredEqs ei)
+
+irrelevantEquationsEvaluator :: Evaluator Int
+irrelevantEquationsEvaluator = Evaluator "irrelevant-equations" go show
+  where
+    go ei =
+        length $
+        filter (not . mentionsEq (eiFocusFuncName ei)) (eiDiscoveredEqs ei)
+
+mentionsEq :: ES.EasyName -> ES.EasyEq -> Bool
+mentionsEq n (ES.EasyEq e1 e2) = ES.mentions n e1 || ES.mentions n e2

@@ -63,6 +63,7 @@ showEvaluationReport pointss = showTable $ concatMap go $ concat pointss
         , line runtimeEvaluator
         , line relevantEquationsEvaluator
         , line irrelevantEquationsEvaluator
+        , line relativeRelevantEquationsEvaluator
         ]
       where
         ip = pointToInput eip
@@ -105,6 +106,15 @@ lengthEvaluator = Evaluator "length" (length . eiDiscoveredEqs) show
 
 runtimeEvaluator :: Evaluator Double
 runtimeEvaluator = Evaluator "runtime" eiRuntime (printf "%.2fs")
+
+relativeRelevantEquationsEvaluator :: Evaluator Double
+relativeRelevantEquationsEvaluator =
+    Evaluator "relative-relevant-equations" go show
+  where
+    go ei =
+        genericLength
+            (filter (mentionsEq $ eiFocusFuncName ei) (eiDiscoveredEqs ei)) /
+        genericLength (eiDiscoveredEqs ei)
 
 relevantEquationsEvaluator :: Evaluator Int
 relevantEquationsEvaluator = Evaluator "relevant-equations" go show

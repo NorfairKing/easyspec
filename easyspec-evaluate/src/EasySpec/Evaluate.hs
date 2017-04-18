@@ -109,7 +109,7 @@ runtimeEvaluator = Evaluator "runtime" eiRuntime (printf "%.2fs")
 
 relativeRelevantEquationsEvaluator :: Evaluator Double
 relativeRelevantEquationsEvaluator =
-    Evaluator "relative-relevant-equations" go show
+    Evaluator "relative-relevant-equations" go (printf "%.2f")
   where
     go ei =
         genericLength

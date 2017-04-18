@@ -1,6 +1,10 @@
 language: c
 sudo: false
 
+env:
+  global:
+  - TERM=dumb
+
 addons:
   apt:
     packages:

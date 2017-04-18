@@ -25,8 +25,15 @@ combineToInstructions cmd Flags Configuration = (,) <$> disp <*> pure Settings
     disp =
         case cmd of
             CommandEvaluate mdirpath -> do
-                dir <- resolveDir' $ fromMaybe "examples" mdirpath
-                pure $ DispatchEvaluate dir
+                let path = fromMaybe "examples" mdirpath
+                file <- resolveFile' path
+                b <- doesFileExist file
+                if b
+                    then pure $ DispatchEvaluate [file]
+                    else do
+                        dir <- resolveDir' $ fromMaybe "examples" mdirpath
+                        fs <- snd <$> listDirRecur dir
+                        pure $ DispatchEvaluate fs
 
 getConfiguration :: Command -> Flags -> IO Configuration
 getConfiguration _ _ = pure Configuration
@@ -67,13 +74,12 @@ parseCommandEvaluate = info parser modifier
   where
     parser =
         CommandEvaluate <$>
-        option
+        argument
             (Just <$> str)
             (mconcat
-                 [ metavar "DIR"
-                 , long "examples-dir"
+                 [ metavar "PATH"
                  , value Nothing
-                 , help "the directory to look for code to evaluate in"
+                 , help "the path to a file or directory of example/examples"
                  ])
     modifier = fullDesc <> progDesc "Command example."
 

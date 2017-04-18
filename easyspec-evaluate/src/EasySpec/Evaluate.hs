@@ -19,17 +19,19 @@ import EasySpec.Evaluate.Types
 
 easyspecEvaluate :: IO ()
 easyspecEvaluate = do
-    (DispatchEvaluate exdir, Settings) <- getInstructions
-    fs <- (filter ((== ".hs") . fileExtension) . snd) <$> listDirRecur exdir
+    (DispatchEvaluate fs, Settings) <- getInstructions
     epointss <- mapM getEvaluationInputPointsFor fs
     putStrLn $ showEvaluationReport epointss
 
 getEvaluationInputPointsFor :: Path Abs File -> IO [EvaluationInputPoint]
 getEvaluationInputPointsFor f = do
     eids <- ES.getEasyIds f
-    fmap concat $
-        forM (map ES.idName eids) $ \funcname ->
-            forM ES.inferenceStrategies $ getEvaluationInputPoint f funcname
+    fmap concat $ forM (map ES.idName eids) $ getEvaluationInputPointsForName f
+
+getEvaluationInputPointsForName ::
+       Path Abs File -> ES.EasyName -> IO [EvaluationInputPoint]
+getEvaluationInputPointsForName f funcname =
+    forM ES.inferenceStrategies $ getEvaluationInputPoint f funcname
 
 getEvaluationInputPoint ::
        Path Abs File

@@ -19,7 +19,7 @@ data Configuration =
     deriving (Show, Eq)
 
 newtype Dispatch =
-    DispatchEvaluate (Path Abs Dir)
+    DispatchEvaluate [Path Abs File]
     deriving (Show, Eq)
 
 data Settings =

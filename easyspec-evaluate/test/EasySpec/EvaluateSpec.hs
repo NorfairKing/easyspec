@@ -4,12 +4,26 @@ module EasySpec.EvaluateSpec
 
 import TestImport
 
-import System.Environment (withArgs)
-
 import EasySpec.Evaluate
+
+import qualified EasySpec.Discover as ES
+import qualified EasySpec.Discover.Types as ES
 
 spec :: Spec
 spec =
-    describe "easyspec-evaluate" $
-    it "runs" $
-    withArgs ["evaluate", "--examples-dir", "../examples"] easyspecEvaluate
+    describe "easyspec-evaluate" $ do
+        fs <-
+            runIO $ do
+                dir <- resolveDir' "../examples"
+                (filter ((== ".hs") . fileExtension) . snd) <$> listDirRecur dir
+        forM_ fs $ \f ->
+            it
+                (unwords
+                     [ "runs on"
+                     , toFilePath f
+                     , "with all signature inference strategies"
+                     ]) $ do
+                eids <- ES.getEasyIds f
+                funcname <- generate $ elements $ map ES.idName eids
+                eips <- getEvaluationInputPointsForName f funcname
+                putStrLn $ showEvaluationReport [eips]

@@ -30,4 +30,4 @@ install:
 script:
   - git --version
   - stack --version
-  - ./zift.hs run
+  - stack build

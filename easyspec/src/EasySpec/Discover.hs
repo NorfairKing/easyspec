@@ -52,7 +52,7 @@ discoverEquations ds = do
     let (focusIds, bgIds) = splitFocus ds ids
     let iSig = inferStrat focusIds bgIds
     allEqs <- runEasySpec ds iSig
-    pure allEqs
+    pure $ nub allEqs
 
 getEasyIds :: MonadIO m => Path Abs File -> m [EasyId]
 getEasyIds = fmap (map toEasyId) . getGHCIds

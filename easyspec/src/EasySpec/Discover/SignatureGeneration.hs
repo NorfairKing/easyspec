@@ -106,6 +106,18 @@ createQuickspecSig nexps =
                              (ModuleName mempty "Data.Maybe")
                              (Ident mempty "Just")))
                    (Lit mempty (Int mempty 100 "100")))
+        , FieldUpdate -- Keep quickspec silent
+              mempty
+              (Qual
+                   mempty
+                   (ModuleName mempty "QuickSpec.Signature")
+                   (Ident mempty "silent"))
+              (Con
+                   mempty
+                   (Qual
+                        mempty
+                        (ModuleName mempty "Prelude")
+                        (Ident mempty "True")))
         ]
 
 signatureComponent :: (Eq m, Monoid m) => NamedExp m -> Exp m

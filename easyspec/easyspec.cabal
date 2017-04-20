@@ -19,6 +19,10 @@ library
         EasySpec.Discover.QuickSpec
         EasySpec.Discover.SignatureGeneration
         EasySpec.Discover.SignatureInference
+        EasySpec.Discover.SignatureInference.FullBackground
+        EasySpec.Discover.SignatureInference.SyntacticSimilarityName
+        EasySpec.Discover.SignatureInference.EmptyBackground
+        EasySpec.Discover.SignatureInference.Utils
         EasySpec.Discover.TH
         EasySpec.Discover.TypeTranslation
         EasySpec.Discover.Types

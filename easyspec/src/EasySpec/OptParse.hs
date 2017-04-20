@@ -15,7 +15,7 @@ import Options.Applicative
 
 import Language.Haskell.Exts (Name(Ident))
 
-import EasySpec.Discover
+import EasySpec.Discover.SignatureInference
 import EasySpec.Discover.Types
 import EasySpec.OptParse.Types
 
@@ -34,7 +34,7 @@ combineToInstructions cmd Flags {..} Configuration = (,) <$> disp <*> sets
                 DispatchDiscover <$> do
                     file <- resolveFile' argDiscFile
                     let infStrat =
-                            fromMaybe inferFullSignature $
+                            fromMaybe inferFullBackground $
                             argDiscInfStratName >>=
                             (\n ->
                                  find

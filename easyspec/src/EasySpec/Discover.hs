@@ -16,9 +16,6 @@ module EasySpec.Discover
     , discoverEquations
     , getEasyIds
     , inferenceStrategies
-    , inferEmptySignature
-    , inferFullSignature
-    , infer5ByNameSyntactically
     ) where
 
 import Import
@@ -70,7 +67,3 @@ splitFocus ds ids =
                 Nothing -> []
                 Just i -> [i]
     in (fs, ids \\ fs)
-
-inferenceStrategies :: [SignatureInferenceStrategy]
-inferenceStrategies =
-    [inferEmptySignature, inferFullSignature, infer5ByNameSyntactically]

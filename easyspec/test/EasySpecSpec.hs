@@ -17,8 +17,8 @@ spec =
             (\f -> unwords ["works on", toFilePath f])
             (\f -> withArgs ["discover", toFilePath f] easyspec)
 
-forSourceFilesInDir ::
-       Example a
+forSourceFilesInDir
+    :: Example a
     => Path Abs Dir
     -> (Path Abs File -> String)
     -> (Path Abs File -> a)

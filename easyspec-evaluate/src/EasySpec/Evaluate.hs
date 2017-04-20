@@ -28,13 +28,14 @@ getEvaluationInputPointsFor f = do
     eids <- ES.getEasyIds f
     fmap concat $ forM (map ES.idName eids) $ getEvaluationInputPointsForName f
 
-getEvaluationInputPointsForName ::
-       Path Abs File -> ES.EasyName -> IO [EvaluationInputPoint]
+getEvaluationInputPointsForName :: Path Abs File
+                                -> ES.EasyName
+                                -> IO [EvaluationInputPoint]
 getEvaluationInputPointsForName f funcname =
     forM ES.inferenceStrategies $ getEvaluationInputPoint f funcname
 
-getEvaluationInputPoint ::
-       Path Abs File
+getEvaluationInputPoint
+    :: Path Abs File
     -> ES.EasyName
     -> ES.SignatureInferenceStrategy
     -> IO EvaluationInputPoint

@@ -18,6 +18,7 @@ module EasySpec.Discover
     , inferenceStrategies
     , inferEmptySignature
     , inferFullSignature
+    , infer5ByNameSyntactically
     ) where
 
 import Import
@@ -33,7 +34,9 @@ import EasySpec.Discover.TypeTranslation
 import EasySpec.Discover.Types
 import EasySpec.Utils
 
-discover :: (MonadIO m, MonadReader Settings m) => DiscoverSettings -> m ()
+discover
+    :: (MonadIO m, MonadReader Settings m)
+    => DiscoverSettings -> m ()
 discover ds = do
     res <- discoverEquations ds
     liftIO $
@@ -42,8 +45,9 @@ discover ds = do
                  putStrLn $ prettyPrint lh ++ " = " ++ prettyPrint rh)
             res
 
-discoverEquations ::
-       (MonadIO m, MonadReader Settings m) => DiscoverSettings -> m [EasyEq]
+discoverEquations
+    :: (MonadIO m, MonadReader Settings m)
+    => DiscoverSettings -> m [EasyEq]
 discoverEquations ds = do
     ids <- getEasyIds $ setDiscFile ds
     debug1 "Gathered signature:"
@@ -54,7 +58,9 @@ discoverEquations ds = do
     allEqs <- runEasySpec ds iSig
     pure $ nub allEqs
 
-getEasyIds :: MonadIO m => Path Abs File -> m [EasyId]
+getEasyIds
+    :: MonadIO m
+    => Path Abs File -> m [EasyId]
 getEasyIds = fmap (map toEasyId) . getGHCIds
 
 splitFocus :: DiscoverSettings -> [EasyId] -> ([EasyId], [EasyId])
@@ -66,4 +72,5 @@ splitFocus ds ids =
     in (fs, ids \\ fs)
 
 inferenceStrategies :: [SignatureInferenceStrategy]
-inferenceStrategies = [inferEmptySignature, inferFullSignature]
+inferenceStrategies =
+    [inferEmptySignature, inferFullSignature, infer5ByNameSyntactically]

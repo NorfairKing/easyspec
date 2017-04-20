@@ -2,6 +2,8 @@ module EasySpec.Discover.SignatureInference where
 
 import Import
 
+import Data.HashMap.Lazy (HashMap)
+import qualified Data.HashMap.Lazy as HM
 import Data.Tree
 
 import Language.Haskell.Exts.Syntax
@@ -20,8 +22,35 @@ inferFullSignature =
 inferEmptySignature :: SignatureInferenceStrategy
 inferEmptySignature = splitInferAlg "empty-background" $ \_ _ -> []
 
-splitInferAlg ::
-       String
+infer5ByNameSyntactically :: SignatureInferenceStrategy
+infer5ByNameSyntactically =
+    splitInferAlg "5-by-name-syntactically" $ \focus scope ->
+        take 5 $
+        sortOn
+            (\f -> sum $ map (\ff -> difference (dictOf ff) (dictOf f)) focus)
+            scope
+        -- TODO generalise to a bigger focus)
+  where
+    dictOf :: EasyId -> HashMap Char Int
+    dictOf = letterDict . prettyPrintOneLine . idName
+
+letterDict :: String -> HashMap Char Int
+letterDict = foldl go HM.empty
+  where
+    go :: HashMap Char Int -> Char -> HashMap Char Int
+    go hm k = HM.alter u k hm
+      where
+        u Nothing = Just 1
+        u (Just n) = Just (n + 1)
+
+difference :: HashMap Char Int -> HashMap Char Int -> Int
+difference hm1 hm2 = HM.foldl' (+) 0 $ HM.unionWith go hm1 hm2
+  where
+    go :: Int -> Int -> Int
+    go n1 n2 = abs (n1 - n2)
+
+splitInferAlg
+    :: String
     -> ([EasyId] -> [EasyId] -> [EasyId]) -- ^ Something that chooses the background ids.
     -> SignatureInferenceStrategy
 splitInferAlg name func =
@@ -69,7 +98,9 @@ addTypeClassTrickery eid = go (expr, idType eid)
                          t')
             _ -> (e, t)
 
-replaceVarsWithQuickspecVars :: Eq l => Type l -> Either String (Type l)
+replaceVarsWithQuickspecVars
+    :: Eq l
+    => Type l -> Either String (Type l)
 replaceVarsWithQuickspecVars et =
     let tvs = getTyVars et
         funcs =
@@ -82,8 +113,9 @@ replaceVarsWithQuickspecVars et =
                 ["A", "B", "C", "D", "E"]
     in replaceTyVars (zip tvs funcs) et
   where
-    replaceTyVars ::
-           Eq l => [(Name l, l -> Type l)] -> Type l -> Either String (Type l)
+    replaceTyVars
+        :: Eq l
+        => [(Name l, l -> Type l)] -> Type l -> Either String (Type l)
     replaceTyVars repls t =
         flip runReaderT False $
         -- Bool says 'whether it's higher-order'

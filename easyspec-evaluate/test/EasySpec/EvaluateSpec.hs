@@ -21,7 +21,7 @@ spec =
                 runIO $ do
                     eids <- ES.getEasyIds f
                     generate $ elements $ map ES.idName eids
-            forM_ ES.inferenceStrategies $ \is -> do
+            forM_ ES.inferenceStrategies $ \is ->
                 it (unwords [ES.sigInfStratName is, "runs on", toFilePath f]) $ do
                     ip <- getEvaluationInputPoint f funcname is
                     putStrLn $ showEvaluationReport [[ip]]

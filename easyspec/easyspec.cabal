@@ -35,7 +35,7 @@ library
         ghc-boot >=8.0.1 && <8.1,
         ghc-paths >=0.1 && <0.2,
         haskell-src-exts >=1.18 && <1.19,
-        jukebox ==0.2.14,
+        jukebox >=0.2.14,
         mtl >=2.2 && <2.3,
         optparse-applicative >=0.13,
         path >=0.5 && <0.6,

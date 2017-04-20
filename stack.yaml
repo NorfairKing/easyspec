@@ -4,7 +4,7 @@ packages:
 - './easyspec-evaluate'
 - location:
       git: git@github.com:NorfairKing/quickspec.git
-      commit: d4ee1a3737a210e22cd9aabb0a3c0710276d31f3
+      commit: 67aae18aefe2c8d0832cf4b797cbab0540652c76
   extra-dep: true
 extra-deps:
 - optparse-applicative-0.13.2.0
@@ -15,7 +15,7 @@ extra-deps:
 - genvalidity-0.3.1.0
 - genvalidity-hspec-0.3.1.0
 - genvalidity-path-0.1.0.0
-- jukebox-0.2.14
+- jukebox-0.2.17
 - twee-0.1
 - minisat-0.1.2
 resolver: lts-8.6

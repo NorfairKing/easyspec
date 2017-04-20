@@ -27,9 +27,11 @@ import EasySpec.Discover.SignatureGeneration
 import EasySpec.Discover.Types
 import EasySpec.Discover.Utils
 
-runEasySpec
-    :: (MonadIO m, MonadReader Settings m)
-    => DiscoverSettings -> InferredSignature -> m [EasyEq]
+runEasySpec ::
+       (MonadIO m, MonadReader Settings m)
+    => DiscoverSettings
+    -> InferredSignature
+    -> m [EasyEq]
 runEasySpec ds iSig = do
     sets <- ask
     liftIO $
@@ -73,9 +75,7 @@ runEasySpec ds iSig = do
             void $ execStmt declaretc execOptions
             runReaderT (runQuickspecOn iSig) sets
 
-runQuickspecOn
-    :: GhcMonad m
-    => InferredSignature -> ReaderT Settings m [EasyEq]
+runQuickspecOn :: GhcMonad m => InferredSignature -> ReaderT Settings m [EasyEq]
 runQuickspecOn iSig = do
     let expTree = makeSignatureExpressions iSig
     execWriterT $ evalStateT (go expTree) (0 :: Int)

@@ -2,8 +2,8 @@ module TestUtils where
 
 import TestImport
 
-forSourceFilesInDir
-    :: Example a
+forSourceFilesInDir ::
+       Example a
     => Path Abs Dir
     -> (Path Abs File -> String)
     -> (Path Abs File -> a)

@@ -13,14 +13,10 @@ import GHC
 import GHC.LanguageExtensions
 import Outputable (Outputable(..), showPpr)
 
-setDFlagsNoLinking
-    :: GhcMonad m
-    => DynFlags -> m ()
+setDFlagsNoLinking :: GhcMonad m => DynFlags -> m ()
 setDFlagsNoLinking = void . setSessionDynFlags
 
-loadSuccessfully
-    :: GhcMonad m
-    => LoadHowMuch -> m ()
+loadSuccessfully :: GhcMonad m => LoadHowMuch -> m ()
 loadSuccessfully hm = do
     r <- load hm
     case r of
@@ -33,14 +29,10 @@ prepareFlags dflags = foldl xopt_set dflags [Cpp, ImplicitPrelude, MagicHash]
 getTargetModName :: Path Abs File -> GHC.ModuleName
 getTargetModName = mkModuleName . dropExtension . toFilePath . filename
 
-showGHC
-    :: (GhcMonad m, Outputable a)
-    => a -> m String
+showGHC :: (GhcMonad m, Outputable a) => a -> m String
 showGHC a = do
     dfs <- getProgramDynFlags
     pure $ showPpr dfs a
 
-printO
-    :: (GhcMonad m, Outputable a)
-    => a -> m ()
+printO :: (GhcMonad m, Outputable a) => a -> m ()
 printO a = showGHC a >>= (liftIO . putStrLn)

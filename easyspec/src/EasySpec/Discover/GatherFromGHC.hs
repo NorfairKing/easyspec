@@ -14,9 +14,7 @@ import TyCon
 
 import EasySpec.Discover.Utils
 
-getGHCIds
-    :: MonadIO m
-    => Path Abs File -> m [GHC.Id]
+getGHCIds :: MonadIO m => Path Abs File -> m [GHC.Id]
 getGHCIds discFile =
     liftIO $
     runGhc (Just libdir) $ do

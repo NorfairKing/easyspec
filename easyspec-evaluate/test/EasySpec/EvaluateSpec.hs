@@ -16,14 +16,12 @@ spec =
             runIO $ do
                 dir <- resolveDir' "../examples"
                 (filter ((== ".hs") . fileExtension) . snd) <$> listDirRecur dir
-        forM_ fs $ \f ->
-            it
-                (unwords
-                     [ "runs on"
-                     , toFilePath f
-                     , "with all signature inference strategies"
-                     ]) $ do
-                eids <- ES.getEasyIds f
-                funcname <- generate $ elements $ map ES.idName eids
-                eips <- getEvaluationInputPointsForName f funcname
-                putStrLn $ showEvaluationReport [eips]
+        forM_ fs $ \f -> do
+            funcname <-
+                runIO $ do
+                    eids <- ES.getEasyIds f
+                    generate $ elements $ map ES.idName eids
+            forM_ ES.inferenceStrategies $ \is -> do
+                it (unwords [ES.sigInfStratName is, "runs on", toFilePath f]) $ do
+                    ip <- getEvaluationInputPoint f funcname is
+                    putStrLn $ showEvaluationReport [[ip]]

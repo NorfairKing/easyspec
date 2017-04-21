@@ -29,20 +29,25 @@ getGHCIds discFile =
         modSum <- getModSummary modname
         parsedModule <- parseModule modSum
         tmod <- typecheckModule parsedModule
-        let (tcenv, _) = tm_internals_ tmod
-        let names = concatMap (map gre_name) $ occEnvElts $ tcg_rdr_env tcenv
-        fmap concat $
-            forM names $ \name -> do
-                tything <- lookupName name
-                pure $
-                    case tything of
-                        Nothing -> []
+        getGHCIdsFromTcModule tmod
+
+getGHCIdsFromTcModule :: GhcMonad m => TypecheckedModule -> m [GHC.Id]
+getGHCIdsFromTcModule tmod = do
+    let (tcenv, _) = tm_internals_ tmod
+        -- Get the global reader elementss out of the global env
+    let names = concatMap (map gre_name) $ occEnvElts $ tcg_rdr_env tcenv
+    fmap concat $
+        forM names $ \name -> do
+            tything <- lookupName name
+            pure $
+                case tything of
+                    Nothing -> []
                         -- If it's a function, return it
-                        Just (AnId i) -> [i]
+                    Just (AnId i) -> [i]
                         -- If it's a data declaration, get its constructors as functions
-                        Just (ATyCon tc) ->
-                            if isVanillaAlgTyCon tc
-                                then flip map (tyConDataCons tc) $ \dc ->
-                                         dataConWorkId dc
-                                else []
-                        Just _ -> []
+                    Just (ATyCon tc) ->
+                        if isVanillaAlgTyCon tc
+                            then flip map (tyConDataCons tc) $ \dc ->
+                                     dataConWorkId dc
+                            else []
+                    Just _ -> []

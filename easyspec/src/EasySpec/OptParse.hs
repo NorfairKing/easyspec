@@ -33,13 +33,20 @@ combineToInstructions cmd Flags {..} Configuration = (,) <$> disp <*> sets
             CommandDiscover DiscoverArgs {..} ->
                 DispatchDiscover <$> do
                     file <- resolveFile' argDiscFile
-                    let infStrat =
-                            fromMaybe inferFullBackground $
-                            argDiscInfStratName >>=
-                            (\n ->
-                                 find
-                                     ((== n) . sigInfStratName)
-                                     inferenceStrategies)
+                    infStrat <-
+                        case argDiscInfStratName of
+                            Nothing -> pure inferFullBackground
+                            Just n ->
+                                case find
+                                         ((== n) . sigInfStratName)
+                                         inferenceStrategies of
+                                    Nothing ->
+                                        die $
+                                        unwords
+                                            [ "Unknown signature inference strategy:"
+                                            , n
+                                            ]
+                                    Just r -> pure r
                     pure
                         DiscoverSettings
                         { setDiscFile = file
@@ -100,8 +107,18 @@ parseCommandDiscover = info parser modifier
              (Just <$> str)
              (mconcat
                   [ metavar "SIGINFALG"
+                  , long "strategy"
                   , value Nothing
-                  , help "The name of the signature inference algorithm to use"
+                  , completer $
+                    listCompleter $ map sigInfStratName inferenceStrategies
+                  , help $
+                    unlines
+                        [ "The name of the signature inference algorithm to use"
+                        , unwords
+                              [ "Options:"
+                              , show $ map sigInfStratName inferenceStrategies
+                              ]
+                        ]
                   ]))
     modifier = fullDesc <> progDesc "Command example."
 

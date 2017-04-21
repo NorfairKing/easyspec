@@ -6,6 +6,7 @@ import Prelude as X hiding (return)
 
 import Control.Monad as X
 import Control.Monad.IO.Class as X
+import Control.Monad.Reader as X
 
 import Data.List as X
 import Data.Maybe as X

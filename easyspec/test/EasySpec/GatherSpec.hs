@@ -8,9 +8,10 @@ import TestUtils
 import Language.Haskell.Exts
 import Text.Show.Pretty
 
-import EasySpec.Discover.GatherFromGHC
-import EasySpec.Discover.TypeTranslation
+import EasySpec.Discover
+import EasySpec.Discover.SourceGathering
 import EasySpec.Discover.Types
+import EasySpec.OptParse.Types
 
 spec :: Spec
 spec =
@@ -24,7 +25,7 @@ spec =
                      , "matches what ghc sees with what haskell-src-exts sees"
                      ]) $ \f -> do
             srcExtsEasyIds <- getHSEEasyIds f
-            ghcEasyIds <- map toEasyId <$> getGHCIds f
+            ghcEasyIds <- runReaderT (getEasyIds f) defaultSettings
             forM_ srcExtsEasyIds $ \seei ->
                 case find (\geid -> idName seei == idName geid) ghcEasyIds of
                     Nothing ->
@@ -72,15 +73,23 @@ getHSEEasyIds f = do
                 , "with error"
                 , err
                 ]
-        ParseOk m -> pure $ getEasyIdsFrom m
+        ParseOk m -> pure $ getEasyIdsFrom $ () <$ m
 
-getEasyIdsFrom :: Module a -> [EasyId]
+getEasyIdsFrom :: Module () -> [EasyId]
 getEasyIdsFrom m =
-    case () <$ m of
+    case m of
         Module _ _ _ _ ds ->
             concat $
             flip map ds $ \d ->
                 case d of
-                    TypeSig _ ns t -> map (\n -> Id {idName = n, idType = t}) ns
+                    TypeSig _ ns t ->
+                        map
+                            (\n ->
+                                 Id
+                                 { idName = n
+                                 , idType = t
+                                 , idImpl = getImplFrom n m
+                                 })
+                            ns
                     _ -> []
         _ -> []

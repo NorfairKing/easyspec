@@ -14,7 +14,11 @@ import TyCon
 
 import EasySpec.Discover.Utils
 
-getGHCIds :: MonadIO m => Path Abs File -> m [GHC.Id]
+data IdData =
+    IdData GHC.Id
+           [GHC.ModuleName]
+
+getGHCIds :: MonadIO m => Path Abs File -> m [IdData]
 getGHCIds discFile =
     liftIO $
     runGhc (Just libdir) $ do
@@ -31,15 +35,17 @@ getGHCIds discFile =
         tmod <- typecheckModule parsedModule
         getGHCIdsFromTcModule tmod
 
-getGHCIdsFromTcModule :: GhcMonad m => TypecheckedModule -> m [GHC.Id]
+getGHCIdsFromTcModule :: GhcMonad m => TypecheckedModule -> m [IdData]
 getGHCIdsFromTcModule tmod = do
     let (tcenv, _) = tm_internals_ tmod
         -- Get the global reader elementss out of the global env
-    let names = concatMap (map gre_name) $ occEnvElts $ tcg_rdr_env tcenv
+    let gres = concat $ occEnvElts $ tcg_rdr_env tcenv
     fmap concat $
-        forM names $ \name -> do
-            tything <- lookupName name
+        forM gres $ \gre -> do
+            tything <- lookupName $ gre_name gre
+            let modulesThatImportThis = map (is_mod . is_decl) $ gre_imp gre
             pure $
+                map (`IdData` modulesThatImportThis) $
                 case tything of
                     Nothing -> []
                         -- If it's a function, return it

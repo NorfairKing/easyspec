@@ -38,3 +38,6 @@ data DiscoverSettings = DiscoverSettings
 newtype Settings = Settings
     { setsDebugLevel :: Int
     } deriving (Show, Eq)
+
+defaultSettings :: Settings
+defaultSettings = Settings {setsDebugLevel = 0}

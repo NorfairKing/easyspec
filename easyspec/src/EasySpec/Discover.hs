@@ -27,6 +27,7 @@ import EasySpec.OptParse.Types
 import EasySpec.Discover.GatherFromGHC
 import EasySpec.Discover.QuickSpec
 import EasySpec.Discover.SignatureInference
+import EasySpec.Discover.SourceGathering
 import EasySpec.Discover.TypeTranslation
 import EasySpec.Discover.Types
 import EasySpec.Utils
@@ -52,8 +53,14 @@ discoverEquations ds = do
     allEqs <- runEasySpec ds iSig
     pure $ nub allEqs
 
-getEasyIds :: MonadIO m => Path Abs File -> m [EasyId]
-getEasyIds = fmap (map toEasyId) . getGHCIds
+getEasyIds :: (MonadIO m, MonadReader Settings m) => Path Abs File -> m [EasyId]
+getEasyIds file = do
+    idDatas <- getGHCIds file
+    tups <-
+        forM idDatas $ \idData@(IdData i _) -> do
+            mimpl <- gatherSourceOf file idData
+            pure (i, mimpl)
+    pure $ map (uncurry toEasyId) tups
 
 splitFocus :: DiscoverSettings -> [EasyId] -> ([EasyId], [EasyId])
 splitFocus ds ids =

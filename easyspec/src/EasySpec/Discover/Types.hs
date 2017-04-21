@@ -31,6 +31,7 @@ newtype SignatureExpression =
 data Id m = Id
     { idName :: Name m
     , idType :: Type m
+    , idImpl :: Maybe (Impl m)
     } deriving (Show, Eq)
 
 type EasyId = Id ()
@@ -63,3 +64,9 @@ data EasyEq =
 
 prettyEasyEq :: EasyEq -> String
 prettyEasyEq (EasyEq e1 e2) = unwords [H.prettyPrint e1, "=", H.prettyPrint e2]
+
+newtype Impl l =
+    Impl [H.Match l]
+    deriving (Show, Eq)
+
+type EasyImpl = Impl ()

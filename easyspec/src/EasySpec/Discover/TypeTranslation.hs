@@ -16,7 +16,7 @@ import Language.Haskell.Exts.Syntax as H
 
 import EasySpec.Discover.Types as E
 
-toEasyId :: Monoid m => GHC.Id -> Maybe (E.Impl m)-> E.Id m
+toEasyId :: Monoid m => GHC.Id -> Maybe (E.Impl m) -> E.Id m
 toEasyId i impl =
     Id
     { E.idName = toEasyName $ Var.varName i

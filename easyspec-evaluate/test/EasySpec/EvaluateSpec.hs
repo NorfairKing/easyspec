@@ -8,6 +8,7 @@ import EasySpec.Evaluate
 
 import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.Types as ES
+import qualified EasySpec.OptParse.Types as ES
 
 spec :: Spec
 spec =
@@ -19,7 +20,7 @@ spec =
         forM_ fs $ \f -> do
             funcname <-
                 runIO $ do
-                    eids <- ES.getEasyIds f
+                    eids <- runReaderT (ES.getEasyIds f) ES.defaultSettings
                     generate $ elements $ map ES.idName eids
             forM_ ES.inferenceStrategies $ \is ->
                 it (unwords [ES.sigInfStratName is, "runs on", toFilePath f]) $ do

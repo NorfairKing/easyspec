@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveFunctor #-}
 
 module EasySpec.Discover.Types where
 
@@ -67,6 +68,9 @@ prettyEasyEq (EasyEq e1 e2) = unwords [H.prettyPrint e1, "=", H.prettyPrint e2]
 
 newtype Impl l =
     Impl [H.Match l]
-    deriving (Show, Eq)
+    deriving (Show, Eq, Functor)
 
 type EasyImpl = Impl ()
+
+prettyEasyImpl :: EasyImpl -> String
+prettyEasyImpl (Impl ms) = H.prettyPrint $ FunBind () ms

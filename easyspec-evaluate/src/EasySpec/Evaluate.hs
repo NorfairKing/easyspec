@@ -25,7 +25,7 @@ easyspecEvaluate = do
 
 getEvaluationInputPointsFor :: Path Abs File -> IO [EvaluationInputPoint]
 getEvaluationInputPointsFor f = do
-    eids <- ES.getEasyIds f
+    eids <- runReaderT (ES.getEasyIds f) evaluationSettings
     fmap concat $ forM (map ES.idName eids) $ getEvaluationInputPointsForName f
 
 getEvaluationInputPointsForName ::
@@ -33,20 +33,23 @@ getEvaluationInputPointsForName ::
 getEvaluationInputPointsForName f funcname =
     forM ES.inferenceStrategies $ getEvaluationInputPoint f funcname
 
+evaluationSettings :: ES.Settings
+evaluationSettings = ES.Settings {ES.setsDebugLevel = 0}
+
 getEvaluationInputPoint ::
        Path Abs File
     -> ES.EasyName
     -> ES.SignatureInferenceStrategy
     -> IO EvaluationInputPoint
 getEvaluationInputPoint f funcname strat = do
-    let sets = ES.Settings {ES.setsDebugLevel = 0}
-        ds =
+    let ds =
             ES.DiscoverSettings
             { ES.setDiscFile = f
             , ES.setDiscFun = Just funcname
             , ES.setDiscInfStrat = strat
             }
-    (runtime, eqs) <- timeItT $ runReaderT (ES.discoverEquations ds) sets
+    (runtime, eqs) <-
+        timeItT $ runReaderT (ES.discoverEquations ds) evaluationSettings
     pure
         EvaluationInputPoint
         { eipFile = f

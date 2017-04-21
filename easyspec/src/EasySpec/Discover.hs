@@ -53,12 +53,12 @@ discoverEquations ds = do
     allEqs <- runEasySpec ds iSig
     pure $ nub allEqs
 
-getEasyIds :: MonadIO m => Path Abs File -> m [EasyId]
+getEasyIds :: (MonadIO m, MonadReader Settings m) => Path Abs File -> m [EasyId]
 getEasyIds file = do
     idDatas <- getGHCIds file
     tups <-
         forM idDatas $ \idData@(IdData i _) -> do
-            mimpl <- gatherSourceOf idData
+            mimpl <- gatherSourceOf file idData
             pure (i, mimpl)
     pure $ map (uncurry toEasyId) tups
 

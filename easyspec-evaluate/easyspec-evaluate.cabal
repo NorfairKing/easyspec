@@ -48,12 +48,13 @@ test-suite easyspec-evaluate-test
         base >=4.9 && <=5,
         easyspec -any,
         easyspec-evaluate -any,
-        hspec -any,
-        path -any,
-        path-io -any,
         QuickCheck >=2.9 && <2.10,
         genvalidity-hspec >=0.3 && <0.4,
-        genvalidity-path >=0.1 && <0.2
+        genvalidity-path >=0.1 && <0.2,
+        hspec -any,
+        mtl -any,
+        path -any,
+        path-io -any
     default-language: Haskell2010
     default-extensions: NoImplicitPrelude
     hs-source-dirs: test/

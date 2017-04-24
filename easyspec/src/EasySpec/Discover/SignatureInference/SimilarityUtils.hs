@@ -6,7 +6,6 @@ import Data.HashMap.Lazy (HashMap)
 import qualified Data.HashMap.Lazy as HM
 import Data.Hashable
 
-import EasySpec.Discover.CodeUtils
 import EasySpec.Discover.SignatureInference.Utils
 import EasySpec.Discover.Types
 
@@ -30,17 +29,7 @@ differenceInferAlg ::
     -> SignatureInferenceStrategy
 differenceInferAlg name diff =
     splitInferAlg name $ \focus scope ->
-        take 5 $
-        sortOn
-            (\f ->
-                 sum $
-                 map
-                     (\ff ->
-                          traceShow
-                              (prettyEasyId f, prettyEasyId ff) $
-                          traceShowId $ diff ff f)
-                     focus)
-            scope
+        take 5 $ sortOn (\f -> sum $ map (diff f) focus) scope
 
 letterDict :: (Hashable a, Eq a, Foldable f) => f a -> HashMap a Int
 letterDict = foldl go HM.empty

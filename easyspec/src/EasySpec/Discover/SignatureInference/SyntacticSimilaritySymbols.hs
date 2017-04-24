@@ -24,18 +24,8 @@ diffImpl ei1 ei2 =
     dictDiff (letterDict $ namesOf ei1) (letterDict $ namesOf ei2)
 
 namesOf :: EasyImpl -> [String]
-namesOf (Impl ms) = map nameStr $ concatMap go ms
+namesOf (Impl ms) = map nameStr $ concatMap getMatchSymbols ms
   where
-    go :: Match l -> [Name l]
-    go (Match _ n ps rhs mbs) =
-        n :
-        concatMap getPatSymbols ps ++
-        getRhsSymbols rhs ++ fromMaybe [] (getBindsSymbols <$> mbs)
-    go (InfixMatch _ p1 n ps rhs mbs) =
-        n :
-        getPatSymbols p1 ++
-        concatMap getPatSymbols ps ++
-        getRhsSymbols rhs ++ fromMaybe [] (getBindsSymbols <$> mbs)
     nameStr :: Name () -> String
     nameStr (Ident _ s) = s
     nameStr (Symbol _ s) = s

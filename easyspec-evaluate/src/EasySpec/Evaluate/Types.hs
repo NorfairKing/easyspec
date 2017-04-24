@@ -1,6 +1,11 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
+
 module EasySpec.Evaluate.Types where
 
 import Import
+
+import Data.Csv
 
 import qualified EasySpec.Discover.Types as ES
 
@@ -23,3 +28,24 @@ data Evaluator a = Evaluator
     , evaluatorGather :: EvaluationInput -> a
     , evaluatorPretty :: a -> String
     }
+
+data EvaluatorCsvLine = EvaluatorCsvLine
+    { eclPath :: String
+    , eclStratName :: String
+    , eclFocusFuncName :: String
+    , eclEvaluatorName :: String
+    , eclEvaluatorOutput :: String
+    } deriving (Show, Eq)
+
+instance ToNamedRecord EvaluatorCsvLine where
+    toNamedRecord EvaluatorCsvLine {..} =
+        namedRecord
+            [ "path" .= eclPath
+            , "strategy" .= eclStratName
+            , "focus" .= eclFocusFuncName
+            , "evaluator" .= eclEvaluatorName
+            , "output" .= eclEvaluatorOutput
+            ]
+
+instance DefaultOrdered EvaluatorCsvLine where
+    headerOrder _ = header ["path", "strategy", "focus", "evaluator", "output"]

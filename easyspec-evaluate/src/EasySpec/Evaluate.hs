@@ -7,6 +7,10 @@ import Import
 import System.TimeIt
 import Text.Printf
 
+import Data.Csv
+
+import qualified Data.ByteString.Lazy.Char8 as LB8
+
 import Language.Haskell.Exts.Pretty (prettyPrint)
 
 import qualified EasySpec.Discover as ES
@@ -21,7 +25,9 @@ easyspecEvaluate :: IO ()
 easyspecEvaluate = do
     (DispatchEvaluate fs, Settings) <- getInstructions
     epointss <- mapM getEvaluationInputPointsFor fs
-    putStrLn $ showEvaluationReport epointss
+    LB8.putStrLn $
+        encodeDefaultOrderedByName $
+        concatMap evaluationInputPointCsvLines $ concat epointss
 
 getEvaluationInputPointsFor :: Path Abs File -> IO [EvaluationInputPoint]
 getEvaluationInputPointsFor f = do
@@ -79,6 +85,25 @@ showEvaluationReport pointss = showTable $ concatMap go $ concat pointss
             , evaluatorName ev
             , evaluate ip ev
             ]
+
+evaluationInputPointCsvLines :: EvaluationInputPoint -> [EvaluatorCsvLine]
+evaluationInputPointCsvLines eip =
+    [ line lengthEvaluator
+    , line runtimeEvaluator
+    , line relevantEquationsEvaluator
+    , line irrelevantEquationsEvaluator
+    , line relativeRelevantEquationsEvaluator
+    ]
+  where
+    ip = pointToInput eip
+    line ev =
+        EvaluatorCsvLine
+        { eclPath = toFilePath $ eipFile eip
+        , eclStratName = ES.sigInfStratName $ eipStrat eip
+        , eclFocusFuncName = prettyPrint $ eipFunc eip
+        , eclEvaluatorName = evaluatorName ev
+        , eclEvaluatorOutput = evaluate ip ev
+        }
 
 showTable :: [[String]] -> String
 showTable = unlines . map unwords . formatTable

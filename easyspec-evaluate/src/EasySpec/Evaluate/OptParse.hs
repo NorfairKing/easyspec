@@ -33,7 +33,9 @@ combineToInstructions cmd Flags Configuration = (,) <$> disp <*> pure Settings
                     else do
                         dir <- resolveDir' $ fromMaybe "examples" mdirpath
                         fs <- snd <$> listDirRecur dir
-                        pure $ DispatchEvaluate fs
+                        pure $
+                            DispatchEvaluate $
+                            filter ((== ".hs") . fileExtension) fs
 
 getConfiguration :: Command -> Flags -> IO Configuration
 getConfiguration _ _ = pure Configuration

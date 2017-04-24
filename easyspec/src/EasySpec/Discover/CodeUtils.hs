@@ -37,7 +37,7 @@ getTyVars =
 getPatSymbols :: Pat l -> [Name l]
 getPatSymbols =
     foldPat
-        (\_ n -> []) -- Don't count variables
+        (\_ _ -> []) -- Don't count variables
                      -- TODO maybe we should count variables?
         (\_ _ _ -> [])
         (\_ n _ -> [n])
@@ -70,16 +70,20 @@ getRPatSymbols :: RPat l -> [Name l]
 getRPatSymbols = undefined
 
 getQNameSymbols :: QName l -> [Name l]
-getQNameSymbols (Qual _ mn n) = [n]
+getQNameSymbols (Qual _ _ n) = [n]
 getQNameSymbols (UnQual _ n) = [n]
 getQNameSymbols (Special _ _) = []
 
 getQOpSymbols :: QOp l -> [Name l]
 getQOpSymbols (QVarOp _ _) = [] -- Don't count variables, TODO see above TODO
-getQOpSymbols (QVarOp _ qn) = getQNameSymbols qn
+getQOpSymbols (QConOp _ qn) = getQNameSymbols qn
 
 getBindsSymbols :: Binds l -> [Name l]
 getBindsSymbols = undefined
+
+getRhsSymbols :: Rhs l -> [Name l]
+getRhsSymbols (UnGuardedRhs _ e) = getExpSymbols e
+getRhsSymbols (GuardedRhss _ grhss) = concatMap getGuardedRhsSymbols grhss
 
 getGuardedRhsSymbols :: GuardedRhs l -> [Name l]
 getGuardedRhsSymbols = undefined
@@ -428,6 +432,79 @@ foldExp ff1 ff2 ff3 ff4 ff5 ff6 ff7 ff8 ff9 ff10 ff11 ff12 ff13 ff14 ff15 ff16 f
     go (RightArrHighApp l b1 b2) = ff53 l (go b1) (go b2)
     go (LCase l as) = ff54 l as
     go (ExprHole l) = ff55 l
+
+foldDecl ::
+       (l -> DeclHead l -> Type l -> b)
+    -> (l -> DeclHead l -> Maybe (ResultSig l) -> Maybe (InjectivityInfo l) -> b)
+    -> (l -> DeclHead l -> Maybe (ResultSig l) -> Maybe (InjectivityInfo l) -> [TypeEqn l] -> b)
+    -> (l -> DataOrNew l -> Maybe (Context l) -> DeclHead l -> [QualConDecl l] -> Maybe (Deriving l) -> b)
+    -> (l -> DataOrNew l -> Maybe (Context l) -> DeclHead l -> Maybe (Kind l) -> [GadtDecl l] -> Maybe (Deriving l) -> b)
+    -> (l -> Maybe (Context l) -> DeclHead l -> Maybe (ResultSig l) -> b)
+    -> (l -> Type l -> Type l -> b)
+    -> (l -> DataOrNew l -> Type l -> [QualConDecl l] -> Maybe (Deriving l) -> b)
+    -> (l -> DataOrNew l -> Type l -> Maybe (Kind l) -> [GadtDecl l] -> Maybe (Deriving l) -> b)
+    -> (l -> Maybe (Context l) -> DeclHead l -> [FunDep l] -> Maybe [ClassDecl l] -> b)
+    -> (l -> Maybe (Overlap l) -> InstRule l -> Maybe [InstDecl l] -> b)
+    -> (l -> Maybe (Overlap l) -> InstRule l -> b)
+    -> (l -> Assoc l -> Maybe Int -> [Op l] -> b)
+    -> (l -> [Type l] -> b)
+    -> (l -> Exp l -> b)
+    -> (l -> [Name l] -> Type l -> b)
+    -> (l -> Name l -> Maybe [TyVarBind l] -> Maybe (Context l) -> Maybe (Context l) -> Type l -> b)
+    -> (l -> [Match l] -> b)
+    -> (l -> Pat l -> Rhs l -> Maybe (Binds l) -> b)
+    -> (l -> Pat l -> Pat l -> PatternSynDirection l -> b)
+    -> (l -> CallConv l -> Maybe (Safety l) -> Maybe String -> Name l -> Type l -> b)
+    -> (l -> CallConv l -> Maybe String -> Name l -> Type l -> b)
+    -> (l -> [Rule l] -> b)
+    -> (l -> [([Name l], String)] -> b)
+    -> (l -> [([Name l], String)] -> b)
+    -> (l -> Bool -> Maybe (Activation l) -> QName l -> b)
+    -> (l -> Maybe (Activation l) -> QName l -> b)
+    -> (l -> Maybe (Activation l) -> QName l -> [Type l] -> b)
+    -> (l -> Bool -> Maybe (Activation l) -> QName l -> [Type l] -> b)
+    -> (l -> InstRule l -> b)
+    -> (l -> Annotation l -> b)
+    -> (l -> Maybe (BooleanFormula l) -> b)
+    -> (l -> QName l -> [Role l] -> b)
+    -> Decl l
+    -> b
+foldDecl f01 f02 f03 f04 f05 f06 f07 f08 f09 f10 f11 f12 f13 f14 f15 f16 f17 f18 f19 f20 f21 f22 f23 f24 f25 f26 f27 f28 f29 f30 f31 f32 f33 =
+    go
+  where
+    go (TypeDecl l dh t) = f01 l dh t
+    go (TypeFamDecl l dh mrs mii) = f02 l dh mrs mii
+    go (ClosedTypeFamDecl l dh mrs mii teqs) = f03 l dh mrs mii teqs
+    go (DataDecl l don mctx dh qcds md) = f04 l don mctx dh qcds md
+    go (GDataDecl l don mctx dh mk gadtds md) = f05 l don mctx dh mk gadtds md
+    go (DataFamDecl l mctx dh mrs) = f06 l mctx dh mrs
+    go (TypeInsDecl l t1 t2) = f07 l t1 t2
+    go (DataInsDecl l don t qcds md) = f08 l don t qcds md
+    go (GDataInsDecl l don t mk gadtds md) = f09 l don t mk gadtds md
+    go (ClassDecl l mctx dh fds mcds) = f10 l mctx dh fds mcds
+    go (InstDecl l mo ir mids) = f11 l mo ir mids
+    go (DerivDecl l mo ir) = f12 l mo ir
+    go (InfixDecl l a mi os) = f13 l a mi os
+    go (DefaultDecl l ts) = f14 l ts
+    go (SpliceDecl l e) = f15 l e
+    go (TypeSig l ns t) = f16 l ns t
+    go (PatSynSig l n mtvbs mctx1 mctx2 t) = f17 l n mtvbs mctx1 mctx2 t
+    go (FunBind l ms) = f18 l ms
+    go (PatBind l p rhs mbs) = f19 l p rhs mbs
+    go (PatSyn l p1 p2 psd) = f20 l p1 p2 psd
+    go (ForImp l cc msaf mstr n t) = f21 l cc msaf mstr n t
+    go (ForExp l cc mstr n t) = f22 l cc mstr n t
+    go (RulePragmaDecl l rs) = f23 l rs
+    go (DeprPragmaDecl l ns) = f24 l ns
+    go (WarnPragmaDecl l ns) = f25 l ns
+    go (InlineSig l b ma qn) = f26 l b ma qn
+    go (InlineConlikeSig l ma qn) = f27 l ma qn
+    go (SpecSig l ma qn ts) = f28 l ma qn ts
+    go (SpecInlineSig l b ma qn ts) = f29 l b ma qn ts
+    go (InstSig l ir) = f30 l ir
+    go (AnnPragma l a) = f31 l a
+    go (MinimalPragma l mbf) = f32 l mbf
+    go (RoleAnnotDecl l qn rs) = f33 l qn rs
 
 prettyPrintOneLine :: Pretty a => a -> String
 prettyPrintOneLine =

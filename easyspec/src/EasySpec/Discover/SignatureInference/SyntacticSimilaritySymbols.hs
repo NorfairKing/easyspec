@@ -27,9 +27,15 @@ namesOf :: EasyImpl -> [String]
 namesOf (Impl ms) = map nameStr $ concatMap go ms
   where
     go :: Match l -> [Name l]
-    go (Match _ n ps rhs mbs) = n : concatMap getPatSymbols ps
+    go (Match _ n ps rhs mbs) =
+        n :
+        concatMap getPatSymbols ps ++
+        getRhsSymbols rhs ++ fromMaybe [] (getBindsSymbols <$> mbs)
     go (InfixMatch _ p1 n ps rhs mbs) =
-        n : getPatSymbols p1 ++ concatMap getPatSymbols ps
+        n :
+        getPatSymbols p1 ++
+        concatMap getPatSymbols ps ++
+        getRhsSymbols rhs ++ fromMaybe [] (getBindsSymbols <$> mbs)
     nameStr :: Name () -> String
     nameStr (Ident _ s) = s
     nameStr (Symbol _ s) = s

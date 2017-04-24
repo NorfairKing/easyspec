@@ -41,40 +41,119 @@ getPatSymbols =
                      -- TODO maybe we should count variables?
         (\_ _ _ -> [])
         (\_ n _ -> [n])
-        (\_ b1 qn b2 -> b1 ++ qpv qn ++ b2)
-        (\_ qn bs -> qpv qn ++ concat bs)
+        (\_ b1 qn b2 -> b1 ++ getQNameSymbols qn ++ b2)
+        (\_ qn bs -> getQNameSymbols qn ++ concat bs)
         (\_ _ bs -> concat bs)
         (\_ bs -> concat bs)
         (\_ b -> b)
-        (\_ qn pfs -> qpv qn ++ concatMap pfpv pfs)
+        (\_ qn pfs -> getQNameSymbols qn ++ concatMap pfpv pfs)
         (\_ n b -> n : b)
         (\_ -> [])
         (\_ b -> b)
         (\_ b _ -> b) -- Don't go into types
-        (\_ e b -> getExpVars e ++ b)
-        (\_ rps -> concatMap getRPatVars rps)
+        (\_ e b -> getExpSymbols e ++ b)
+        (\_ rps -> concatMap getRPatSymbols rps)
         (\_ _ _ mb bs -> fromMaybe [] mb ++ concat bs)
         (\_ _ _ mb -> fromMaybe [] mb)
         (\_ _ -> [])
         (\_ b -> b)
-        (\_ rpats -> concatMap getRPatVars rpats)
+        (\_ rpats -> concatMap getRPatSymbols rpats)
         (\_ _ _ -> [])
         (\_ b -> b)
   where
-    qpv :: QName l -> [Name l]
-    qpv (Qual _ mn n) = [n]
-    qpv (UnQual _ n) = [n]
-    qpv (Special _ _) = []
     pfpv :: PatField l -> [Name l]
-    pfpv (PFieldPat _ qn p) = qpv qn ++ getPatSymbols p
-    pfpv (PFieldPun _ qn) = qpv qn
+    pfpv (PFieldPat _ qn p) = getQNameSymbols qn ++ getPatSymbols p
+    pfpv (PFieldPun _ qn) = getQNameSymbols qn
     pfpv (PFieldWildcard _) = []
 
-getRPatVars :: RPat l -> [Name l]
-getRPatVars = undefined
+getRPatSymbols :: RPat l -> [Name l]
+getRPatSymbols = undefined
 
-getExpVars :: Exp l -> [Name l]
-getExpVars = undefined
+getQNameSymbols :: QName l -> [Name l]
+getQNameSymbols (Qual _ mn n) = [n]
+getQNameSymbols (UnQual _ n) = [n]
+getQNameSymbols (Special _ _) = []
+
+getQOpSymbols :: QOp l -> [Name l]
+getQOpSymbols (QVarOp _ _) = [] -- Don't count variables, TODO see above TODO
+getQOpSymbols (QVarOp _ qn) = getQNameSymbols qn
+
+getBindsSymbols :: Binds l -> [Name l]
+getBindsSymbols = undefined
+
+getGuardedRhsSymbols :: GuardedRhs l -> [Name l]
+getGuardedRhsSymbols = undefined
+
+getAltSymbols :: Alt l -> [Name l]
+getAltSymbols = undefined
+
+getStmtSymbols :: Stmt l -> [Name l]
+getStmtSymbols = undefined
+
+getFieldUpdateSymbols :: FieldUpdate l -> [Name l]
+getFieldUpdateSymbols = undefined
+
+getQualStmtSymbols :: QualStmt l -> [Name l]
+getQualStmtSymbols = undefined
+
+getExpSymbols :: Exp l -> [Name l]
+getExpSymbols =
+    foldExp
+        (\_ _ -> []) -- Don't count variables, TODO see above TODO
+        (\_ _ -> [])
+        (\_ _ -> []) -- Don't count variables see above
+        (\_ qn -> getQNameSymbols qn)
+        (\_ _ -> [])
+        (\_ b1 qo b2 -> b1 ++ getQOpSymbols qo ++ b2)
+        (\_ -> (++))
+        (\_ -> id)
+        (\_ ps b -> concatMap getPatSymbols ps ++ b)
+        (\_ bs b -> getBindsSymbols bs ++ b)
+        (\_ b1 b2 b3 -> b1 ++ b2 ++ b3)
+        (\_ grhss -> concatMap getGuardedRhsSymbols grhss)
+        (\_ b as -> b ++ concatMap getAltSymbols as)
+        (\_ stmts -> concatMap getStmtSymbols stmts)
+        (\_ stmts -> concatMap getStmtSymbols stmts)
+        (\_ _ bs -> concat bs)
+        (\_ _ mbs -> concat $ catMaybes mbs)
+        (\_ bs -> concat bs)
+        (\_ bs -> concat bs)
+        (\_ b -> b)
+        (\_ b qo -> b ++ getQOpSymbols qo)
+        (\_ qo b -> getQOpSymbols qo ++ b)
+        (\_ qn fus -> getQNameSymbols qn ++ concatMap getFieldUpdateSymbols fus)
+        (\_ b fus -> b ++ concatMap getFieldUpdateSymbols fus)
+        (\_ b -> b)
+        (\_ -> (++))
+        (\_ -> (++))
+        (\_ b1 b2 b3 -> b1 ++ b2 ++ b3)
+        (\_ -> (++))
+        (\_ b1 b2 b3 -> b1 ++ b2 ++ b3)
+        (\_ b qstms -> b ++ concatMap getQualStmtSymbols qstms)
+        (\_ b qstmss -> b ++ concat (concatMap (map getQualStmtSymbols) qstmss))
+        (\_ b qstmss -> b ++ concat (concatMap (map getQualStmtSymbols) qstmss))
+        (\_ b _ -> b) -- Don't count type symbols
+        (\_ _ -> [])
+        (\_ _ -> [])
+        (\_ _ -> [])
+        (\_ _ -> [])
+        (\_ _ _ -> [])
+        (\_ _ -> []) -- Don't count type symbols
+        (\_ _ _ mb bs -> fromMaybe [] mb ++ concat bs)
+        (\_ _ _ mb -> fromMaybe [] mb)
+        (\_ _ -> [])
+        (\_ b -> b)
+        (\_ bs -> concat bs)
+        (\_ _ b -> b)
+        (\_ _ b -> b)
+        (\_ _ _ _ b -> b)
+        (\_ p b -> getPatSymbols p ++ b)
+        (\_ -> (++))
+        (\_ -> (++))
+        (\_ -> (++))
+        (\_ -> (++))
+        (\_ as -> concatMap getAltSymbols as)
+        (\_ -> [])
 
 foldPat ::
        (l -> Name l -> b)

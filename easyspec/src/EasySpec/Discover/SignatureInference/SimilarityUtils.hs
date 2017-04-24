@@ -17,13 +17,16 @@ similarityInferAlg ::
     -> (EasyId -> f a)
     -> SignatureInferenceStrategy
 similarityInferAlg name distil =
-    splitInferAlg name $ \focus scope ->
-        take 5 $
-        sortOn
-            (\f -> sum $ map (\ff -> difference (dictOf ff) (dictOf f)) focus)
-            scope
+    differenceInferAlg name $ \e1 e2 -> dictDiff (dictOf e1) (dictOf e2)
   where
     dictOf = letterDict . distil
+
+-- Make a signature inference strategy, by describing the difference between two 'EasyId's.
+differenceInferAlg ::
+       (Ord n, Num n) => String -> (EasyId -> EasyId -> n) -> SignatureInferenceStrategy
+differenceInferAlg name diff =
+    splitInferAlg name $ \focus scope ->
+        take 5 $ sortOn (\f -> sum $ map (\ff -> diff ff f) focus) scope
 
 letterDict :: (Hashable a, Eq a, Foldable f) => f a -> HashMap a Int
 letterDict = foldl go HM.empty
@@ -33,8 +36,8 @@ letterDict = foldl go HM.empty
         u Nothing = Just 1
         u (Just n) = Just (n + 1)
 
-difference :: (Hashable a, Eq a) => HashMap a Int -> HashMap a Int -> Int
-difference hm1 hm2 = HM.foldl' (+) 0 $ HM.unionWith go hm1 hm2
+dictDiff :: (Hashable a, Eq a) => HashMap a Int -> HashMap a Int -> Int
+dictDiff hm1 hm2 = HM.foldl' (+) 0 $ HM.unionWith go hm1 hm2
   where
     go :: Int -> Int -> Int
     go n1 n2 = abs (n1 - n2)

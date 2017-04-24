@@ -34,6 +34,48 @@ getTyVars =
         (\_ _ -> [])
         (\_ _ _ -> [])
 
+getPatSymbols :: Pat l -> [Name l]
+getPatSymbols =
+    foldPat
+        (\_ n -> []) -- Don't count variables
+                     -- TODO maybe we should count variables?
+        (\_ _ _ -> [])
+        (\_ n _ -> [n])
+        (\_ b1 qn b2 -> b1 ++ qpv qn ++ b2)
+        (\_ qn bs -> qpv qn ++ concat bs)
+        (\_ _ bs -> concat bs)
+        (\_ bs -> concat bs)
+        (\_ b -> b)
+        (\_ qn pfs -> qpv qn ++ concatMap pfpv pfs)
+        (\_ n b -> n : b)
+        (\_ -> [])
+        (\_ b -> b)
+        (\_ b _ -> b) -- Don't go into types
+        (\_ e b -> getExpVars e ++ b)
+        (\_ rps -> concatMap getRPatVars rps)
+        (\_ _ _ mb bs -> fromMaybe [] mb ++ concat bs)
+        (\_ _ _ mb -> fromMaybe [] mb)
+        (\_ _ -> [])
+        (\_ b -> b)
+        (\_ rpats -> concatMap getRPatVars rpats)
+        (\_ _ _ -> [])
+        (\_ b -> b)
+  where
+    qpv :: QName l -> [Name l]
+    qpv (Qual _ mn n) = [n]
+    qpv (UnQual _ n) = [n]
+    qpv (Special _ _) = []
+    pfpv :: PatField l -> [Name l]
+    pfpv (PFieldPat _ qn p) = qpv qn ++ getPatSymbols p
+    pfpv (PFieldPun _ qn) = qpv qn
+    pfpv (PFieldWildcard _) = []
+
+getRPatVars :: RPat l -> [Name l]
+getRPatVars = undefined
+
+getExpVars :: Exp l -> [Name l]
+getExpVars = undefined
+
 foldPat ::
        (l -> Name l -> b)
     -> (l -> Sign l -> Literal l -> b)
@@ -84,6 +126,9 @@ foldPat f01 f02 f03 f04 f05 f06 f07 f08 f09 f10 f11 f12 f13 f14 f15 f16 f17 f18 
     go (PXRPats l rpats) = f20 l rpats
     go (PQuasiQuote l s1 s2) = f21 l s1 s2
     go (PBangPat l b) = f22 l (go b)
+
+foldRPatVars :: RPat l -> b
+foldRPatVars = undefined
 
 foldType ::
        (l -> Maybe [TyVarBind l] -> Maybe (Context l) -> b -> b)

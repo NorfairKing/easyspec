@@ -34,6 +34,57 @@ getTyVars =
         (\_ _ -> [])
         (\_ _ _ -> [])
 
+foldPat ::
+       (l -> Name l -> b)
+    -> (l -> Sign l -> Literal l -> b)
+    -> (l -> Name l -> Integer -> b)
+    -> (l -> b -> QName l -> b -> b)
+    -> (l -> QName l -> [b] -> b)
+    -> (l -> Boxed -> [b] -> b)
+    -> (l -> [b] -> b)
+    -> (l -> b -> b)
+    -> (l -> QName l -> [PatField l] -> b)
+    -> (l -> Name l -> b -> b)
+    -> (l -> b)
+    -> (l -> b -> b)
+    -> (l -> b -> Type l -> b)
+    -> (l -> Exp l -> b -> b)
+    -> (l -> [RPat l] -> b)
+    -> (l -> XName l -> [PXAttr l] -> Maybe b -> [b] -> b)
+    -> (l -> XName l -> [PXAttr l] -> Maybe b -> b)
+    -> (l -> String -> b)
+    -> (l -> b -> b)
+    -> (l -> [RPat l] -> b)
+    -> (l -> String -> String -> b)
+    -> (l -> b -> b)
+    -> Pat l
+    -> b
+foldPat f01 f02 f03 f04 f05 f06 f07 f08 f09 f10 f11 f12 f13 f14 f15 f16 f17 f18 f19 f20 f21 f22 =
+    go
+  where
+    go (PVar l n) = f01 l n
+    go (PLit l sn lt) = f02 l sn lt
+    go (PNPlusK l n int) = f03 l n int
+    go (PInfixApp l b1 qn b2) = f04 l (go b1) qn (go b2)
+    go (PApp l qn bs) = f05 l qn (map go bs)
+    go (PTuple l bxd bs) = f06 l bxd (map go bs)
+    go (PList l bs) = f07 l (map go bs)
+    go (PParen l b) = f08 l (go b)
+    go (PRec l qn patfs) = f09 l qn patfs
+    go (PAsPat l n b) = f10 l n (go b)
+    go (PWildCard l) = f11 l
+    go (PIrrPat l b) = f12 l (go b)
+    go (PatTypeSig l b t) = f13 l (go b) t
+    go (PViewPat l e b) = f14 l e (go b)
+    go (PRPat l rpats) = f15 l rpats
+    go (PXTag l xn pxattrs mb bs) = f16 l xn pxattrs (go <$> mb) (map go bs)
+    go (PXETag l xn pxattrs mb) = f17 l xn pxattrs (go <$> mb)
+    go (PXPcdata l s) = f18 l s
+    go (PXPatTag l b) = f19 l (go b)
+    go (PXRPats l rpats) = f20 l rpats
+    go (PQuasiQuote l s1 s2) = f21 l s1 s2
+    go (PBangPat l b) = f22 l (go b)
+
 foldType ::
        (l -> Maybe [TyVarBind l] -> Maybe (Context l) -> b -> b)
     -> (l -> b -> b -> b)

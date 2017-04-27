@@ -24,6 +24,7 @@ library
         EasySpec.Discover.SignatureInference.FullBackground
         EasySpec.Discover.SignatureInference.SyntacticSimilarityName
         EasySpec.Discover.SignatureInference.SyntacticSimilaritySymbols
+        EasySpec.Discover.SignatureInference.SyntacticSimilarityType
         EasySpec.Discover.SignatureInference.Utils
         EasySpec.Discover.SourceGathering
         EasySpec.Discover.TH

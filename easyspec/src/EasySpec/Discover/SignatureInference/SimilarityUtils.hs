@@ -2,9 +2,8 @@ module EasySpec.Discover.SignatureInference.SimilarityUtils where
 
 import Import
 
-import Data.HashMap.Lazy (HashMap)
-import qualified Data.HashMap.Lazy as HM
-import Data.Hashable
+import Data.Map.Lazy (Map)
+import qualified Data.Map.Lazy as M
 
 import EasySpec.Discover.SignatureInference.Utils
 import EasySpec.Discover.Types
@@ -12,7 +11,7 @@ import EasySpec.Discover.Types
 -- Make a signature inference strategy, by describing how to get a 'fingerprint'
 -- from an 'EasyId'.
 similarityInferAlg ::
-       (Hashable a, Eq a, Foldable f)
+       (Eq a, Ord a, Foldable f)
     => String
     -> (EasyId -> f a)
     -> SignatureInferenceStrategy
@@ -31,16 +30,16 @@ differenceInferAlg name diff =
     splitInferAlg name $ \focus scope ->
         take 5 $ sortOn (\f -> sum $ map (diff f) focus) scope
 
-letterDict :: (Hashable a, Eq a, Foldable f) => f a -> HashMap a Int
-letterDict = foldl go HM.empty
+letterDict :: (Eq a, Ord a, Foldable f) => f a -> Map a Int
+letterDict = foldl go M.empty
   where
-    go hm k = HM.alter u k hm
+    go hm k = M.alter u k hm
       where
         u Nothing = Just 1
         u (Just n) = Just (n + 1)
 
-dictDiff :: (Hashable a, Eq a) => HashMap a Int -> HashMap a Int -> Int
-dictDiff hm1 hm2 = HM.foldl' (+) 0 $ HM.unionWith go hm1 hm2
+dictDiff :: (Eq a, Ord a) => Map a Int -> Map a Int -> Int
+dictDiff hm1 hm2 = M.foldl' (+) 0 $ M.unionWith go hm1 hm2
   where
     go :: Int -> Int -> Int
     go n1 n2 = abs (n1 - n2)

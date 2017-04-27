@@ -10,7 +10,7 @@ import EasySpec.Discover.Types
 
 inferSyntacticSimilaritySymbols :: SignatureInferenceStrategy
 inferSyntacticSimilaritySymbols =
-    differenceInferAlg "syntactically-similarity-symbols" diffIdImpl
+    differenceInferAlg "syntactical-similarity-symbols" diffIdImpl
 
 diffIdImpl :: EasyId -> EasyId -> Double
 diffIdImpl i1 i2 =

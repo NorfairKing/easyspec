@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveFunctor #-}
 
 module EasySpec.Discover.Types where
@@ -33,7 +34,7 @@ data Id m = Id
     { idName :: Name m
     , idType :: Type m
     , idImpl :: Maybe (Impl m)
-    } deriving (Show, Eq)
+    } deriving (Show, Eq, Generic)
 
 type EasyId = Id ()
 

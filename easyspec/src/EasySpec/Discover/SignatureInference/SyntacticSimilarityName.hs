@@ -9,5 +9,5 @@ import EasySpec.Discover.Types
 inferSyntacticSimilarityName :: SignatureInferenceStrategy
 inferSyntacticSimilarityName =
     similarityInferAlg
-        "syntactically-similarity-name"
+        "syntactical-similarity-name"
         (prettyPrintOneLine . idName)

@@ -13,9 +13,10 @@ author: Tom Sydney Kerckhove
 library
     exposed-modules:
         EasySpec.Evaluate
-        EasySpec.Evaluate.Types
+        EasySpec.Evaluate.Evaluate
         EasySpec.Evaluate.OptParse
         EasySpec.Evaluate.OptParse.Types
+        EasySpec.Evaluate.Types
     build-depends:
         base >=4.9 && <=5,
         easyspec >=0.0 && <0.1,
@@ -62,5 +63,5 @@ test-suite easyspec-evaluate-test
     hs-source-dirs: test/
     other-modules:
         TestImport
-        EasySpec.EvaluateSpec
+        EasySpec.Evaluate.EvaluateSpec
     ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall

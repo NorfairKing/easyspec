@@ -1,10 +1,10 @@
-module EasySpec.EvaluateSpec
+module EasySpec.Evaluate.EvaluateSpec
     ( spec
     ) where
 
 import TestImport
 
-import EasySpec.Evaluate
+import EasySpec.Evaluate.Evaluate
 
 import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.Types as ES

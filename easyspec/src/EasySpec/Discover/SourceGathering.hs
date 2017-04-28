@@ -16,11 +16,9 @@ import EasySpec.Discover.Types
 import EasySpec.OptParse.Types
 import EasySpec.Utils
 
-gatherSourceOf ::
-       (MonadIO m, MonadReader Settings m)
-    => Path Abs File
-    -> IdData
-    -> m (Maybe EasyImpl)
+gatherSourceOf
+    :: (MonadIO m, MonadReader Settings m)
+    => Path Abs File -> IdData -> m (Maybe EasyImpl)
 gatherSourceOf mainSrc (IdData i ms) = do
     mimpl <-
         case ms of
@@ -57,7 +55,9 @@ gatherSourceOf mainSrc (IdData i ms) = do
                 ]
     pure mimpl
 
-getImplFrom :: (Eq l, Monoid l) => Name l -> Module l -> Maybe (Impl l)
+getImplFrom
+    :: (Eq l, Monoid l)
+    => Name l -> Module l -> Maybe (Impl l)
 getImplFrom name mod_ =
     case mod_ of
         (Module _ _ _ _ decls) ->

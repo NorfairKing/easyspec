@@ -6,6 +6,7 @@ import Import
 
 import Data.Csv
 import System.Environment
+import System.Exit
 import System.FilePath (dropExtensions)
 
 import qualified Data.ByteString.Lazy as LB
@@ -21,9 +22,15 @@ import Development.Shake
 import Development.Shake.Path
 
 runBuild :: String -> IO ()
-runBuild target =
-    withArgs ["--color", target] $
-    shakeArgs shakeOptions {shakeVerbosity = Loud} shakeBuild
+runBuild target = do
+    here <- getCurrentDir
+    fs <- snd <$> listDir here
+    case find ((== $(mkRelFile "easyspec-evaluate.cabal")) . filename) fs of
+        Nothing ->
+            die "easyspec-evaluate build is being run in the wrong directory."
+        Just _ ->
+            withArgs ["--color", target] $
+            shakeArgs shakeOptions {shakeVerbosity = Loud} shakeBuild
 
 shakeBuild :: Rules ()
 shakeBuild = do
@@ -34,7 +41,7 @@ analyseRule :: String
 analyseRule = "analyse"
 
 examplesDir :: MonadIO m => m (Path Abs Dir)
-examplesDir = liftIO $ resolveDir' "examples"
+examplesDir = liftIO $ resolveDir' "../examples"
 
 absSourceFile :: MonadIO m => Path Rel File -> m (Path Abs File)
 absSourceFile f = (</> f) <$> examplesDir

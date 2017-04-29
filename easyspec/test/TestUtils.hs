@@ -7,8 +7,9 @@ import EasySpec.Utils
 forSourceFilesInDir ::
        Example a
     => Path Abs Dir
-    -> (Path Rel File -> String)
-    -> (Path Rel File -> a)
+    -> (Path Abs File -> String)
+    -> (Path Abs File -> a)
     -> SpecWith (Arg a)
-forSourceFilesInDir dir itfunc func =
-    void $ forSourcesIn dir $ \f -> it (itfunc f) $ func f
+forSourceFilesInDir dir itfunc func = do
+    fs <- runIO $ (filter isSourceFile . snd) <$> listDirRecur dir
+    forM_ fs $ \f -> it (itfunc f) $ func f

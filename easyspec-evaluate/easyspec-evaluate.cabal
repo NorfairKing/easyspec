@@ -13,6 +13,7 @@ author: Tom Sydney Kerckhove
 library
     exposed-modules:
         EasySpec.Evaluate
+        EasySpec.Evaluate.Build
         EasySpec.Evaluate.Evaluate
         EasySpec.Evaluate.OptParse
         EasySpec.Evaluate.OptParse.Types
@@ -27,7 +28,8 @@ library
         path-io >=1.2 && <1.3,
         mtl >=2.2 && <2.3,
         timeit >=1.0 && <1.1,
-        haskell-src-exts >=1.18 && <1.19
+        haskell-src-exts >=1.18 && <1.19,
+        shake >=0.15 && <0.16
     default-language: Haskell2010
     default-extensions: NoImplicitPrelude
     hs-source-dirs: src/

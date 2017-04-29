@@ -36,6 +36,7 @@ combineToInstructions cmd Flags Configuration = (,) <$> disp <*> pure Settings
                         pure $
                             DispatchEvaluate $
                             filter ((== ".hs") . fileExtension) fs
+            CommandBuild target -> pure $ DispatchBuild target
 
 getConfiguration :: Command -> Flags -> IO Configuration
 getConfiguration _ _ = pure Configuration
@@ -69,7 +70,12 @@ parseArgs :: Parser Arguments
 parseArgs = (,) <$> parseCommand <*> parseFlags
 
 parseCommand :: Parser Command
-parseCommand = hsubparser $ mconcat [command "evaluate" parseCommandEvaluate]
+parseCommand =
+    hsubparser $
+    mconcat
+        [ command "evaluate" parseCommandEvaluate
+        , command "build" parseCommandBuild
+        ]
 
 parseCommandEvaluate :: ParserInfo Command
 parseCommandEvaluate = info parser modifier
@@ -83,7 +89,17 @@ parseCommandEvaluate = info parser modifier
                  , value Nothing
                  , help "the path to a file or directory of example/examples"
                  ])
-    modifier = fullDesc <> progDesc "Command example."
+    modifier =
+        fullDesc <>
+        progDesc "Evaluate different easyspec strategies on examples."
+
+parseCommandBuild :: ParserInfo Command
+parseCommandBuild = info parser modifier
+  where
+    parser =
+        CommandBuild <$>
+        strArgument (mconcat [metavar "TARGET", help "the target to build."])
+    modifier = fullDesc <> progDesc "Build a target in the evaluation system."
 
 parseFlags :: Parser Flags
 parseFlags = pure Flags

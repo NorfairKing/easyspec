@@ -1,3 +1,5 @@
 .stack-work/
+.shake/
+tmp/
 *.css
 *.js

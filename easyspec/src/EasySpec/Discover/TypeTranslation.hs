@@ -16,9 +16,7 @@ import Language.Haskell.Exts.Syntax as H
 
 import EasySpec.Discover.Types as E
 
-toEasyId
-    :: Monoid m
-    => GHC.Id -> Maybe (E.Impl m) -> E.Id m
+toEasyId :: Monoid m => GHC.Id -> Maybe (E.Impl m) -> E.Id m
 toEasyId i impl =
     Id
     { E.idName = toEasyName $ Var.varName i
@@ -26,14 +24,10 @@ toEasyId i impl =
     , E.idImpl = impl
     }
 
-toEasyName
-    :: Monoid a
-    => GHC.Name -> H.Name a
+toEasyName :: Monoid a => GHC.Name -> H.Name a
 toEasyName n = Ident mempty $ showName n
 
-toEasyType
-    :: Monoid a
-    => GHC.Type -> H.Type a
+toEasyType :: Monoid a => GHC.Type -> H.Type a
 toEasyType ty =
     case splitFunTy_maybe ty of
         Just (tf, tt) ->

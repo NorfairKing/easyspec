@@ -10,25 +10,27 @@ import EasySpec.Discover.Types
 
 -- Make a signature inference strategy, by describing how to get a 'fingerprint'
 -- from an 'EasyId'.
-similarityInferAlg
-    :: (Eq a, Ord a, Foldable f)
-    => String -> (EasyId -> f a) -> SignatureInferenceStrategy
+similarityInferAlg ::
+       (Eq a, Ord a, Foldable f)
+    => String
+    -> (EasyId -> f a)
+    -> SignatureInferenceStrategy
 similarityInferAlg name distil =
     differenceInferAlg name $ \e1 e2 -> dictDiff (dictOf e1) (dictOf e2)
   where
     dictOf = letterDict . distil
 
 -- Make a signature inference strategy, by describing the difference between two 'EasyId's.
-differenceInferAlg
-    :: (Ord n, Show n, Num n)
-    => String -> (EasyId -> EasyId -> n) -> SignatureInferenceStrategy
+differenceInferAlg ::
+       (Ord n, Show n, Num n)
+    => String
+    -> (EasyId -> EasyId -> n)
+    -> SignatureInferenceStrategy
 differenceInferAlg name diff =
     splitInferAlg name $ \focus scope ->
         take 5 $ sortOn (\f -> sum $ map (diff f) focus) scope
 
-letterDict
-    :: (Eq a, Ord a, Foldable f)
-    => f a -> Map a Int
+letterDict :: (Eq a, Ord a, Foldable f) => f a -> Map a Int
 letterDict = foldl go M.empty
   where
     go hm k = M.alter u k hm
@@ -36,9 +38,7 @@ letterDict = foldl go M.empty
         u Nothing = Just 1
         u (Just n) = Just (n + 1)
 
-dictDiff
-    :: (Eq a, Ord a)
-    => Map a Int -> Map a Int -> Int
+dictDiff :: (Eq a, Ord a) => Map a Int -> Map a Int -> Int
 dictDiff hm1 hm2 = M.foldl' (+) 0 $ M.unionWith go hm1 hm2
   where
     go :: Int -> Int -> Int

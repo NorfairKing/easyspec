@@ -2,13 +2,13 @@ module TestUtils where
 
 import TestImport
 
-forSourceFilesInDir
-    :: Example a
+import EasySpec.Utils
+
+forSourceFilesInDir ::
+       Example a
     => Path Abs Dir
-    -> (Path Abs File -> String)
-    -> (Path Abs File -> a)
+    -> (Path Rel File -> String)
+    -> (Path Rel File -> a)
     -> SpecWith (Arg a)
-forSourceFilesInDir dir itfunc func = do
-    fs <-
-        runIO $ (filter ((== ".hs") . fileExtension) . snd) <$> listDirRecur dir
-    forM_ fs $ \f -> it (itfunc f) $ func f
+forSourceFilesInDir dir itfunc func =
+    void $ forSourcesIn dir $ \f -> it (itfunc f) $ func f

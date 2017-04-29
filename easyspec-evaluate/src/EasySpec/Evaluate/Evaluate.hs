@@ -27,22 +27,28 @@ runEvaluate fs = do
         encodeDefaultOrderedByName $
         concatMap evaluationInputPointCsvLines $ concat epointss
 
+namesInSource :: MonadIO m => Path Abs File -> m [ES.EasyName]
+namesInSource f =
+    map ES.idName <$> runReaderT (ES.getEasyIds f) evaluationSettings
+
 getEvaluationInputPointsFor :: Path Abs File -> IO [EvaluationInputPoint]
 getEvaluationInputPointsFor f = do
-    eids <- runReaderT (ES.getEasyIds f) evaluationSettings
-    fmap concat $ forM (map ES.idName eids) $ getEvaluationInputPointsForName f
+    names <- namesInSource f
+    fmap concat $ forM names $ getEvaluationInputPointsForName f
 
-getEvaluationInputPointsForName :: Path Abs File
-                                -> ES.EasyName
-                                -> IO [EvaluationInputPoint]
+signatureInferenceStrategies :: [ES.SignatureInferenceStrategy]
+signatureInferenceStrategies = ES.inferenceStrategies
+
+getEvaluationInputPointsForName ::
+       Path Abs File -> ES.EasyName -> IO [EvaluationInputPoint]
 getEvaluationInputPointsForName f funcname =
-    forM ES.inferenceStrategies $ getEvaluationInputPoint f funcname
+    forM signatureInferenceStrategies $ getEvaluationInputPoint f funcname
 
 evaluationSettings :: ES.Settings
 evaluationSettings = ES.Settings {ES.setsDebugLevel = 0}
 
-getEvaluationInputPoint
-    :: Path Abs File
+getEvaluationInputPoint ::
+       Path Abs File
     -> ES.EasyName
     -> ES.SignatureInferenceStrategy
     -> IO EvaluationInputPoint

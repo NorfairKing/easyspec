@@ -11,6 +11,8 @@ import System.Environment (getArgs)
 
 import Options.Applicative
 
+import EasySpec.Utils (isSourceFile)
+
 import EasySpec.Evaluate.OptParse.Types
 
 getInstructions :: IO Instructions
@@ -33,9 +35,7 @@ combineToInstructions cmd Flags Configuration = (,) <$> disp <*> pure Settings
                     else do
                         dir <- resolveDir' $ fromMaybe "examples" mdirpath
                         fs <- snd <$> listDirRecur dir
-                        pure $
-                            DispatchEvaluate $
-                            filter ((== ".hs") . fileExtension) fs
+                        pure $ DispatchEvaluate $ filter isSourceFile fs
             CommandBuild target -> pure $ DispatchBuild target
 
 getConfiguration :: Command -> Flags -> IO Configuration

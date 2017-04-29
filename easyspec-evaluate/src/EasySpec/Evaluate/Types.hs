@@ -37,6 +37,12 @@ data EvaluatorCsvLine = EvaluatorCsvLine
     , eclEvaluatorOutput :: String
     } deriving (Show, Eq)
 
+instance FromNamedRecord EvaluatorCsvLine where
+    parseNamedRecord r =
+        EvaluatorCsvLine <$> r .: "path" <*> r .: "strategy" <*> r .: "focus" <*>
+        r .: "evaluator" <*>
+        r .: "output"
+
 instance ToNamedRecord EvaluatorCsvLine where
     toNamedRecord EvaluatorCsvLine {..} =
         namedRecord

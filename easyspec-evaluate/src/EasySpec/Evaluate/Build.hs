@@ -78,10 +78,19 @@ dataFileForExampleAndName f name =
 
 csvDataFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
-csvDataFileWithComponents f comps = do
-    dd <- dataDir
+csvDataFileWithComponents = fileInDirWithExtensionAndComponents dataDir "csv"
+
+fileInDirWithExtensionAndComponents ::
+       MonadIO m
+    => m (Path Abs Dir)
+    -> String
+    -> Path Rel File
+    -> [String]
+    -> m (Path Abs File)
+fileInDirWithExtensionAndComponents genDir ext f comps = do
+    dd <- genDir
     let fileStr = intercalate "-" $ dropExtensions (toFilePath f) : comps
-    liftIO $ (dd </>) <$> parseRelFile (fileStr ++ ".csv")
+    liftIO $ (dd </>) <$> parseRelFile (concat [fileStr, ".", ext])
 
 dataFilesForExampleAndName ::
        MonadIO m => Path Rel File -> ES.EasyName -> m [Path Abs File]
@@ -103,16 +112,20 @@ allDataFile = (</> $(mkRelFile "all.csv")) <$> dataDir
 outDir :: MonadIO m => m (Path Abs Dir)
 outDir = liftIO $ resolveDir' "out"
 
+forExamples :: MonadIO m => (Path Rel File -> m a) -> m [a]
+forExamples func = do
+    edir <- examplesDir
+    forSourcesIn edir func
+
 dataRules :: Rules (Path Abs File)
 dataRules = do
-    edir <- examplesDir
-    csvFs <- forSourcesIn edir dataRulesForFile
+    csvFs <- forExamples dataRulesForExample
     combF <- allDataFile
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
-dataRulesForFile :: Path Rel File -> Rules (Path Abs File)
-dataRulesForFile sourceF = do
+dataRulesForExample :: Path Rel File -> Rules (Path Abs File)
+dataRulesForExample sourceF = do
     absSourceF <- absSourceFile sourceF
     names <- namesInSource absSourceF
     csvFs <- forM names $ rulesForFileAndName sourceF
@@ -212,5 +225,42 @@ dataFromAll = do
     needP [dataFile]
     readCSV dataFile
 
+pngPlotFileWithComponents ::
+       MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
+pngPlotFileWithComponents = fileInDirWithExtensionAndComponents plotsDir "png"
+
+runtimePlotFileForExampleAndName ::
+       MonadIO m => Path Rel File -> ES.EasyName -> m (Path Abs File)
+runtimePlotFileForExampleAndName file name =
+    pngPlotFileWithComponents file ["runtime", prettyPrint name]
+
 plotsRules :: Rules [Path Abs File]
-plotsRules = pure []
+plotsRules = concat <$> forExamples plotsRulesForExample
+
+plotsRulesForExample :: Path Rel File -> Rules [Path Abs File]
+plotsRulesForExample sourceF = do
+    absSourceF <- absSourceFile sourceF
+    names <- namesInSource absSourceF
+    fmap concat $ forM names $ plotsRulesForExampleAndName sourceF
+
+scriptFile :: MonadIO m => String -> m (Path Abs File)
+scriptFile fname = liftIO $ resolveFile' $ "rscripts/" ++ fname
+
+runtimeAnalysisScript :: MonadIO m => m (Path Abs File)
+runtimeAnalysisScript = scriptFile "runtime.r"
+
+plotsRulesForExampleAndName ::
+       Path Rel File -> ES.EasyName -> Rules [Path Abs File]
+plotsRulesForExampleAndName sourceF name = do
+    runtimePlotFile <- runtimePlotFileForExampleAndName sourceF name
+    dataFile <- dataFileForExampleAndName sourceF name
+    runtimeScript <- runtimeAnalysisScript
+    runtimePlotFile $%> do
+        needP [runtimeScript, dataFile]
+        cmd
+            "Rscript"
+            (toFilePath runtimeScript)
+            (toFilePath dataFile)
+            (toFilePath runtimePlotFile)
+            (prettyPrint name)
+    pure [runtimePlotFile]

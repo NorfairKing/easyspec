@@ -40,8 +40,9 @@ runBuild target = do
 
 shakeBuild :: Rules ()
 shakeBuild = do
-    dataFs <- dataRules
-    analyseRule ~> needP dataFs
+    dataF <- dataRules
+    plotsFs <- plotsRules
+    analyseRule ~> needP (dataF : plotsFs)
 
 analyseRule :: String
 analyseRule = "analyse"
@@ -57,6 +58,9 @@ tmpDir = liftIO $ resolveDir' "tmp"
 
 dataDir :: MonadIO m => m (Path Abs Dir)
 dataDir = (</> $(mkRelDir "data")) <$> tmpDir
+
+plotsDir :: MonadIO m => m (Path Abs Dir)
+plotsDir = (</> $(mkRelDir "plots")) <$> tmpDir
 
 dataFileFor ::
        MonadIO m
@@ -93,13 +97,19 @@ dataFilesForExample file = do
     names <- namesInSource absSourceF
     fmap concat $ forM names $ dataFilesForExampleAndName file
 
+allDataFile :: MonadIO m => m (Path Abs File)
+allDataFile = (</> $(mkRelFile "all.csv")) <$> dataDir
+
 outDir :: MonadIO m => m (Path Abs Dir)
 outDir = liftIO $ resolveDir' "out"
 
-dataRules :: Rules [Path Abs File]
+dataRules :: Rules (Path Abs File)
 dataRules = do
     edir <- examplesDir
-    forSourcesIn edir dataRulesForFile
+    csvFs <- forSourcesIn edir dataRulesForFile
+    combF <- allDataFile
+    combineCSVFiles @EvaluatorCsvLine combF csvFs
+    pure combF
 
 dataRulesForFile :: Path Rel File -> Rules (Path Abs File)
 dataRulesForFile sourceF = do
@@ -186,12 +196,21 @@ dataFrom file name strat = do
 dataFromExampleAndName ::
        Path Rel File -> ES.EasyName -> Action [EvaluatorCsvLine]
 dataFromExampleAndName file name = do
-    dataFiles <- dataFilesForExampleAndName file name
-    needP dataFiles
-    concat <$> mapM readCSV dataFiles
+    dataFile <- dataFileForExampleAndName file name
+    needP [dataFile]
+    readCSV dataFile
 
 dataFromExample :: Path Rel File -> Action [EvaluatorCsvLine]
 dataFromExample file = do
-    dataFiles <- dataFilesForExample file
-    needP dataFiles
-    concat <$> mapM readCSV dataFiles
+    dataFile <- dataFileForExample file
+    needP [dataFile]
+    readCSV dataFile
+
+dataFromAll :: Action [EvaluatorCsvLine]
+dataFromAll = do
+    dataFile <- allDataFile
+    needP [dataFile]
+    readCSV dataFile
+
+plotsRules :: Rules [Path Abs File]
+plotsRules = pure []

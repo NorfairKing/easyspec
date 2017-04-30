@@ -280,6 +280,7 @@ plotsRulesForExampleAndName sourceF name = do
                 (toFilePath singleEvaluatorBarScript)
                 (toFilePath dataFile)
                 (toFilePath runtimePlotFile)
+                (toFilePath sourceF)
                 (prettyPrint name)
                 (evaluatorName evaluator)
         pure runtimePlotFile

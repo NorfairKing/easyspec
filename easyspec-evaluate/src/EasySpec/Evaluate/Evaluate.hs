@@ -76,7 +76,7 @@ data AnyEvaluator =
 
 evaluators :: [AnyEvaluator]
 evaluators =
-    [ AnyEvaluator lengthEvaluator
+    [ AnyEvaluator equationsEvaluator
     , AnyEvaluator runtimeEvaluator
     , AnyEvaluator relevantEquationsEvaluator
     , AnyEvaluator irrelevantEquationsEvaluator
@@ -137,8 +137,8 @@ pointToInput EvaluationInputPoint {..} =
     , eiFocusFuncName = eipFunc
     }
 
-lengthEvaluator :: Evaluator Int
-lengthEvaluator = Evaluator "length" (length . eiDiscoveredEqs) show
+equationsEvaluator :: Evaluator Int
+equationsEvaluator = Evaluator "equations" (length . eiDiscoveredEqs) show
 
 runtimeEvaluator :: Evaluator Double
 runtimeEvaluator = Evaluator "runtime" eiRuntime (printf "%.3f")

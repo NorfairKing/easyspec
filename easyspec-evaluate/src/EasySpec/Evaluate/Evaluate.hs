@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ExistentialQuantification #-}
 
 module EasySpec.Evaluate.Evaluate where
 
@@ -70,20 +71,26 @@ getEvaluationInputPoint f funcname strat = do
         , eipRuntime = runtime
         }
 
+data AnyEvaluator =
+    forall a. AnyEvaluator (Evaluator a)
+
+evaluators :: [AnyEvaluator]
+evaluators =
+    [ AnyEvaluator lengthEvaluator
+    , AnyEvaluator runtimeEvaluator
+    , AnyEvaluator relevantEquationsEvaluator
+    , AnyEvaluator irrelevantEquationsEvaluator
+    , AnyEvaluator relativeRelevantEquationsEvaluator
+    ]
+
 showEvaluationReport :: [[EvaluationInputPoint]] -> String
 showEvaluationReport pointss = showTable $ concatMap go $ concat pointss
   where
     go :: EvaluationInputPoint -> [[String]]
-    go eip =
-        [ line lengthEvaluator
-        , line runtimeEvaluator
-        , line relevantEquationsEvaluator
-        , line irrelevantEquationsEvaluator
-        , line relativeRelevantEquationsEvaluator
-        ]
+    go eip = map line evaluators
       where
         ip = pointToInput eip
-        line ev =
+        line (AnyEvaluator ev) =
             [ toFilePath $ eipFile eip
             , ES.sigInfStratName $ eipStrat eip
             , prettyPrint $ eipFunc eip
@@ -92,16 +99,10 @@ showEvaluationReport pointss = showTable $ concatMap go $ concat pointss
             ]
 
 evaluationInputPointCsvLines :: EvaluationInputPoint -> [EvaluatorCsvLine]
-evaluationInputPointCsvLines eip =
-    [ line lengthEvaluator
-    , line runtimeEvaluator
-    , line relevantEquationsEvaluator
-    , line irrelevantEquationsEvaluator
-    , line relativeRelevantEquationsEvaluator
-    ]
+evaluationInputPointCsvLines eip = map line evaluators
   where
     ip = pointToInput eip
-    line ev =
+    line (AnyEvaluator ev) =
         EvaluatorCsvLine
         { eclPath = toFilePath $ eipFile eip
         , eclStratName = ES.sigInfStratName $ eipStrat eip
@@ -140,7 +141,7 @@ lengthEvaluator :: Evaluator Int
 lengthEvaluator = Evaluator "length" (length . eiDiscoveredEqs) show
 
 runtimeEvaluator :: Evaluator Double
-runtimeEvaluator = Evaluator "runtime" eiRuntime (printf "%.2fs")
+runtimeEvaluator = Evaluator "runtime" eiRuntime (printf "%.3f")
 
 relativeRelevantEquationsEvaluator :: Evaluator Double
 relativeRelevantEquationsEvaluator =

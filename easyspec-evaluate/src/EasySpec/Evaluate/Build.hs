@@ -36,7 +36,9 @@ runBuild target = do
             die "easyspec-evaluate build is being run in the wrong directory."
         Just _ ->
             withArgs ["--color", target] $
-            shakeArgs shakeOptions {shakeVerbosity = Loud} shakeBuild
+            shakeArgs
+                shakeOptions {shakeVerbosity = Loud, shakeThreads = 0}
+                shakeBuild
 
 shakeBuild :: Rules ()
 shakeBuild = do
@@ -122,52 +124,57 @@ forExamples func = do
 
 dataRules :: Rules (Path Abs File)
 dataRules = do
-    csvFs <- forExamples dataRulesForExample
+    ghciResource <- newResource "ghci" 1
+    csvFs <- forExamples (dataRulesForExample ghciResource)
     combF <- allDataFile
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
-dataRulesForExample :: Path Rel File -> Rules (Path Abs File)
-dataRulesForExample sourceF = do
+dataRulesForExample :: Resource -> Path Rel File -> Rules (Path Abs File)
+dataRulesForExample ghciResource sourceF = do
     absSourceF <- absSourceFile sourceF
     names <- namesInSource absSourceF
-    csvFs <- forM names $ rulesForFileAndName sourceF
+    csvFs <- forM names $ rulesForFileAndName ghciResource sourceF
     combF <- dataFileForExample sourceF
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
-rulesForFileAndName :: Path Rel File -> ES.EasyName -> Rules (Path Abs File)
-rulesForFileAndName sourceF name = do
+rulesForFileAndName ::
+       Resource -> Path Rel File -> ES.EasyName -> Rules (Path Abs File)
+rulesForFileAndName ghciResource sourceF name = do
     csvFs <-
         forM signatureInferenceStrategies $
-        rulesForFileNameAndStrat sourceF name
+        rulesForFileNameAndStrat ghciResource sourceF name
     combF <- dataFileForExampleAndName sourceF name
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
 rulesForFileNameAndStrat ::
-       Path Rel File
+       Resource
+    -> Path Rel File
     -> ES.EasyName
     -> ES.SignatureInferenceStrategy
     -> Rules (Path Abs File)
-rulesForFileNameAndStrat sourceF name infStrat = do
+rulesForFileNameAndStrat ghciResource sourceF name infStrat = do
     absSourceF <- absSourceFile sourceF
     csvF <- dataFileFor sourceF name infStrat
     csvF $%> do
         needP [absSourceF]
-        putLoud $
-            unwords
-                [ "Building data file"
-                , toFilePath csvF
-                , "by running 'easyspec-evaluate' on"
-                , toFilePath absSourceF
-                , "with focus:"
-                , prettyPrint name
-                , "and signature inference strategy:"
-                , ES.sigInfStratName infStrat
-                ]
+        ip <-
+            withResource ghciResource 1 $ do
+                putLoud $
+                    unwords
+                        [ "Building data file"
+                        , toFilePath csvF
+                        , "by running 'easyspec-evaluate' on"
+                        , toFilePath absSourceF
+                        , "with focus:"
+                        , prettyPrint name
+                        , "and signature inference strategy:"
+                        , ES.sigInfStratName infStrat
+                        ]
+                liftIO $ getEvaluationInputPoint absSourceF name infStrat
         liftIO $ do
-            ip <- getEvaluationInputPoint absSourceF name infStrat
             ensureDir $ parent csvF
             LB.writeFile (toFilePath csvF) $
                 encodeDefaultOrderedByName $ evaluationInputPointCsvLines ip
@@ -232,10 +239,16 @@ pngPlotFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
 pngPlotFileWithComponents = fileInDirWithExtensionAndComponents plotsDir "png"
 
-runtimePlotFileForExampleAndName ::
-       MonadIO m => Path Rel File -> ES.EasyName -> m (Path Abs File)
-runtimePlotFileForExampleAndName file name =
-    pngPlotFileWithComponents file ["runtime", prettyPrint name]
+singleEvaluatorBarPlotFileForExampleAndName ::
+       MonadIO m
+    => Path Rel File
+    -> ES.EasyName
+    -> Evaluator a
+    -> m (Path Abs File)
+singleEvaluatorBarPlotFileForExampleAndName file name ev =
+    pngPlotFileWithComponents
+        file
+        ["runtime", prettyPrint name, evaluatorName ev]
 
 plotsRules :: Rules [Path Abs File]
 plotsRules = concat <$> forExamples plotsRulesForExample
@@ -249,24 +262,27 @@ plotsRulesForExample sourceF = do
 scriptFile :: MonadIO m => String -> m (Path Abs File)
 scriptFile fname = liftIO $ resolveFile' $ "rscripts/" ++ fname
 
-runtimeAnalysisScript :: MonadIO m => m (Path Abs File)
-runtimeAnalysisScript = scriptFile "runtime.r"
+singleEvaluatorBarAnalysisScript :: MonadIO m => m (Path Abs File)
+singleEvaluatorBarAnalysisScript = scriptFile "single_evaluator_bar.r"
 
 plotsRulesForExampleAndName ::
        Path Rel File -> ES.EasyName -> Rules [Path Abs File]
 plotsRulesForExampleAndName sourceF name = do
-    runtimePlotFile <- runtimePlotFileForExampleAndName sourceF name
+    singleEvaluatorBarScript <- singleEvaluatorBarAnalysisScript
     dataFile <- dataFileForExampleAndName sourceF name
-    runtimeScript <- runtimeAnalysisScript
-    runtimePlotFile $%> do
-        needP [runtimeScript, dataFile]
-        cmd
-            "Rscript"
-            (toFilePath runtimeScript)
-            (toFilePath dataFile)
-            (toFilePath runtimePlotFile)
-            (prettyPrint name)
-    pure [runtimePlotFile]
+    forM evaluators $ \(AnyEvaluator evaluator) -> do
+        runtimePlotFile <-
+            singleEvaluatorBarPlotFileForExampleAndName sourceF name evaluator
+        runtimePlotFile $%> do
+            needP [singleEvaluatorBarScript, dataFile]
+            cmd
+                "Rscript"
+                (toFilePath singleEvaluatorBarScript)
+                (toFilePath dataFile)
+                (toFilePath runtimePlotFile)
+                (prettyPrint name)
+                (evaluatorName evaluator)
+        pure runtimePlotFile
 
 analysisZipFile :: MonadIO m => m (Path Abs File)
 analysisZipFile = do

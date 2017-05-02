@@ -2,20 +2,15 @@ module EasySpec.Evaluate.Analyse.Data.Content where
 
 import Import
 
-import Language.Haskell.Exts.Pretty (prettyPrint)
-
 import qualified EasySpec.Discover.Types as ES
-
-import EasySpec.Evaluate.Evaluate
-import EasySpec.Evaluate.Types
-import EasySpec.Utils
-
-import EasySpec.Evaluate.Analyse.Common
-import EasySpec.Evaluate.Analyse.Data.Files
-import EasySpec.Evaluate.Analyse.Utils
 
 import Development.Shake
 import Development.Shake.Path
+
+import EasySpec.Evaluate.Types
+
+import EasySpec.Evaluate.Analyse.Data.Files
+import EasySpec.Evaluate.Analyse.Utils
 
 dataFrom ::
        Path Rel File

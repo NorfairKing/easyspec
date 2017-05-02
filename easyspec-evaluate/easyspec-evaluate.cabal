@@ -19,7 +19,9 @@ library
         EasySpec.Evaluate.Analyse.Common
         EasySpec.Evaluate.Analyse.Data
         EasySpec.Evaluate.Analyse.Data.Files
+        EasySpec.Evaluate.Analyse.Data.Content
         EasySpec.Evaluate.Analyse.Plots
+        EasySpec.Evaluate.Analyse.Plots.Files
         EasySpec.Evaluate.Analyse.Utils
         EasySpec.Evaluate.Evaluate
         EasySpec.Evaluate.OptParse

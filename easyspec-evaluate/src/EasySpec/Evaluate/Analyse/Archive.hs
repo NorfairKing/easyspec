@@ -2,10 +2,10 @@ module EasySpec.Evaluate.Analyse.Archive where
 
 import Import
 
-import EasySpec.Evaluate.Analyse.Common
-
 import Development.Shake
 import Development.Shake.Path
+
+import EasySpec.Evaluate.Analyse.Common
 
 archiveRule :: String
 archiveRule = "zip"

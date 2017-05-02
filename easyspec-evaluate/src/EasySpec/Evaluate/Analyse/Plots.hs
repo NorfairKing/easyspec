@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
@@ -11,14 +9,15 @@ import Language.Haskell.Exts.Pretty (prettyPrint)
 
 import qualified EasySpec.Discover.Types as ES
 
+import Development.Shake
+import Development.Shake.Path
+
 import EasySpec.Evaluate.Evaluate
 import EasySpec.Evaluate.Types
 
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Files
-
-import Development.Shake
-import Development.Shake.Path
+import EasySpec.Evaluate.Analyse.Plots.Files
 
 plotsRule :: String
 plotsRule = "plots"
@@ -29,52 +28,32 @@ plotsRules = do
     plotsFs <- concat <$> mapM plotsRulesForExample es
     plotsRule ~> needP plotsFs
 
-plotsDir :: MonadIO m => m (Path Abs Dir)
-plotsDir = (</> $(mkRelDir "plots")) <$> tmpDir
-
-pngPlotFileWithComponents ::
-       MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
-pngPlotFileWithComponents = fileInDirWithExtensionAndComponents plotsDir "png"
-
-singleEvaluatorBarPlotFileForExampleAndName ::
-       MonadIO m
-    => Path Rel File
-    -> ES.EasyName
-    -> Evaluator a
-    -> m (Path Abs File)
-singleEvaluatorBarPlotFileForExampleAndName file name ev =
-    pngPlotFileWithComponents
-        file
-        ["runtime", prettyPrint name, evaluatorName ev]
-
 plotsRulesForExample :: Path Rel File -> Rules [Path Abs File]
 plotsRulesForExample sourceF = do
     absSourceF <- absExampleFile sourceF
     names <- namesInSource absSourceF
     fmap concat $ forM names $ plotsRulesForExampleAndName sourceF
 
-scriptFile :: MonadIO m => String -> m (Path Abs File)
-scriptFile fname = liftIO $ resolveFile' $ "rscripts/" ++ fname
-
-singleEvaluatorBarAnalysisScript :: MonadIO m => m (Path Abs File)
-singleEvaluatorBarAnalysisScript = scriptFile "single_evaluator_bar.r"
-
 plotsRulesForExampleAndName ::
        Path Rel File -> ES.EasyName -> Rules [Path Abs File]
-plotsRulesForExampleAndName sourceF name = do
+plotsRulesForExampleAndName sourceF name =
+    forM evaluators $ perEvaluatorBarPlotFor sourceF name
+
+perEvaluatorBarPlotFor ::
+       Path Rel File -> ES.EasyName -> AnyEvaluator -> Rules (Path Abs File)
+perEvaluatorBarPlotFor sourceF name (AnyEvaluator evaluator) = do
     singleEvaluatorBarScript <- singleEvaluatorBarAnalysisScript
     dataFile <- dataFileForExampleAndName sourceF name
-    forM evaluators $ \(AnyEvaluator evaluator) -> do
-        runtimePlotFile <-
-            singleEvaluatorBarPlotFileForExampleAndName sourceF name evaluator
-        runtimePlotFile $%> do
-            needP [singleEvaluatorBarScript, dataFile]
-            cmd
-                "Rscript"
-                (toFilePath singleEvaluatorBarScript)
-                (toFilePath dataFile)
-                (toFilePath runtimePlotFile)
-                (toFilePath sourceF)
-                (prettyPrint name)
-                (evaluatorName evaluator)
-        pure runtimePlotFile
+    runtimePlotFile <-
+        singleEvaluatorBarPlotFileForExampleAndName sourceF name evaluator
+    runtimePlotFile $%> do
+        needP [singleEvaluatorBarScript, dataFile]
+        cmd
+            "Rscript"
+            (toFilePath singleEvaluatorBarScript)
+            (toFilePath dataFile)
+            (toFilePath runtimePlotFile)
+            (toFilePath sourceF)
+            (prettyPrint name)
+            (evaluatorName evaluator)
+    pure runtimePlotFile

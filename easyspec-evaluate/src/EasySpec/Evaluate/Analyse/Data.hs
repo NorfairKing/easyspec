@@ -11,6 +11,9 @@ import Import
 
 import Language.Haskell.Exts.Pretty (prettyPrint)
 
+import Development.Shake
+import Development.Shake.Path
+
 import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Evaluate
@@ -19,9 +22,6 @@ import EasySpec.Evaluate.Types
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Utils
-
-import Development.Shake
-import Development.Shake.Path
 
 dataRule :: String
 dataRule = "data"

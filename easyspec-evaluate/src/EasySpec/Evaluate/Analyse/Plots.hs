@@ -15,13 +15,19 @@ import EasySpec.Evaluate.Evaluate
 import EasySpec.Evaluate.Types
 
 import EasySpec.Evaluate.Analyse.Common
-import EasySpec.Evaluate.Analyse.Data
+import EasySpec.Evaluate.Analyse.Data.Files
 
 import Development.Shake
 import Development.Shake.Path
 
-plotsRules :: Rules [Path Abs File]
-plotsRules = concat <$> forExamples plotsRulesForExample
+plotsRule :: String
+plotsRule = "plots"
+
+plotsRules :: Rules ()
+plotsRules = do
+    es <- examples
+    plotsFs <- concat <$> mapM plotsRulesForExample es
+    plotsRule ~> needP plotsFs
 
 plotsDir :: MonadIO m => m (Path Abs Dir)
 plotsDir = (</> $(mkRelDir "plots")) <$> tmpDir
@@ -43,7 +49,7 @@ singleEvaluatorBarPlotFileForExampleAndName file name ev =
 
 plotsRulesForExample :: Path Rel File -> Rules [Path Abs File]
 plotsRulesForExample sourceF = do
-    absSourceF <- absSourceFile sourceF
+    absSourceF <- absExampleFile sourceF
     names <- namesInSource absSourceF
     fmap concat $ forM names $ plotsRulesForExampleAndName sourceF
 

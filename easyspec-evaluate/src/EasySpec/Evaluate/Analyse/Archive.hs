@@ -7,14 +7,12 @@ import EasySpec.Evaluate.Analyse.Common
 import Development.Shake
 import Development.Shake.Path
 
-analysisZipFile :: MonadIO m => m (Path Abs File)
-analysisZipFile = do
-    od <- outDir
-    liftIO $ resolveFile od "easyspec-data.tar.gz"
+archiveRule :: String
+archiveRule = "zip"
 
-analysisZipFileRules :: Rules (Path Abs File)
-analysisZipFileRules = do
-    zf <- analysisZipFile
+archiveRules :: Rules ()
+archiveRules = do
+    zf <- archiveFile
     td <- tmpDir
     zf $%> do
         fs <- liftIO $ snd <$> listDirRecur td
@@ -25,4 +23,9 @@ analysisZipFileRules = do
             "cvzf"
             (toFilePath zf)
             (map toFilePath $ mapMaybe (stripDir td) fs)
-    pure zf
+    archiveRule ~> needP [zf]
+
+archiveFile :: MonadIO m => m (Path Abs File)
+archiveFile = do
+    od <- outDir
+    liftIO $ resolveFile od "easyspec-data.tar.gz"

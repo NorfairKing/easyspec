@@ -11,5 +11,5 @@ forSourceFilesInDir ::
     -> (Path Abs File -> a)
     -> SpecWith (Arg a)
 forSourceFilesInDir dir itfunc func = do
-    fs <- runIO $ (filter isSourceFile . snd) <$> listDirRecur dir
-    forM_ fs $ \f -> it (itfunc f) $ func f
+    fs <- runIO $ sourcesIn dir
+    forM_ fs $ \f -> it (itfunc $ dir </> f) $ func (dir </> f)

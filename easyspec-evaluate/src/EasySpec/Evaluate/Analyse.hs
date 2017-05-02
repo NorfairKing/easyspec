@@ -7,16 +7,13 @@ import EasySpec.Evaluate.Analyse.Data
 import EasySpec.Evaluate.Analyse.Plots
 
 import Development.Shake
-import Development.Shake.Path
 
 analyseRule :: String
 analyseRule = "analyse"
 
 analyseRules :: Rules ()
 analyseRules = do
-    dataF <- dataRules
-    plotsFs <- plotsRules
-    zf <- analysisZipFileRules
-    analyseRule ~> do
-        needP (dataF : plotsFs)
-        needP [zf]
+    dataRules
+    plotsRules
+    archiveRules
+    analyseRule ~> need [dataRule, plotsRule, archiveRule]

@@ -1,7 +1,10 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module EasySpec.Evaluate.Analyse.Plots where
+module EasySpec.Evaluate.Analyse.Plots
+    ( plotsRule
+    , plotsRules
+    ) where
 
 import Import
 
@@ -37,11 +40,11 @@ plotsRulesForExample sourceF = do
 plotsRulesForExampleAndName ::
        Path Rel File -> ES.EasyName -> Rules [Path Abs File]
 plotsRulesForExampleAndName sourceF name =
-    forM evaluators $ perEvaluatorBarPlotFor sourceF name
+    forM evaluators $ perExampleNameAndEvaluatorBarPlotFor sourceF name
 
-perEvaluatorBarPlotFor ::
-       Path Rel File -> ES.EasyName -> AnyEvaluator -> Rules (Path Abs File)
-perEvaluatorBarPlotFor sourceF name (AnyEvaluator evaluator) = do
+perExampleNameAndEvaluatorBarPlotFor ::
+       Path Rel File -> ES.EasyName -> Evaluator -> Rules (Path Abs File)
+perExampleNameAndEvaluatorBarPlotFor sourceF name evaluator = do
     singleEvaluatorBarScript <- singleEvaluatorBarAnalysisScript
     dataFile <- dataFileForExampleAndName sourceF name
     runtimePlotFile <-

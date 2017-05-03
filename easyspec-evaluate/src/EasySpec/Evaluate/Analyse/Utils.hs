@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
@@ -6,7 +5,9 @@ module EasySpec.Evaluate.Analyse.Utils where
 
 import Import
 
-import Data.Csv
+import Data.Aeson as JSON
+import Data.Aeson.Encode.Pretty as JSON
+import Data.Csv as CSV
 
 import qualified Data.Vector as V
 
@@ -28,17 +29,22 @@ combineCSVFiles res ins =
                 (unwords
                      ["Combining the following CSV files into", toFilePath res] :
                  map toFilePath ins)
-        ls <- concat <$> mapM (readCSV @a) ins
+        ls <- concat <$> mapM readCSV ins :: Action [a]
         writeCSV res ls
 
 readCSV :: (FromNamedRecord a, MonadIO m) => Path Abs File -> m [a]
 readCSV file = do
     contents <- liftIO $ LB.readFile $ toFilePath file
-    case decodeByName contents of
+    case CSV.decodeByName contents of
         Left err ->
             fail $
-            unwords
-                ["Failed to read CSV file", toFilePath file, "with error:", err]
+            unlines
+                [ "Failed to read CSV file"
+                , toFilePath file
+                , "with error:"
+                , err
+                , show contents
+                ]
         Right (_, res) -> pure $ V.toList res
 
 writeCSV ::
@@ -48,4 +54,24 @@ writeCSV ::
     -> m ()
 writeCSV file records = do
     ensureDir $ parent file
-    liftIO $ LB.writeFile (toFilePath file) $ encodeDefaultOrderedByName records
+    liftIO $
+        LB.writeFile (toFilePath file) $ CSV.encodeDefaultOrderedByName records
+
+readJSON :: (FromJSON a, MonadIO m) => Path Abs File -> m a
+readJSON file = do
+    contents <- liftIO $ LB.readFile $ toFilePath file
+    case JSON.eitherDecode contents of
+        Left err ->
+            fail $
+            unwords
+                [ "Failed to read JSON file"
+                , toFilePath file
+                , "with error:"
+                , err
+                ]
+        Right res -> pure res
+
+writeJSON :: (ToJSON a, MonadIO m) => Path Abs File -> a -> m ()
+writeJSON file dat = do
+    ensureDir $ parent file
+    liftIO $ LB.writeFile (toFilePath file) $ JSON.encodePretty dat

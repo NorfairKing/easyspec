@@ -9,6 +9,8 @@ import Data.Csv
 
 import qualified EasySpec.Discover.Types as ES
 
+type EvaluatorName = String
+
 data EvaluationInputPoint = EvaluationInputPoint
     { eipFile :: Path Abs File
     , eipFunc :: ES.EasyName
@@ -23,18 +25,18 @@ data EvaluationInput = EvaluationInput
     , eiRuntime :: Double
     } deriving (Show, Eq)
 
-data Evaluator a = Evaluator
-    { evaluatorName :: String
-    , evaluatorGather :: EvaluationInput -> a
-    , evaluatorPretty :: a -> String
+data Evaluator = Evaluator
+    { evaluatorName :: EvaluatorName
+    , evaluatorGather :: EvaluationInput -> Double
+    , evaluatorPretty :: Double -> String
     }
 
 data EvaluatorCsvLine = EvaluatorCsvLine
     { eclPath :: String
     , eclStratName :: String
     , eclFocusFuncName :: String
-    , eclEvaluatorName :: String
-    , eclEvaluatorOutput :: String
+    , eclEvaluatorName :: EvaluatorName
+    , eclEvaluatorOutput :: Double
     } deriving (Show, Eq)
 
 instance FromNamedRecord EvaluatorCsvLine where

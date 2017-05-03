@@ -26,7 +26,7 @@ singleEvaluatorBarPlotFileForExampleAndName ::
        MonadIO m
     => Path Rel File
     -> ES.EasyName
-    -> Evaluator a
+    -> Evaluator
     -> m (Path Abs File)
 singleEvaluatorBarPlotFileForExampleAndName file name ev =
     pngPlotFileWithComponents

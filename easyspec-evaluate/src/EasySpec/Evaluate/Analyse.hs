@@ -16,4 +16,6 @@ analyseRules = do
     dataRules
     plotsRules
     archiveRules
-    analyseRule ~> need [dataRule, plotsRule, archiveRule]
+    analyseRule ~> do
+        need [dataRule, plotsRule]
+        need [archiveRule] -- needs to be seperate

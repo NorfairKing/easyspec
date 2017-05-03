@@ -4,6 +4,9 @@ import Import
 
 import System.FilePath (dropExtensions)
 
+import qualified EasySpec.Discover as ES
+import qualified EasySpec.Discover.Types as ES
+
 import EasySpec.Utils
 
 examplesDir :: MonadIO m => m (Path Abs Dir)
@@ -34,3 +37,6 @@ examples = do
 
 absExampleFile :: MonadIO m => Path Rel File -> m (Path Abs File)
 absExampleFile f = (</> f) <$> examplesDir
+
+signatureInferenceStrategies :: [ES.SignatureInferenceStrategy]
+signatureInferenceStrategies = ES.inferenceStrategies

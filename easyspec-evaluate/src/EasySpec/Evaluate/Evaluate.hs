@@ -37,13 +37,10 @@ getEvaluationInputPointsFor f = do
     names <- namesInSource f
     fmap concat $ forM names $ getEvaluationInputPointsForName f
 
-signatureInferenceStrategies :: [ES.SignatureInferenceStrategy]
-signatureInferenceStrategies = ES.inferenceStrategies
-
 getEvaluationInputPointsForName ::
        Path Abs File -> ES.EasyName -> IO [EvaluationInputPoint]
 getEvaluationInputPointsForName f funcname =
-    forM signatureInferenceStrategies $ getEvaluationInputPoint f funcname
+    forM ES.inferenceStrategies $ getEvaluationInputPoint f funcname
 
 evaluationSettings :: ES.Settings
 evaluationSettings = ES.Settings {ES.setsDebugLevel = 0}
@@ -71,16 +68,13 @@ getEvaluationInputPoint f funcname strat = do
         , eipRuntime = runtime
         }
 
-data AnyEvaluator =
-    forall a. AnyEvaluator (Evaluator a)
-
-evaluators :: [AnyEvaluator]
+evaluators :: [Evaluator]
 evaluators =
-    [ AnyEvaluator equationsEvaluator
-    , AnyEvaluator runtimeEvaluator
-    , AnyEvaluator relevantEquationsEvaluator
-    , AnyEvaluator irrelevantEquationsEvaluator
-    , AnyEvaluator relativeRelevantEquationsEvaluator
+    [ equationsEvaluator
+    , runtimeEvaluator
+    , relevantEquationsEvaluator
+    , irrelevantEquationsEvaluator
+    , relativeRelevantEquationsEvaluator
     ]
 
 showEvaluationReport :: [[EvaluationInputPoint]] -> String
@@ -90,7 +84,7 @@ showEvaluationReport pointss = showTable $ concatMap go $ concat pointss
     go eip = map line evaluators
       where
         ip = pointToInput eip
-        line (AnyEvaluator ev) =
+        line ev =
             [ toFilePath $ eipFile eip
             , ES.sigInfStratName $ eipStrat eip
             , prettyPrint $ eipFunc eip
@@ -102,13 +96,13 @@ evaluationInputPointCsvLines :: EvaluationInputPoint -> [EvaluatorCsvLine]
 evaluationInputPointCsvLines eip = map line evaluators
   where
     ip = pointToInput eip
-    line (AnyEvaluator ev) =
+    line ev =
         EvaluatorCsvLine
         { eclPath = toFilePath $ eipFile eip
         , eclStratName = ES.sigInfStratName $ eipStrat eip
         , eclFocusFuncName = prettyPrint $ eipFunc eip
         , eclEvaluatorName = evaluatorName ev
-        , eclEvaluatorOutput = evaluate ip ev
+        , eclEvaluatorOutput = evaluatorGather ev ip
         }
 
 showTable :: [[String]] -> String
@@ -126,7 +120,7 @@ pad c i s
     | length s < i = s ++ replicate (i - length s) c
     | otherwise = s
 
-evaluate :: EvaluationInput -> Evaluator a -> String
+evaluate :: EvaluationInput -> Evaluator -> String
 evaluate ei e = evaluatorPretty e $ evaluatorGather e ei
 
 pointToInput :: EvaluationInputPoint -> EvaluationInput
@@ -137,32 +131,37 @@ pointToInput EvaluationInputPoint {..} =
     , eiFocusFuncName = eipFunc
     }
 
-equationsEvaluator :: Evaluator Int
-equationsEvaluator = Evaluator "equations" (length . eiDiscoveredEqs) show
+equationsEvaluator :: Evaluator
+equationsEvaluator =
+    Evaluator "equations" (genericLength . eiDiscoveredEqs) show
 
-runtimeEvaluator :: Evaluator Double
+runtimeEvaluator :: Evaluator
 runtimeEvaluator = Evaluator "runtime" eiRuntime (printf "%.3f")
 
-relativeRelevantEquationsEvaluator :: Evaluator Double
+relativeRelevantEquationsEvaluator :: Evaluator
 relativeRelevantEquationsEvaluator =
     Evaluator "relative-relevant-equations" go (printf "%.2f")
   where
     go ei =
-        genericLength
-            (filter (mentionsEq $ eiFocusFuncName ei) (eiDiscoveredEqs ei)) /
-        genericLength (eiDiscoveredEqs ei)
+        let l =
+                evaluatorGather relevantEquationsEvaluator ei /
+                evaluatorGather equationsEvaluator ei
+        in if isNaN l
+               then 0
+               else l
 
-relevantEquationsEvaluator :: Evaluator Int
+relevantEquationsEvaluator :: Evaluator
 relevantEquationsEvaluator = Evaluator "relevant-equations" go show
   where
     go ei =
-        length $ filter (mentionsEq $ eiFocusFuncName ei) (eiDiscoveredEqs ei)
+        genericLength $
+        filter (mentionsEq $ eiFocusFuncName ei) (eiDiscoveredEqs ei)
 
-irrelevantEquationsEvaluator :: Evaluator Int
+irrelevantEquationsEvaluator :: Evaluator
 irrelevantEquationsEvaluator = Evaluator "irrelevant-equations" go show
   where
     go ei =
-        length $
+        genericLength $
         filter (not . mentionsEq (eiFocusFuncName ei)) (eiDiscoveredEqs ei)
 
 mentionsEq :: ES.EasyName -> ES.EasyEq -> Bool

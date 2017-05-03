@@ -25,9 +25,70 @@ averageDataRule = "average-data"
 averageDataRules :: Rules ()
 averageDataRules = do
     exs <- examples
-    fs <- mapM averageOverNamesAndStrategiesForExampleRules exs
-    fss <- mapM averageOverNamesPerStrategyForExampleRules exs
+    fs <- mapM averageOverNamesPerStrategyForExampleRules exs
+    fss <- mapM averageOverNamesAndStrategiesForExampleRules exs
     averageDataRule ~> needP (fs ++ fss)
+
+averageOverNamesPerStrategyForExampleRules ::
+       Path Rel File -> Rules (Path Abs File)
+averageOverNamesPerStrategyForExampleRules sourceF = do
+    avgF <- averageOverNamesPerStrategyForExampleFile sourceF
+    avgF $%> do
+        dataPoints <- dataFromExample sourceF
+        let averages =
+                flip
+                    map
+                    (averagePer (eclEvaluatorName &&& eclStratName) dataPoints) $ \((n, s), a) ->
+                    ( s
+                    , AverageEvaluatorOutput
+                      { averageEvaluatorOutputEvaluatorName = n
+                      , averageEvaluatorOutputAverage = a
+                      })
+        let averagesPerStrategies =
+                flip map (groupUnorderedBy fst averages) $ \(s, ls) ->
+                    AverageEvaluatorPerStrategyOutput
+                    { averageEvaluatorPerStrategyStrategy = s
+                    , averageEvaluatorPerStrategyAverageEvaluatorOutput =
+                          map snd ls
+                    }
+        let avoverNamesPerStrat =
+                AverageOverNamesForExampleAndStrategy
+                { averageOverNamesForExampleAndStrategyExample = sourceF
+                , averageOverNamesForExampleAndStrategyAverage =
+                      averagesPerStrategies
+                }
+        writeJSON avgF avoverNamesPerStrat
+    pure avgF
+
+averageOverNamesPerStrategyForExampleFile ::
+       MonadIO m => Path Rel File -> m (Path Abs File)
+averageOverNamesPerStrategyForExampleFile sourceF =
+    jsonAverageFileWithComponents sourceF ["average-per-strategy"]
+
+data AverageOverNamesForExampleAndStrategy = AverageOverNamesForExampleAndStrategy
+    { averageOverNamesForExampleAndStrategyExample :: Path Rel File
+    , averageOverNamesForExampleAndStrategyAverage :: [AverageEvaluatorPerStrategyOutput]
+    } deriving (Show, Eq, Generic)
+
+instance ToJSON AverageOverNamesForExampleAndStrategy where
+    toJSON AverageOverNamesForExampleAndStrategy {..} =
+        object
+            [ "example" .=
+              toFilePath averageOverNamesForExampleAndStrategyExample
+            , "averages" .= averageOverNamesForExampleAndStrategyAverage
+            ]
+
+data AverageEvaluatorPerStrategyOutput = AverageEvaluatorPerStrategyOutput
+    { averageEvaluatorPerStrategyStrategy :: String
+    , averageEvaluatorPerStrategyAverageEvaluatorOutput :: [AverageEvaluatorOutput]
+    } deriving (Show, Eq, Generic)
+
+instance ToJSON AverageEvaluatorPerStrategyOutput where
+    toJSON AverageEvaluatorPerStrategyOutput {..} =
+        object
+            [ "strategy" .= averageEvaluatorPerStrategyStrategy
+            , "average" .= averageEvaluatorPerStrategyAverageEvaluatorOutput
+            ]
 
 averageOverNamesAndStrategiesForExampleRules ::
        Path Rel File -> Rules (Path Abs File)
@@ -57,9 +118,12 @@ averagePer ::
     -> [EvaluatorCsvLine]
     -> [(a, AverageOutput)]
 averagePer func ls =
+    map (second averageEvaluatorCsvLines) $ groupUnorderedBy func ls
+
+groupUnorderedBy :: Eq b => (a -> b) -> [a] -> [(b, [a])]
+groupUnorderedBy func ls =
     let oups = nub $ map func ls
-    in flip map oups $ \oup ->
-           (oup, averageEvaluatorCsvLines $ filter ((== oup) . func) ls)
+    in flip map oups $ \oup -> (oup, filter ((== oup) . func) ls)
 
 averageOverNamesAndStrategiesForExampleFile ::
        MonadIO m => Path Rel File -> m (Path Abs File)
@@ -89,61 +153,6 @@ instance ToJSON AverageEvaluatorOutput where
         object
             [ "name" .= averageEvaluatorOutputEvaluatorName
             , "average" .= averageEvaluatorOutputAverage
-            ]
-
-averageOverNamesPerStrategyForExampleRules ::
-       Path Rel File -> Rules (Path Abs File)
-averageOverNamesPerStrategyForExampleRules sourceF = do
-    avgF <- averageOverNamesPerStrategyForExampleFile sourceF
-    avgF $%> do
-        dataPoints <- dataFromExample sourceF
-        let averages =
-                map
-                    (\((n, s), a) ->
-                         AverageEvaluatorPerStrategyOutput
-                         { averageEvaluatorPerStrategyEvaluatorName = n
-                         , averageEvaluatorPerStrategyStrategy = s
-                         , averageEvaluatorPerStrategyAverage = a
-                         }) $
-                averagePer (eclEvaluatorName &&& eclStratName) dataPoints
-        let avoverNamesPerStrat =
-                AverageOverNamesForExampleAndStrategy
-                { averageOverNamesForExampleAndStrategyExample = sourceF
-                , averageOverNamesForExampleAndStrategyAverage = averages
-                }
-        writeJSON avgF avoverNamesPerStrat
-    pure avgF
-
-averageOverNamesPerStrategyForExampleFile ::
-       MonadIO m => Path Rel File -> m (Path Abs File)
-averageOverNamesPerStrategyForExampleFile sourceF =
-    jsonAverageFileWithComponents sourceF ["average-per-strategy"]
-
-data AverageOverNamesForExampleAndStrategy = AverageOverNamesForExampleAndStrategy
-    { averageOverNamesForExampleAndStrategyExample :: Path Rel File
-    , averageOverNamesForExampleAndStrategyAverage :: [AverageEvaluatorPerStrategyOutput]
-    } deriving (Show, Eq, Generic)
-
-instance ToJSON AverageOverNamesForExampleAndStrategy where
-    toJSON AverageOverNamesForExampleAndStrategy {..} =
-        object
-            [ "example" .=
-              toFilePath averageOverNamesForExampleAndStrategyExample
-            , "averages" .= averageOverNamesForExampleAndStrategyAverage
-            ]
-
-data AverageEvaluatorPerStrategyOutput = AverageEvaluatorPerStrategyOutput
-    { averageEvaluatorPerStrategyEvaluatorName :: String
-    , averageEvaluatorPerStrategyStrategy :: String
-    , averageEvaluatorPerStrategyAverage :: AverageOutput
-    } deriving (Show, Eq, Generic)
-
-instance ToJSON AverageEvaluatorPerStrategyOutput where
-    toJSON AverageEvaluatorPerStrategyOutput {..} =
-        object
-            [ "name" .= averageEvaluatorPerStrategyEvaluatorName
-            , "strategy" .= averageEvaluatorPerStrategyStrategy
-            , "average" .= averageEvaluatorPerStrategyAverage
             ]
 
 averagesDir :: MonadIO m => m (Path Abs Dir)

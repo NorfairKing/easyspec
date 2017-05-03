@@ -8,6 +8,7 @@ module EasySpec.Evaluate.Analyse.Data.Averages where
 import Import
 
 import Data.Aeson as JSON
+import Data.Csv as CSV hiding ((.=), (.:))
 
 import Development.Shake
 import Development.Shake.Path
@@ -25,14 +26,21 @@ averageDataRule = "average-data"
 averageDataRules :: Rules ()
 averageDataRules = do
     exs <- examples
-    fs <- mapM averageOverNamesPerStrategyForExampleRules exs
+    fs <- concat <$> mapM averageOverNamesPerStrategyForExampleRules exs
     fss <- mapM averageOverNamesAndStrategiesForExampleRules exs
     averageDataRule ~> needP (fs ++ fss)
 
 averageOverNamesPerStrategyForExampleRules ::
-       Path Rel File -> Rules (Path Abs File)
+       Path Rel File -> Rules [Path Abs File]
 averageOverNamesPerStrategyForExampleRules sourceF = do
-    avgF <- averageOverNamesPerStrategyForExampleFile sourceF
+    jf <- averageOverNamesPerStrategyForExampleJSONRules sourceF
+    cf <- averageOverNamesPerStrategyForExampleCSVRules sourceF
+    pure [jf, cf]
+
+averageOverNamesPerStrategyForExampleJSONRules ::
+       Path Rel File -> Rules (Path Abs File)
+averageOverNamesPerStrategyForExampleJSONRules sourceF = do
+    avgF <- averageOverNamesPerStrategyForExampleJSONFile sourceF
     avgF $%> do
         dataPoints <- dataFromExample sourceF
         let averages =
@@ -60,10 +68,29 @@ averageOverNamesPerStrategyForExampleRules sourceF = do
         writeJSON avgF avoverNamesPerStrat
     pure avgF
 
-averageOverNamesPerStrategyForExampleFile ::
+averageOverNamesPerStrategyForExampleCSVRules ::
+       Path Rel File -> Rules (Path Abs File)
+averageOverNamesPerStrategyForExampleCSVRules sourceF = do
+    avgcsvF <- averageOverNamesPerStrategyForExampleCSVFile sourceF
+    avgcsvF $%> do
+        sf <- averageOverNamesPerStrategyForExampleJSONFile sourceF
+        needP [sf]
+        averageOverNamesForExampleAndStrategy <- readJSON sf
+        let ls =
+                makeAverageCsvLinesFromAverageOverNamesForExampleAndStrategy
+                    averageOverNamesForExampleAndStrategy
+        writeCSV avgcsvF ls
+    pure avgcsvF
+
+averageOverNamesPerStrategyForExampleJSONFile ::
        MonadIO m => Path Rel File -> m (Path Abs File)
-averageOverNamesPerStrategyForExampleFile sourceF =
+averageOverNamesPerStrategyForExampleJSONFile sourceF =
     jsonAverageFileWithComponents sourceF ["average-per-strategy"]
+
+averageOverNamesPerStrategyForExampleCSVFile ::
+       MonadIO m => Path Rel File -> m (Path Abs File)
+averageOverNamesPerStrategyForExampleCSVFile sourceF =
+    csvAverageFileWithComponents sourceF ["average-per-strategy"]
 
 data AverageOverNamesForExampleAndStrategy = AverageOverNamesForExampleAndStrategy
     { averageOverNamesForExampleAndStrategyExample :: Path Rel File
@@ -78,6 +105,12 @@ instance ToJSON AverageOverNamesForExampleAndStrategy where
             , "averages" .= averageOverNamesForExampleAndStrategyAverage
             ]
 
+instance FromJSON AverageOverNamesForExampleAndStrategy where
+    parseJSON =
+        withObject "AverageOverNamesForExampleAndStrategy" $ \o ->
+            AverageOverNamesForExampleAndStrategy <$> o .: "example" <*>
+            o .: "averages"
+
 data AverageEvaluatorPerStrategyOutput = AverageEvaluatorPerStrategyOutput
     { averageEvaluatorPerStrategyStrategy :: String
     , averageEvaluatorPerStrategyAverageEvaluatorOutput :: [AverageEvaluatorOutput]
@@ -89,6 +122,12 @@ instance ToJSON AverageEvaluatorPerStrategyOutput where
             [ "strategy" .= averageEvaluatorPerStrategyStrategy
             , "average" .= averageEvaluatorPerStrategyAverageEvaluatorOutput
             ]
+
+instance FromJSON AverageEvaluatorPerStrategyOutput where
+    parseJSON =
+        withObject "AverageEvaluatorPerStrategyOutput" $ \o ->
+            AverageEvaluatorPerStrategyOutput <$> o .: "strategy" <*>
+            o .: "average"
 
 averageOverNamesAndStrategiesForExampleRules ::
        Path Rel File -> Rules (Path Abs File)
@@ -143,6 +182,12 @@ instance ToJSON AverageOverNamesAndStrategiesForExample where
             , "averages" .= averageOverNamesAndStrategiesForExampleAverage
             ]
 
+instance FromJSON AverageOverNamesAndStrategiesForExample where
+    parseJSON =
+        withObject "AverageOverNamesAndStrategiesForExample" $ \o ->
+            AverageOverNamesAndStrategiesForExample <$> o .: "example" <*>
+            o .: "averages"
+
 data AverageEvaluatorOutput = AverageEvaluatorOutput
     { averageEvaluatorOutputEvaluatorName :: String
     , averageEvaluatorOutputAverage :: AverageOutput
@@ -151,17 +196,85 @@ data AverageEvaluatorOutput = AverageEvaluatorOutput
 instance ToJSON AverageEvaluatorOutput where
     toJSON AverageEvaluatorOutput {..} =
         object
-            [ "name" .= averageEvaluatorOutputEvaluatorName
+            [ "evaluator" .= averageEvaluatorOutputEvaluatorName
             , "average" .= averageEvaluatorOutputAverage
             ]
 
-averagesDir :: MonadIO m => m (Path Abs Dir)
-averagesDir = (</> $(mkRelDir "averages")) <$> tmpDir
+instance FromJSON AverageEvaluatorOutput where
+    parseJSON =
+        withObject "AverageEvaluatorOutput" $ \o ->
+            AverageEvaluatorOutput <$> o .: "evaluator" <*> o .: "average"
+
+data AverageCsvLine = AverageCsvLine
+    { averageCsvLineSourceFile :: Path Rel File
+    , averageCsvLineEvaluatorName :: String
+    , averageCsvLineStrategyName :: String
+    , averageCsvLineAverage :: AverageOutput
+    } deriving (Show, Eq, Generic)
+
+instance ToNamedRecord AverageCsvLine where
+    toNamedRecord AverageCsvLine {..} =
+        namedRecord
+            [ ("source", toField $ toFilePath averageCsvLineSourceFile)
+            , ("evaluator", toField averageCsvLineEvaluatorName)
+            , ("strategy", toField averageCsvLineStrategyName)
+            , ("avg", toField $ averageOutputAverage averageCsvLineAverage)
+            , ("stddev", toField $ averageOutputStdDev averageCsvLineAverage)
+            ]
+
+instance DefaultOrdered AverageCsvLine where
+    headerOrder _ = header ["source", "evaluator", "strategy", "avg", "stddev"]
+
+makeAverageCsvLinesFromAverageOverNamesForExampleAndStrategy ::
+       AverageOverNamesForExampleAndStrategy -> [AverageCsvLine]
+makeAverageCsvLinesFromAverageOverNamesForExampleAndStrategy AverageOverNamesForExampleAndStrategy {..} =
+    concatMap
+        (makeAverageCsvLinesFromAverageEvaluatorPerStrategyOutput
+             averageOverNamesForExampleAndStrategyExample)
+        averageOverNamesForExampleAndStrategyAverage
+
+makeAverageCsvLinesFromAverageEvaluatorPerStrategyOutput ::
+       Path Rel File -> AverageEvaluatorPerStrategyOutput -> [AverageCsvLine]
+makeAverageCsvLinesFromAverageEvaluatorPerStrategyOutput sourceF AverageEvaluatorPerStrategyOutput {..} =
+    map
+        (makeAverageCsvLinesFromAverageEvaluatorOutput
+             sourceF
+             averageEvaluatorPerStrategyStrategy)
+        averageEvaluatorPerStrategyAverageEvaluatorOutput
+
+makeAverageCsvLinesFromAverageOverNamesAndStrategiesForExample ::
+       String -> AverageOverNamesAndStrategiesForExample -> [AverageCsvLine]
+makeAverageCsvLinesFromAverageOverNamesAndStrategiesForExample stratName AverageOverNamesAndStrategiesForExample {..} =
+    map
+        (makeAverageCsvLinesFromAverageEvaluatorOutput
+             averageOverNamesAndStrategiesForExampleExample
+             stratName)
+        averageOverNamesAndStrategiesForExampleAverage
+
+makeAverageCsvLinesFromAverageEvaluatorOutput ::
+       Path Rel File -> String -> AverageEvaluatorOutput -> AverageCsvLine
+makeAverageCsvLinesFromAverageEvaluatorOutput sourceF stratName AverageEvaluatorOutput {..} =
+    AverageCsvLine
+    { averageCsvLineSourceFile = sourceF
+    , averageCsvLineEvaluatorName = averageEvaluatorOutputEvaluatorName
+    , averageCsvLineStrategyName = stratName
+    , averageCsvLineAverage = averageEvaluatorOutputAverage
+    }
 
 jsonAverageFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
-jsonAverageFileWithComponents =
-    fileInDirWithExtensionAndComponents averagesDir "json"
+jsonAverageFileWithComponents = averagesFile "json"
+
+csvAverageFileWithComponents ::
+       MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
+csvAverageFileWithComponents = averagesFile "csv"
+
+averagesFile ::
+       MonadIO m => String -> Path Rel File -> [String] -> m (Path Abs File)
+averagesFile = fileInDirWithExtensionAndComponents averagesDir
+
+averagesDir :: MonadIO m => m (Path Abs Dir)
+averagesDir = (</> $(mkRelDir "averages")) <$> tmpDir
 
 averageEvaluatorCsvLines :: [EvaluatorCsvLine] -> AverageOutput
 averageEvaluatorCsvLines ecsvls =
@@ -185,6 +298,11 @@ instance ToJSON AverageOutput where
             [ "average" .= averageOutputAverage
             , "standard-deviation" .= averageOutputStdDev
             ]
+
+instance FromJSON AverageOutput where
+    parseJSON =
+        withObject "AverageOutput" $ \o ->
+            AverageOutput <$> o .: "average" <*> o .: "standard-deviation"
 
 averageOrZero :: [Double] -> Double
 averageOrZero [] = 0

@@ -28,8 +28,27 @@ plotsRule = "plots"
 plotsRules :: Rules ()
 plotsRules = do
     es <- examples
+    allDataPlotsFs <- plotsRulesForAllData
     plotsFs <- concat <$> mapM plotsRulesForExample es
-    plotsRule ~> needP plotsFs
+    plotsRule ~> needP (allDataPlotsFs ++ plotsFs)
+
+plotsRulesForAllData :: Rules [Path Abs File]
+plotsRulesForAllData = mapM plotsRulesForLinesPlotWithEvaluator evaluators
+
+plotsRulesForLinesPlotWithEvaluator :: Evaluator -> Rules (Path Abs File)
+plotsRulesForLinesPlotWithEvaluator ev = do
+    plotF <- linesPlotForEvaluator ev
+    plotF $%> do
+        dataF <- allDataFile
+        scriptF <- linesPlotAnalysisScript
+        needP [dataF, scriptF]
+        cmd
+            "Rscript"
+            (toFilePath scriptF)
+            (toFilePath dataF)
+            (toFilePath plotF)
+            (evaluatorName ev)
+    pure plotF
 
 plotsRulesForExample :: Path Rel File -> Rules [Path Abs File]
 plotsRulesForExample sourceF = do

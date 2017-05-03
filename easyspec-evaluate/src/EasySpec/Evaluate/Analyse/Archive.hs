@@ -19,6 +19,7 @@ archiveRules = do
         needP fs
         cmd
             (Cwd $ toFilePath td)
+            (EchoStdout False)
             "tar"
             "cvzf"
             (toFilePath zf)

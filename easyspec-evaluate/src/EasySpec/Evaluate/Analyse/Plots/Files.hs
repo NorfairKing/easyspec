@@ -29,12 +29,19 @@ singleEvaluatorBarPlotFileForExampleAndName ::
     -> Evaluator
     -> m (Path Abs File)
 singleEvaluatorBarPlotFileForExampleAndName file name ev =
-    pngPlotFileWithComponents
-        file
-        ["runtime", prettyPrint name, evaluatorName ev]
+    pngPlotFileWithComponents file [prettyPrint name, evaluatorName ev]
 
 scriptFile :: MonadIO m => String -> m (Path Abs File)
 scriptFile fname = liftIO $ resolveFile' $ "rscripts/" ++ fname
 
 singleEvaluatorBarAnalysisScript :: MonadIO m => m (Path Abs File)
 singleEvaluatorBarAnalysisScript = scriptFile "single_evaluator_bar.r"
+
+singleEvaluatorAverageBoxPlotFileForExample ::
+       MonadIO m => Path Rel File -> Evaluator -> m (Path Abs File)
+singleEvaluatorAverageBoxPlotFileForExample file ev =
+    pngPlotFileWithComponents file ["average", evaluatorName ev]
+
+singleEvaluatorAverageBoxAnalysisScript :: MonadIO m => m (Path Abs File)
+singleEvaluatorAverageBoxAnalysisScript =
+    scriptFile "single_evaluator_boxplot_average.r"

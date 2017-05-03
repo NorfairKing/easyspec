@@ -35,7 +35,11 @@ plotsRulesForExample :: Path Rel File -> Rules [Path Abs File]
 plotsRulesForExample sourceF = do
     absSourceF <- absExampleFile sourceF
     names <- namesInSource absSourceF
-    fmap concat $ forM names $ plotsRulesForExampleAndName sourceF
+    bars <- fmap concat $ forM names $ plotsRulesForExampleAndName sourceF
+    boxes <-
+        forM evaluators $ \ev ->
+            perExampleAndEvaluatorAverageBoxPlotFor sourceF ev
+    pure $ bars ++ boxes
 
 plotsRulesForExampleAndName ::
        Path Rel File -> ES.EasyName -> Rules [Path Abs File]
@@ -45,11 +49,11 @@ plotsRulesForExampleAndName sourceF name =
 perExampleNameAndEvaluatorBarPlotFor ::
        Path Rel File -> ES.EasyName -> Evaluator -> Rules (Path Abs File)
 perExampleNameAndEvaluatorBarPlotFor sourceF name evaluator = do
-    singleEvaluatorBarScript <- singleEvaluatorBarAnalysisScript
-    dataFile <- dataFileForExampleAndName sourceF name
     runtimePlotFile <-
         singleEvaluatorBarPlotFileForExampleAndName sourceF name evaluator
     runtimePlotFile $%> do
+        singleEvaluatorBarScript <- singleEvaluatorBarAnalysisScript
+        dataFile <- dataFileForExampleAndName sourceF name
         needP [singleEvaluatorBarScript, dataFile]
         cmd
             "Rscript"
@@ -60,3 +64,22 @@ perExampleNameAndEvaluatorBarPlotFor sourceF name evaluator = do
             (prettyPrint name)
             (evaluatorName evaluator)
     pure runtimePlotFile
+
+perExampleAndEvaluatorAverageBoxPlotFor ::
+       Path Rel File -> Evaluator -> Rules (Path Abs File)
+perExampleAndEvaluatorAverageBoxPlotFor sourceF evaluator = do
+    plotF <- singleEvaluatorAverageBoxPlotFileForExample sourceF evaluator
+    plotF $%> do
+        scriptF <- singleEvaluatorAverageBoxAnalysisScript
+        absSourceF <- absExampleFile sourceF
+        dataF <- dataFileForExample sourceF
+        needP [scriptF, dataF]
+        cmd
+            "Rscript"
+            (toFilePath scriptF)
+            (toFilePath dataF)
+            (toFilePath plotF)
+            (toFilePath absSourceF)
+            (toFilePath sourceF)
+            (evaluatorName evaluator)
+    pure plotF

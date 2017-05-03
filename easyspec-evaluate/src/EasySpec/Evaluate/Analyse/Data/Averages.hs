@@ -165,15 +165,26 @@ jsonAverageFileWithComponents =
 
 averageEvaluatorCsvLines :: [EvaluatorCsvLine] -> AverageOutput
 averageEvaluatorCsvLines ecsvls =
-    AverageOutput
-    {averageOutputAverage = averageOrZero $ map eclEvaluatorOutput ecsvls}
+    let a = averageOrZero $ map eclEvaluatorOutput ecsvls
+    in AverageOutput
+       { averageOutputAverage = a
+       , averageOutputStdDev =
+             sqrt $
+             averageOrZero $
+             map (\e -> (a - eclEvaluatorOutput e) ^ (2 :: Int)) ecsvls
+       }
 
-newtype AverageOutput = AverageOutput
+data AverageOutput = AverageOutput
     { averageOutputAverage :: Double
+    , averageOutputStdDev :: Double
     } deriving (Show, Eq, Generic)
 
 instance ToJSON AverageOutput where
-    toJSON AverageOutput {..} = object ["average" .= averageOutputAverage]
+    toJSON AverageOutput {..} =
+        object
+            [ "average" .= averageOutputAverage
+            , "standard-deviation" .= averageOutputStdDev
+            ]
 
 averageOrZero :: [Double] -> Double
 averageOrZero [] = 0

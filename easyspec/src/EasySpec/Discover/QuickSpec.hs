@@ -75,10 +75,14 @@ runEasySpec ds iSig = do
             void $ execStmt declaretc execOptions
             runReaderT (runQuickspecOn iSig) sets
 
-runQuickspecOn :: GhcMonad m => InferredSignature -> ReaderT Settings m [EasyEq]
+runQuickspecOn
+    :: GhcMonad m
+    => InferredSignature -> ReaderT Settings m [EasyEq]
 runQuickspecOn iSig = do
-    let expTree = makeSignatureExpressions iSig
-    execWriterT $ evalStateT (go expTree) (0 :: Int)
+    let expForest = makeSignatureExpressions iSig
+    fmap concat $
+        forM expForest $ \expTree ->
+            execWriterT $ evalStateT (go expTree) (0 :: Int)
   where
     liftGHC = lift . lift . lift
     nextSigExpName = do
@@ -150,8 +154,11 @@ runQuickspecOn iSig = do
 bindTo :: EasyName -> EasyExp -> EasyStmt
 bindTo n = Generator mempty (PVar mempty n)
 
-makeSignatureExpressions :: InferredSignature -> Tree EasyExp
-makeSignatureExpressions (InferredSignature t) = fmap createQuickspecSig t
+makeSignatureExpressions :: InferredSignature -> Forest EasyExp
+makeSignatureExpressions (InferredSignature t) = mapF createQuickspecSig t
+
+mapF :: (a -> b) -> Forest a -> Forest b
+mapF func = map (fmap func)
 
 addTypeClassExts :: DynFlags -> DynFlags
 addTypeClassExts dflags =

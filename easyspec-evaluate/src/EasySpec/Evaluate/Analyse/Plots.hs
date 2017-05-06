@@ -59,13 +59,16 @@ plotsRulesForExample is = do
         forM evaluators $ \ev -> perExampleAndEvaluatorAverageBoxPlotFor is ev
     pure $ bars ++ boxes
 
-plotsRulesForExampleAndName ::
-       ES.InputSpec -> ES.EasyName -> Rules [Path Abs File]
+plotsRulesForExampleAndName :: ES.InputSpec
+                            -> ES.EasyName
+                            -> Rules [Path Abs File]
 plotsRulesForExampleAndName is name =
     forM evaluators $ perExampleNameAndEvaluatorBarPlotFor is name
 
-perExampleNameAndEvaluatorBarPlotFor ::
-       ES.InputSpec -> ES.EasyName -> Evaluator -> Rules (Path Abs File)
+perExampleNameAndEvaluatorBarPlotFor :: ES.InputSpec
+                                     -> ES.EasyName
+                                     -> Evaluator
+                                     -> Rules (Path Abs File)
 perExampleNameAndEvaluatorBarPlotFor is name evaluator = do
     plotFile <- singleEvaluatorBarPlotFileForExampleAndName is name evaluator
     plotFile $%> do
@@ -83,8 +86,9 @@ perExampleNameAndEvaluatorBarPlotFor is name evaluator = do
             (evaluatorName evaluator)
     pure plotFile
 
-perExampleAndEvaluatorAverageBoxPlotFor ::
-       ES.InputSpec -> Evaluator -> Rules (Path Abs File)
+perExampleAndEvaluatorAverageBoxPlotFor :: ES.InputSpec
+                                        -> Evaluator
+                                        -> Rules (Path Abs File)
 perExampleAndEvaluatorAverageBoxPlotFor is evaluator = do
     plotF <- singleEvaluatorAverageBoxPlotFileForExample is evaluator
     plotF $%> do

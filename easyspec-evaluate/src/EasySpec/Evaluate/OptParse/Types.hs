@@ -9,7 +9,8 @@ type Arguments = (Command, Flags)
 type Instructions = (Dispatch, Settings)
 
 data Command
-    = CommandEvaluate (Maybe FilePath) (Maybe FilePath)
+    = CommandEvaluate (Maybe FilePath)
+                      (Maybe FilePath)
     | CommandBuild String
     deriving (Show, Eq)
 

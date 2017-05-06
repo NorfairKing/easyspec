@@ -18,5 +18,9 @@ spec =
             (\f -> unwords ["works on", toFilePath f])
             (\f ->
                  withArgs
-                     ["discover", toFilePath f, "--base-dir", toFilePath exampleDir]
+                     [ "discover"
+                     , toFilePath f
+                     , "--base-dir"
+                     , toFilePath exampleDir
+                     ]
                      easyspec)

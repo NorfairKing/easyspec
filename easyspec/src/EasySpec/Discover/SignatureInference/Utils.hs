@@ -13,8 +13,25 @@ import EasySpec.Discover.Types
 
 {-# ANN module "HLint: ignore Collapse lambdas" #-}
 
-splitInferAlg ::
-       String
+unionInferAlg
+    :: SignatureInferenceStrategy
+    -> SignatureInferenceStrategy
+    -> SignatureInferenceStrategy
+unionInferAlg si1 si2 =
+    SignatureInferenceStrategy
+    { sigInfStratName =
+          intercalate
+              "-"
+              ["union", "of", sigInfStratName si1, "and", sigInfStratName si2]
+    , inferSignature =
+          \ei1 ei2 ->
+              let InferredSignature s1 = inferSignature si1 ei1 ei2
+                  InferredSignature s2 = inferSignature si2 ei1 ei2
+              in InferredSignature $ s1 ++ s2
+    }
+
+splitInferAlg
+    :: String
     -> ([EasyId] -> [EasyId] -> [EasyId]) -- ^ Something that chooses the background ids.
     -> SignatureInferenceStrategy
 splitInferAlg name func =
@@ -22,7 +39,7 @@ splitInferAlg name func =
         let bgSigFuncs = func focus scope
             fgNExps = makeNamedExps focus
             bgNExps = makeNamedExps bgSigFuncs
-        in InferredSignature $ Node fgNExps [Node bgNExps []]
+        in InferredSignature $ [Node fgNExps [Node bgNExps []]]
   where
     makeNamedExps funcs = rights $ map convertToUsableNamedExp funcs
 

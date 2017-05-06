@@ -44,7 +44,7 @@ discover ds = do
 discoverEquations ::
        (MonadIO m, MonadReader Settings m) => DiscoverSettings -> m [EasyEq]
 discoverEquations ds = do
-    ids <- getEasyIds $ setDiscFile ds
+    ids <- getEasyIds $ setDiscInputSpec ds
     debug1 "Gathered signature:"
     debug1 $ unlines $ map prettyEasyId ids
     let SignatureInferenceStrategy _ inferStrat = setDiscInfStrat ds
@@ -53,12 +53,12 @@ discoverEquations ds = do
     allEqs <- runEasySpec ds iSig
     pure $ nub allEqs
 
-getEasyIds :: (MonadIO m, MonadReader Settings m) => Path Abs File -> m [EasyId]
-getEasyIds file = do
-    idDatas <- getGHCIds file
+getEasyIds :: (MonadIO m, MonadReader Settings m) => InputSpec -> m [EasyId]
+getEasyIds is = do
+    idDatas <- getGHCIds is
     tups <-
         forM idDatas $ \idData@(IdData i _) -> do
-            mimpl <- gatherSourceOf file idData
+            mimpl <- gatherSourceOf is idData
             pure (i, mimpl)
     pure $ map (uncurry toEasyId) tups
 

@@ -18,42 +18,43 @@ import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.CodeUtils as ES
 import qualified EasySpec.Discover.Types as ES
 import qualified EasySpec.OptParse as ES
+import qualified EasySpec.OptParse.Types as ES
 
 import EasySpec.Evaluate.Types
 
-runEvaluate :: [Path Abs File] -> IO ()
-runEvaluate fs = do
-    epointss <- mapM getEvaluationInputPointsFor fs
+runEvaluate :: [ES.InputSpec] -> IO ()
+runEvaluate iss = do
+    epointss <- mapM getEvaluationInputPointsFor iss
     LB8.putStrLn $
         encodeDefaultOrderedByName $
         concatMap evaluationInputPointCsvLines $ concat epointss
 
-namesInSource :: MonadIO m => Path Abs File -> m [ES.EasyName]
-namesInSource f =
-    map ES.idName <$> runReaderT (ES.getEasyIds f) evaluationSettings
+namesInSource :: MonadIO m => ES.InputSpec -> m [ES.EasyName]
+namesInSource is =
+    map ES.idName <$> runReaderT (ES.getEasyIds is) evaluationSettings
 
-getEvaluationInputPointsFor :: Path Abs File -> IO [EvaluationInputPoint]
-getEvaluationInputPointsFor f = do
-    names <- namesInSource f
-    fmap concat $ forM names $ getEvaluationInputPointsForName f
+getEvaluationInputPointsFor :: ES.InputSpec -> IO [EvaluationInputPoint]
+getEvaluationInputPointsFor is = do
+    names <- namesInSource is
+    fmap concat $ forM names $ getEvaluationInputPointsForName is
 
 getEvaluationInputPointsForName ::
-       Path Abs File -> ES.EasyName -> IO [EvaluationInputPoint]
-getEvaluationInputPointsForName f funcname =
-    forM ES.inferenceStrategies $ getEvaluationInputPoint f funcname
+       ES.InputSpec -> ES.EasyName -> IO [EvaluationInputPoint]
+getEvaluationInputPointsForName is funcname =
+    forM ES.inferenceStrategies $ getEvaluationInputPoint is funcname
 
 evaluationSettings :: ES.Settings
 evaluationSettings = ES.Settings {ES.setsDebugLevel = 0}
 
 getEvaluationInputPoint ::
-       Path Abs File
+       ES.InputSpec
     -> ES.EasyName
     -> ES.SignatureInferenceStrategy
     -> IO EvaluationInputPoint
-getEvaluationInputPoint f funcname strat = do
+getEvaluationInputPoint is funcname strat = do
     let ds =
             ES.DiscoverSettings
-            { ES.setDiscFile = f
+            { ES.setDiscInputSpec = is
             , ES.setDiscFun = Just funcname
             , ES.setDiscInfStrat = strat
             }
@@ -61,7 +62,7 @@ getEvaluationInputPoint f funcname strat = do
         timeItT $ runReaderT (ES.discoverEquations ds) evaluationSettings
     pure
         EvaluationInputPoint
-        { eipFile = f
+        { eipInputSpec = is
         , eipFunc = funcname
         , eipStrat = strat
         , eipDiscoveredEqs = eqs
@@ -85,7 +86,8 @@ showEvaluationReport pointss = showTable $ concatMap go $ concat pointss
       where
         ip = pointToInput eip
         line ev =
-            [ toFilePath $ eipFile eip
+            [ toFilePath $ ES.inputSpecBaseDir $ eipInputSpec eip
+            , toFilePath $ ES.inputSpecFile $ eipInputSpec eip
             , ES.sigInfStratName $ eipStrat eip
             , prettyPrint $ eipFunc eip
             , evaluatorName ev
@@ -98,7 +100,8 @@ evaluationInputPointCsvLines eip = map line evaluators
     ip = pointToInput eip
     line ev =
         EvaluatorCsvLine
-        { eclPath = toFilePath $ eipFile eip
+        { eclBaseDir = ES.inputSpecBaseDir $ eipInputSpec eip
+        , eclFile = ES.inputSpecFile $ eipInputSpec eip
         , eclStratName = ES.sigInfStratName $ eipStrat eip
         , eclFocusFuncName = prettyPrint $ eipFunc eip
         , eclEvaluatorName = evaluatorName ev

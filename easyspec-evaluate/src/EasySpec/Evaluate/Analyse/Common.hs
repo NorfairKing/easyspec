@@ -6,6 +6,7 @@ import System.FilePath (dropExtensions)
 
 import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.Types as ES
+import qualified EasySpec.OptParse.Types as ES
 
 import EasySpec.Utils
 
@@ -30,13 +31,11 @@ fileInDirWithExtensionAndComponents genDir ext f comps = do
     let fileStr = intercalate "-" $ dropExtensions (toFilePath f) : comps
     liftIO $ (dd </>) <$> parseRelFile (concat [fileStr, ".", ext])
 
-examples :: MonadIO m => m [Path Rel File]
+examples :: MonadIO m => m [ES.InputSpec]
 examples = do
     edir <- examplesDir
-    sourcesIn edir
-
-absExampleFile :: MonadIO m => Path Rel File -> m (Path Abs File)
-absExampleFile f = (</> f) <$> examplesDir
+    ss <- sourcesIn edir
+    pure $ map (ES.InputSpec edir) ss
 
 signatureInferenceStrategies :: [ES.SignatureInferenceStrategy]
 signatureInferenceStrategies = ES.inferenceStrategies

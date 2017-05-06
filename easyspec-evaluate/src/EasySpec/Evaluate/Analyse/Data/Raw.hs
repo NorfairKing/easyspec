@@ -15,6 +15,7 @@ import Development.Shake
 import Development.Shake.Path
 
 import qualified EasySpec.Discover.Types as ES
+import qualified EasySpec.OptParse.Types as ES
 
 import EasySpec.Evaluate.Evaluate
 import EasySpec.Evaluate.Types
@@ -36,36 +37,35 @@ rawDataRules = do
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     rawDataRule ~> needP [combF]
 
-dataRulesForExample :: Resource -> Path Rel File -> Rules (Path Abs File)
-dataRulesForExample ghciResource sourceF = do
-    absSourceF <- absExampleFile sourceF
-    names <- namesInSource absSourceF
-    csvFs <- forM names $ rulesForFileAndName ghciResource sourceF
-    combF <- dataFileForExample sourceF
+dataRulesForExample :: Resource -> ES.InputSpec -> Rules (Path Abs File)
+dataRulesForExample ghciResource is = do
+    names <- namesInSource is
+    csvFs <- forM names $ rulesForFileAndName ghciResource is
+    combF <- dataFileForExample is
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
 rulesForFileAndName ::
-       Resource -> Path Rel File -> ES.EasyName -> Rules (Path Abs File)
-rulesForFileAndName ghciResource sourceF name = do
+       Resource -> ES.InputSpec -> ES.EasyName -> Rules (Path Abs File)
+rulesForFileAndName ghciResource is name = do
     csvFs <-
         forM signatureInferenceStrategies $
-        rulesForFileNameAndStrat ghciResource sourceF name
-    combF <- dataFileForExampleAndName sourceF name
+        rulesForFileNameAndStrat ghciResource is name
+    combF <- dataFileForExampleAndName is name
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
 rulesForFileNameAndStrat ::
        Resource
-    -> Path Rel File
+    -> ES.InputSpec
     -> ES.EasyName
     -> ES.SignatureInferenceStrategy
     -> Rules (Path Abs File)
-rulesForFileNameAndStrat ghciResource sourceF name infStrat = do
-    absSourceF <- absExampleFile sourceF
-    csvF <- dataFileFor sourceF name infStrat
+rulesForFileNameAndStrat ghciResource is name infStrat = do
+    csvF <- dataFileFor is name infStrat
     csvF $%> do
-        needP [absSourceF]
+        let absFile = ES.inputSpecAbsFile is
+        needP [absFile]
         ip <-
             withResource ghciResource 1 $ do
                 putLoud $
@@ -73,12 +73,12 @@ rulesForFileNameAndStrat ghciResource sourceF name infStrat = do
                         [ "Building data file"
                         , toFilePath csvF
                         , "by running 'easyspec-evaluate' on"
-                        , toFilePath absSourceF
+                        , toFilePath absFile
                         , "with focus:"
                         , prettyPrint name
                         , "and signature inference strategy:"
                         , ES.sigInfStratName infStrat
                         ]
-                liftIO $ getEvaluationInputPoint absSourceF name infStrat
+                liftIO $ getEvaluationInputPoint is name infStrat
         writeCSV csvF $ evaluationInputPointCsvLines ip
     pure csvF

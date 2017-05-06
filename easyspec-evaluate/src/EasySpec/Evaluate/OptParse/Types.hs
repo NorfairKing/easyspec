@@ -2,12 +2,14 @@ module EasySpec.Evaluate.OptParse.Types where
 
 import Import
 
+import qualified EasySpec.OptParse.Types as ES
+
 type Arguments = (Command, Flags)
 
 type Instructions = (Dispatch, Settings)
 
 data Command
-    = CommandEvaluate (Maybe FilePath)
+    = CommandEvaluate (Maybe FilePath) (Maybe FilePath)
     | CommandBuild String
     deriving (Show, Eq)
 
@@ -20,7 +22,7 @@ data Configuration =
     deriving (Show, Eq)
 
 data Dispatch
-    = DispatchEvaluate [Path Abs File]
+    = DispatchEvaluate [ES.InputSpec]
     | DispatchBuild String
     deriving (Show, Eq)
 

@@ -32,7 +32,11 @@ combineToInstructions cmd Flags {..} Configuration = (,) <$> disp <*> sets
         case cmd of
             CommandDiscover DiscoverArgs {..} ->
                 DispatchDiscover <$> do
-                    file <- resolveFile' argDiscFile
+                    file <- parseRelFile argDiscFile
+                    dir <-
+                        case argDiscBaseDir of
+                            Nothing -> getCurrentDir
+                            Just bd -> resolveDir' bd
                     infStrat <-
                         case argDiscInfStratName of
                             Nothing -> pure inferFullBackground
@@ -49,7 +53,7 @@ combineToInstructions cmd Flags {..} Configuration = (,) <$> disp <*> sets
                                     Just r -> pure r
                     pure
                         DiscoverSettings
-                        { setDiscFile = file
+                        { setDiscInputSpec = InputSpec dir file
                         , setDiscFun = Ident mempty <$> argDiscFun
                         , setDiscInfStrat = infStrat
                         }
@@ -102,6 +106,13 @@ parseCommandDiscover = info parser modifier
                   [ metavar "FUNCTION"
                   , value Nothing
                   , help "The function to discover properties of"
+                  ]) <*>
+         option
+             (Just <$> str)
+             (mconcat
+                  [ long "base-dir"
+                  , value Nothing
+                  , help "The root directory of the module structure."
                   ]) <*>
          option
              (Just <$> str)

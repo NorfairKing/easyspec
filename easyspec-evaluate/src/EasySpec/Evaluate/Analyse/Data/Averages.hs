@@ -13,6 +13,8 @@ import Data.Csv as CSV hiding ((.=), (.:))
 import Development.Shake
 import Development.Shake.Path
 
+import qualified EasySpec.OptParse.Types as ES
+
 import EasySpec.Evaluate.Types
 
 import EasySpec.Evaluate.Analyse.Common
@@ -31,18 +33,18 @@ averageDataRules = do
     averageDataRule ~> needP (fs ++ fss)
 
 averageOverNamesPerStrategyForExampleRules ::
-       Path Rel File -> Rules [Path Abs File]
-averageOverNamesPerStrategyForExampleRules sourceF = do
-    jf <- averageOverNamesPerStrategyForExampleJSONRules sourceF
-    cf <- averageOverNamesPerStrategyForExampleCSVRules sourceF
+       ES.InputSpec -> Rules [Path Abs File]
+averageOverNamesPerStrategyForExampleRules is = do
+    jf <- averageOverNamesPerStrategyForExampleJSONRules is
+    cf <- averageOverNamesPerStrategyForExampleCSVRules is
     pure [jf, cf]
 
 averageOverNamesPerStrategyForExampleJSONRules ::
-       Path Rel File -> Rules (Path Abs File)
-averageOverNamesPerStrategyForExampleJSONRules sourceF = do
-    avgF <- averageOverNamesPerStrategyForExampleJSONFile sourceF
+       ES.InputSpec -> Rules (Path Abs File)
+averageOverNamesPerStrategyForExampleJSONRules is = do
+    avgF <- averageOverNamesPerStrategyForExampleJSONFile is
     avgF $%> do
-        dataPoints <- dataFromExample sourceF
+        dataPoints <- dataFromExample is
         let averages =
                 flip
                     map
@@ -61,7 +63,7 @@ averageOverNamesPerStrategyForExampleJSONRules sourceF = do
                     }
         let avoverNamesPerStrat =
                 AverageOverNamesForExampleAndStrategy
-                { averageOverNamesForExampleAndStrategyExample = sourceF
+                { averageOverNamesForExampleAndStrategyExample = is
                 , averageOverNamesForExampleAndStrategyAverage =
                       averagesPerStrategies
                 }
@@ -69,11 +71,11 @@ averageOverNamesPerStrategyForExampleJSONRules sourceF = do
     pure avgF
 
 averageOverNamesPerStrategyForExampleCSVRules ::
-       Path Rel File -> Rules (Path Abs File)
-averageOverNamesPerStrategyForExampleCSVRules sourceF = do
-    avgcsvF <- averageOverNamesPerStrategyForExampleCSVFile sourceF
+       ES.InputSpec -> Rules (Path Abs File)
+averageOverNamesPerStrategyForExampleCSVRules is = do
+    avgcsvF <- averageOverNamesPerStrategyForExampleCSVFile is
     avgcsvF $%> do
-        sf <- averageOverNamesPerStrategyForExampleJSONFile sourceF
+        sf <- averageOverNamesPerStrategyForExampleJSONFile is
         needP [sf]
         averageOverNamesForExampleAndStrategy <- readJSON sf
         let ls =
@@ -83,25 +85,24 @@ averageOverNamesPerStrategyForExampleCSVRules sourceF = do
     pure avgcsvF
 
 averageOverNamesPerStrategyForExampleJSONFile ::
-       MonadIO m => Path Rel File -> m (Path Abs File)
-averageOverNamesPerStrategyForExampleJSONFile sourceF =
-    jsonAverageFileWithComponents sourceF ["average-per-strategy"]
+       MonadIO m => ES.InputSpec -> m (Path Abs File)
+averageOverNamesPerStrategyForExampleJSONFile is =
+    jsonAverageFileWithComponents (ES.inputSpecFile is) ["average-per-strategy"]
 
 averageOverNamesPerStrategyForExampleCSVFile ::
-       MonadIO m => Path Rel File -> m (Path Abs File)
-averageOverNamesPerStrategyForExampleCSVFile sourceF =
-    csvAverageFileWithComponents sourceF ["average-per-strategy"]
+       MonadIO m => ES.InputSpec -> m (Path Abs File)
+averageOverNamesPerStrategyForExampleCSVFile is =
+    csvAverageFileWithComponents (ES.inputSpecFile is) ["average-per-strategy"]
 
 data AverageOverNamesForExampleAndStrategy = AverageOverNamesForExampleAndStrategy
-    { averageOverNamesForExampleAndStrategyExample :: Path Rel File
+    { averageOverNamesForExampleAndStrategyExample :: ES.InputSpec
     , averageOverNamesForExampleAndStrategyAverage :: [AverageEvaluatorPerStrategyOutput]
     } deriving (Show, Eq, Generic)
 
 instance ToJSON AverageOverNamesForExampleAndStrategy where
     toJSON AverageOverNamesForExampleAndStrategy {..} =
         object
-            [ "example" .=
-              toFilePath averageOverNamesForExampleAndStrategyExample
+            [ "example" .= averageOverNamesForExampleAndStrategyExample
             , "averages" .= averageOverNamesForExampleAndStrategyAverage
             ]
 
@@ -130,11 +131,11 @@ instance FromJSON AverageEvaluatorPerStrategyOutput where
             o .: "average"
 
 averageOverNamesAndStrategiesForExampleRules ::
-       Path Rel File -> Rules (Path Abs File)
-averageOverNamesAndStrategiesForExampleRules sourceF = do
-    avgF <- averageOverNamesAndStrategiesForExampleFile sourceF
+       ES.InputSpec -> Rules (Path Abs File)
+averageOverNamesAndStrategiesForExampleRules is = do
+    avgF <- averageOverNamesAndStrategiesForExampleFile is
     avgF $%> do
-        dataPoints <- dataFromExample sourceF
+        dataPoints <- dataFromExample is
         let averages =
                 map
                     (\(n, a) ->
@@ -145,7 +146,7 @@ averageOverNamesAndStrategiesForExampleRules sourceF = do
                 averagePer eclEvaluatorName dataPoints
         let avoverNames =
                 AverageOverNamesAndStrategiesForExample
-                { averageOverNamesAndStrategiesForExampleExample = sourceF
+                { averageOverNamesAndStrategiesForExampleExample = is
                 , averageOverNamesAndStrategiesForExampleAverage = averages
                 }
         writeJSON avgF avoverNames
@@ -165,20 +166,28 @@ groupUnorderedBy func ls =
     in flip map oups $ \oup -> (oup, filter ((== oup) . func) ls)
 
 averageOverNamesAndStrategiesForExampleFile ::
-       MonadIO m => Path Rel File -> m (Path Abs File)
-averageOverNamesAndStrategiesForExampleFile sourceF =
-    jsonAverageFileWithComponents sourceF ["average"]
+       MonadIO m => ES.InputSpec -> m (Path Abs File)
+averageOverNamesAndStrategiesForExampleFile is =
+    jsonAverageFileWithComponents (ES.inputSpecFile is) ["average"]
 
 data AverageOverNamesAndStrategiesForExample = AverageOverNamesAndStrategiesForExample
-    { averageOverNamesAndStrategiesForExampleExample :: Path Rel File
+    { averageOverNamesAndStrategiesForExampleExample :: ES.InputSpec
     , averageOverNamesAndStrategiesForExampleAverage :: [AverageEvaluatorOutput]
     } deriving (Show, Eq, Generic)
+
+instance ToJSON ES.InputSpec where
+    toJSON ES.InputSpec {..} =
+        object ["base dir" .= inputSpecBaseDir, "file" .= inputSpecFile]
+
+instance FromJSON ES.InputSpec where
+    parseJSON =
+        withObject "InputSpec" $ \o ->
+            ES.InputSpec <$> o .: "base dir" <*> o .: "file"
 
 instance ToJSON AverageOverNamesAndStrategiesForExample where
     toJSON AverageOverNamesAndStrategiesForExample {..} =
         object
-            [ "example" .=
-              toFilePath averageOverNamesAndStrategiesForExampleExample
+            [ "example" .= averageOverNamesAndStrategiesForExampleExample
             , "averages" .= averageOverNamesAndStrategiesForExampleAverage
             ]
 
@@ -206,7 +215,8 @@ instance FromJSON AverageEvaluatorOutput where
             AverageEvaluatorOutput <$> o .: "evaluator" <*> o .: "average"
 
 data AverageCsvLine = AverageCsvLine
-    { averageCsvLineSourceFile :: Path Rel File
+    { averageCsvLineBaseDir :: Path Abs Dir
+    , averageCsvLineSourceFile :: Path Rel File
     , averageCsvLineEvaluatorName :: String
     , averageCsvLineStrategyName :: String
     , averageCsvLineAverage :: AverageOutput
@@ -215,7 +225,8 @@ data AverageCsvLine = AverageCsvLine
 instance ToNamedRecord AverageCsvLine where
     toNamedRecord AverageCsvLine {..} =
         namedRecord
-            [ ("source", toField $ toFilePath averageCsvLineSourceFile)
+            [ ("base dir", toField $ toFilePath averageCsvLineBaseDir)
+            , ("source", toField $ toFilePath averageCsvLineSourceFile)
             , ("evaluator", toField averageCsvLineEvaluatorName)
             , ("strategy", toField averageCsvLineStrategyName)
             , ("avg", toField $ averageOutputAverage averageCsvLineAverage)
@@ -223,7 +234,8 @@ instance ToNamedRecord AverageCsvLine where
             ]
 
 instance DefaultOrdered AverageCsvLine where
-    headerOrder _ = header ["source", "evaluator", "strategy", "avg", "stddev"]
+    headerOrder _ =
+        header ["base dir", "source", "evaluator", "strategy", "avg", "stddev"]
 
 makeAverageCsvLinesFromAverageOverNamesForExampleAndStrategy ::
        AverageOverNamesForExampleAndStrategy -> [AverageCsvLine]
@@ -234,11 +246,11 @@ makeAverageCsvLinesFromAverageOverNamesForExampleAndStrategy AverageOverNamesFor
         averageOverNamesForExampleAndStrategyAverage
 
 makeAverageCsvLinesFromAverageEvaluatorPerStrategyOutput ::
-       Path Rel File -> AverageEvaluatorPerStrategyOutput -> [AverageCsvLine]
-makeAverageCsvLinesFromAverageEvaluatorPerStrategyOutput sourceF AverageEvaluatorPerStrategyOutput {..} =
+       ES.InputSpec -> AverageEvaluatorPerStrategyOutput -> [AverageCsvLine]
+makeAverageCsvLinesFromAverageEvaluatorPerStrategyOutput is AverageEvaluatorPerStrategyOutput {..} =
     map
         (makeAverageCsvLinesFromAverageEvaluatorOutput
-             sourceF
+             is
              averageEvaluatorPerStrategyStrategy)
         averageEvaluatorPerStrategyAverageEvaluatorOutput
 
@@ -252,10 +264,11 @@ makeAverageCsvLinesFromAverageOverNamesAndStrategiesForExample stratName Average
         averageOverNamesAndStrategiesForExampleAverage
 
 makeAverageCsvLinesFromAverageEvaluatorOutput ::
-       Path Rel File -> String -> AverageEvaluatorOutput -> AverageCsvLine
-makeAverageCsvLinesFromAverageEvaluatorOutput sourceF stratName AverageEvaluatorOutput {..} =
+       ES.InputSpec -> String -> AverageEvaluatorOutput -> AverageCsvLine
+makeAverageCsvLinesFromAverageEvaluatorOutput is stratName AverageEvaluatorOutput {..} =
     AverageCsvLine
-    { averageCsvLineSourceFile = sourceF
+    { averageCsvLineBaseDir = ES.inputSpecBaseDir is
+    , averageCsvLineSourceFile = ES.inputSpecFile is
     , averageCsvLineEvaluatorName = averageEvaluatorOutputEvaluatorName
     , averageCsvLineStrategyName = stratName
     , averageCsvLineAverage = averageEvaluatorOutputAverage

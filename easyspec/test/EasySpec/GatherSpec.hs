@@ -16,16 +16,22 @@ import EasySpec.OptParse.Types
 spec :: Spec
 spec =
     describe "easyspec sources" $ do
-        easyspecSourceDir <- runIO $ resolveDir' "../examples"
+        examplesDir <- runIO $ resolveDir' "../examples"
         forSourceFilesInDir
-            easyspecSourceDir
+            examplesDir
             (\f ->
                  unwords
-                     [ toFilePath f
-                     , "matches what ghc sees with what haskell-src-exts sees"
+                     [ "The translation of what ghc sees in"
+                     , toFilePath $ examplesDir </> f
+                     , "matches what haskell-src-exts sees."
                      ]) $ \f -> do
-            srcExtsEasyIds <- getHSEEasyIds f
-            ghcEasyIds <- runReaderT (getEasyIds f) defaultSettings
+            srcExtsEasyIds <- getHSEEasyIds examplesDir f
+            ghcEasyIds <-
+                runReaderT
+                    (getEasyIds
+                         InputSpec
+                         {inputSpecBaseDir = examplesDir, inputSpecFile = f})
+                    defaultSettings
             forM_ srcExtsEasyIds $ \seei ->
                 case find (\geid -> idName seei == idName geid) ghcEasyIds of
                     Nothing ->
@@ -59,9 +65,9 @@ spec =
                             , ppShow $ idType seei
                             ]
 
-getHSEEasyIds :: Path Abs File -> IO [EasyId]
-getHSEEasyIds f = do
-    pr <- parseFile $ toFilePath f
+getHSEEasyIds :: Path Abs Dir -> Path Rel File -> IO [EasyId]
+getHSEEasyIds bd f = do
+    pr <- parseFile $ toFilePath $ bd </> f
     case pr of
         ParseFailed srcloc err ->
             fail $

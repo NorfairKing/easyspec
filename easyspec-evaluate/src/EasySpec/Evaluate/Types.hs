@@ -8,11 +8,12 @@ import Import
 import Data.Csv
 
 import qualified EasySpec.Discover.Types as ES
+import qualified EasySpec.OptParse.Types as ES
 
 type EvaluatorName = String
 
 data EvaluationInputPoint = EvaluationInputPoint
-    { eipFile :: Path Abs File
+    { eipInputSpec :: ES.InputSpec
     , eipFunc :: ES.EasyName
     , eipStrat :: ES.SignatureInferenceStrategy
     , eipDiscoveredEqs :: [ES.EasyEq]
@@ -32,7 +33,8 @@ data Evaluator = Evaluator
     }
 
 data EvaluatorCsvLine = EvaluatorCsvLine
-    { eclPath :: String
+    { eclBaseDir :: Path Abs Dir
+    , eclFile :: Path Rel File
     , eclStratName :: String
     , eclFocusFuncName :: String
     , eclEvaluatorName :: EvaluatorName
@@ -41,14 +43,30 @@ data EvaluatorCsvLine = EvaluatorCsvLine
 
 instance FromNamedRecord EvaluatorCsvLine where
     parseNamedRecord r =
-        EvaluatorCsvLine <$> r .: "path" <*> r .: "strategy" <*> r .: "focus" <*>
+        EvaluatorCsvLine <$> p parseAbsDir "base-dir" <*> p parseRelFile "file" <*>
+        r .: "strategy" <*>
+        r .: "focus" <*>
         r .: "evaluator" <*>
         r .: "output"
+      where
+        p parser key = do
+            v <- r .: key
+            case parser v of
+                Left err ->
+                    fail $
+                    unwords
+                        [ "Parsing of field"
+                        , show key
+                        , "failed with error:"
+                        , show err
+                        ]
+                Right r -> pure r
 
 instance ToNamedRecord EvaluatorCsvLine where
     toNamedRecord EvaluatorCsvLine {..} =
         namedRecord
-            [ "path" .= eclPath
+            [ "base-dir" .= toFilePath eclBaseDir
+            , "file" .= toFilePath eclFile
             , "strategy" .= eclStratName
             , "focus" .= eclFocusFuncName
             , "evaluator" .= eclEvaluatorName
@@ -56,4 +74,5 @@ instance ToNamedRecord EvaluatorCsvLine where
             ]
 
 instance DefaultOrdered EvaluatorCsvLine where
-    headerOrder _ = header ["path", "strategy", "focus", "evaluator", "output"]
+    headerOrder _ =
+        header ["base-dir", "file", "strategy", "focus", "evaluator", "output"]

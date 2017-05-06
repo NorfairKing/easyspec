@@ -55,6 +55,7 @@ toEasyType ty =
                 TyConApp tc kots ->
                     case (showName (tyConName tc), kots) of
                         ("[]", [lt]) -> TyList mempty $ toEasyType lt
+                        ("()", []) -> TyCon mempty  $Special mempty $ UnitCon mempty
                         _ ->
                             foldl
                                 (TyApp mempty)

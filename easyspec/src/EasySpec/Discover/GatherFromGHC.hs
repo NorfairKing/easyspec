@@ -4,6 +4,8 @@ module EasySpec.Discover.GatherFromGHC where
 
 import Import
 
+import System.Environment
+
 import DataCon
 import GHC
 import GHC.Paths (libdir)
@@ -13,27 +15,35 @@ import TcRnTypes
 import TyCon
 
 import EasySpec.Discover.Utils
+import EasySpec.OptParse.Types
 
 data IdData =
     IdData GHC.Id
            [GHC.ModuleName]
 
-getGHCIds :: MonadIO m => Path Abs File -> m [IdData]
-getGHCIds discFile =
-    liftIO $
-    runGhc (Just libdir) $ do
-        dflags <- getSessionDynFlags
-        let compdflags = prepareFlags dflags
-        setDFlagsNoLinking compdflags
-        target <- guessTarget (toFilePath discFile) Nothing
-        setTargets [target]
-        loadSuccessfully LoadAllTargets
-        -- Doesn't work in a project, only in top-level modules
-        let modname = getTargetModName discFile
-        modSum <- getModSummary modname
-        parsedModule <- parseModule modSum
-        tmod <- typecheckModule parsedModule
-        getGHCIdsFromTcModule tmod
+getGHCIds :: MonadIO m => InputSpec -> m [IdData]
+getGHCIds is =
+    liftIO $ do
+        let sourceFile = inputSpecAbsFile is
+        runGhc (Just libdir) $ do
+            dflags <- getSessionDynFlags
+            let compdflags =
+                    prepareFlags
+                        dflags
+                        { importPaths =
+                              importPaths dflags ++
+                              [toFilePath $ inputSpecBaseDir is]
+                        }
+            setDFlagsNoLinking compdflags
+            let targetModName = getTargetModName $ inputSpecFile is
+            target <- guessTarget (moduleNameString targetModName) Nothing
+            setTargets [target]
+            loadSuccessfully LoadAllTargets
+            -- Doesn't work in a project, only in top-level modules
+            modSum <- getModSummary targetModName
+            parsedModule <- parseModule modSum
+            tmod <- typecheckModule parsedModule
+            getGHCIdsFromTcModule tmod
 
 getGHCIdsFromTcModule :: GhcMonad m => TypecheckedModule -> m [IdData]
 getGHCIdsFromTcModule tmod = do

@@ -10,6 +10,7 @@ import Import
 import Language.Haskell.Exts.Pretty (prettyPrint)
 
 import qualified EasySpec.Discover.Types as ES
+import qualified EasySpec.OptParse.Types as ES
 
 import EasySpec.Evaluate.Types
 
@@ -34,20 +35,24 @@ linesPlotAnalysisScript = scriptFile "lines.r"
 
 singleEvaluatorBarPlotFileForExampleAndName ::
        MonadIO m
-    => Path Rel File
+    => ES.InputSpec
     -> ES.EasyName
     -> Evaluator
     -> m (Path Abs File)
-singleEvaluatorBarPlotFileForExampleAndName file name ev =
-    pngPlotFileWithComponents file [prettyPrint name, evaluatorName ev]
+singleEvaluatorBarPlotFileForExampleAndName is name ev =
+    pngPlotFileWithComponents
+        (ES.inputSpecFile is)
+        [prettyPrint name, evaluatorName ev]
 
 singleEvaluatorBarAnalysisScript :: MonadIO m => m (Path Abs File)
 singleEvaluatorBarAnalysisScript = scriptFile "single_evaluator_bar.r"
 
 singleEvaluatorAverageBoxPlotFileForExample ::
-       MonadIO m => Path Rel File -> Evaluator -> m (Path Abs File)
-singleEvaluatorAverageBoxPlotFileForExample file ev =
-    pngPlotFileWithComponents file ["average", evaluatorName ev]
+       MonadIO m => ES.InputSpec -> Evaluator -> m (Path Abs File)
+singleEvaluatorAverageBoxPlotFileForExample is ev =
+    pngPlotFileWithComponents
+        ($(mkRelDir "single-evaluator-bar") </> ES.inputSpecFile is)
+        ["average", evaluatorName ev]
 
 singleEvaluatorAverageBoxAnalysisScript :: MonadIO m => m (Path Abs File)
 singleEvaluatorAverageBoxAnalysisScript =

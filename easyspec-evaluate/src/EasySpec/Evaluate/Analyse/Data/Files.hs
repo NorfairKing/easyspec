@@ -7,6 +7,7 @@ import Import
 import Language.Haskell.Exts.Pretty (prettyPrint)
 
 import qualified EasySpec.Discover.Types as ES
+import qualified EasySpec.OptParse.Types as ES
 
 import EasySpec.Evaluate.Evaluate
 
@@ -17,35 +18,36 @@ dataDir = (</> $(mkRelDir "data")) <$> tmpDir
 
 dataFileFor ::
        MonadIO m
-    => Path Rel File
+    => ES.InputSpec
     -> ES.EasyName
     -> ES.SignatureInferenceStrategy
     -> m (Path Abs File)
-dataFileFor f name strat =
-    csvDataFileWithComponents f [prettyPrint name, ES.sigInfStratName strat]
+dataFileFor is name strat =
+    csvDataFileWithComponents
+        (ES.inputSpecFile is)
+        [prettyPrint name, ES.sigInfStratName strat]
 
 dataFileForExampleAndName ::
-       MonadIO m => Path Rel File -> ES.EasyName -> m (Path Abs File)
-dataFileForExampleAndName f name =
-    csvDataFileWithComponents f [prettyPrint name]
+       MonadIO m => ES.InputSpec -> ES.EasyName -> m (Path Abs File)
+dataFileForExampleAndName is name =
+    csvDataFileWithComponents (ES.inputSpecFile is) [prettyPrint name]
 
 csvDataFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
 csvDataFileWithComponents = fileInDirWithExtensionAndComponents dataDir "csv"
 
 dataFilesForExampleAndName ::
-       MonadIO m => Path Rel File -> ES.EasyName -> m [Path Abs File]
-dataFilesForExampleAndName file name =
-    forM signatureInferenceStrategies $ dataFileFor file name
+       MonadIO m => ES.InputSpec -> ES.EasyName -> m [Path Abs File]
+dataFilesForExampleAndName is name =
+    forM signatureInferenceStrategies $ dataFileFor is name
 
-dataFileForExample :: MonadIO m => Path Rel File -> m (Path Abs File)
-dataFileForExample f = csvDataFileWithComponents f []
+dataFileForExample :: MonadIO m => ES.InputSpec -> m (Path Abs File)
+dataFileForExample is = csvDataFileWithComponents (ES.inputSpecFile is) []
 
-dataFilesForExample :: MonadIO m => Path Rel File -> m [Path Abs File]
-dataFilesForExample file = do
-    absSourceF <- absExampleFile file
-    names <- namesInSource absSourceF
-    fmap concat $ forM names $ dataFilesForExampleAndName file
+dataFilesForExample :: MonadIO m => ES.InputSpec -> m [Path Abs File]
+dataFilesForExample is = do
+    names <- namesInSource is
+    fmap concat $ forM names $ dataFilesForExampleAndName is
 
 allDataFile :: MonadIO m => m (Path Abs File)
 allDataFile = (</> $(mkRelFile "all.csv")) <$> dataDir

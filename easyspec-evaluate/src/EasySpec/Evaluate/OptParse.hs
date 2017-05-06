@@ -11,6 +11,7 @@ import System.Environment (getArgs)
 
 import Options.Applicative
 
+import qualified EasySpec.OptParse.Types as ES
 import EasySpec.Utils (isSourceFile)
 
 import EasySpec.Evaluate.OptParse.Types
@@ -26,16 +27,20 @@ combineToInstructions cmd Flags Configuration = (,) <$> disp <*> pure Settings
   where
     disp =
         case cmd of
-            CommandEvaluate mdirpath -> do
-                let path = fromMaybe "examples" mdirpath
-                file <- resolveFile' path
-                b <- doesFileExist file
-                if b
-                    then pure $ DispatchEvaluate [file]
-                    else do
-                        dir <- resolveDir' $ fromMaybe "examples" mdirpath
-                        fs <- snd <$> listDirRecur dir
-                        pure $ DispatchEvaluate $ filter isSourceFile fs
+            CommandEvaluate mfilepath mdirpath -> do
+                let dirpath = fromMaybe "examples" mdirpath
+                bd <- resolveDir' dirpath
+                fs <-
+                    case mfilepath of
+                        Just f -> do
+                            af <- resolveFile' f
+                            rf <- makeRelative bd af
+                            pure [rf]
+                        Nothing -> do
+                            (catMaybes .
+                             map (makeRelative bd) . filter isSourceFile . snd) <$>
+                                listDirRecur bd
+                pure $ DispatchEvaluate $ map (ES.InputSpec bd) fs
             CommandBuild target -> pure $ DispatchBuild target
 
 getConfiguration :: Command -> Flags -> IO Configuration
@@ -85,9 +90,17 @@ parseCommandEvaluate = info parser modifier
         argument
             (Just <$> str)
             (mconcat
-                 [ metavar "PATH"
+                 [ metavar "FILE"
                  , value Nothing
-                 , help "the path to a file or directory of example/examples"
+                 , help "the path to a file that is an example"
+                 ]) <*>
+        argument
+            (Just <$> str)
+            (mconcat
+                 [ metavar "DIR"
+                 , value Nothing
+                 , help
+                       "the path to a directory that is the base director of examples"
                  ])
     modifier =
         fullDesc <>

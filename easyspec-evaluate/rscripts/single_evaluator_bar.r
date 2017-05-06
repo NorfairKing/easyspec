@@ -1,14 +1,15 @@
 args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) != 5) {
-  stop("Usage: single_evaluator_bar.r input.csv output.png sourcename funcname evaluator")
+if (length(args) != 6) {
+  stop("Usage: single_evaluator_bar.r input.csv output.png basedir sourcefile funcname evaluator")
 }
 
 inFile <- args[1]
 outPng <- args[2]
-sourcename <- args[3]
-funcname <- args[4]
-evaluator <- args[5]
+basedir <- args[3]
+sourcefile <- args[4]
+funcname <- args[5]
+evaluator <- args[6]
 
 
 res = read.csv(inFile, header=TRUE)
@@ -27,5 +28,5 @@ png(outPng, height=400, width=1200, bg="white")
 barplot(
     res$output
   , names.arg=res$strategy
-  , main=paste("Source:", sourcename, ", ", "Focus:", funcname, ", ", "Evaluator:", evaluator)
+  , main=paste("Source:", sourcefile, ", ", "Focus:", funcname, ", ", "Evaluator:", evaluator)
   )

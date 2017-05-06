@@ -18,22 +18,23 @@ import EasySpec.Utils
 
 gatherSourceOf ::
        (MonadIO m, MonadReader Settings m)
-    => Path Abs File
+    => InputSpec
     -> IdData
     -> m (Maybe EasyImpl)
-gatherSourceOf mainSrc (IdData i ms) = do
+gatherSourceOf is (IdData i ms) = do
     mimpl <-
         case ms of
             (_:_) -> pure Nothing
         -- It was defined locally, so we can get the implementation out of the current file.
             [] -> do
-                mainContents <- liftIO $ readFile $ toFilePath mainSrc
+                let sourceFile = inputSpecAbsFile is
+                mainContents <- liftIO $ readFile $ toFilePath sourceFile
                 case parseModule mainContents of
                     ParseFailed loc err -> do
                         debug1 $
                             unwords
                                 [ "Unable to get source from"
-                                , toFilePath mainSrc
+                                , toFilePath sourceFile
                                 , "because of error"
                                 , show err
                                 , "at"

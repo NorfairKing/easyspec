@@ -3,6 +3,7 @@ module EasySpec.Evaluate.Analyse.Data.Content where
 import Import
 
 import qualified EasySpec.Discover.Types as ES
+import qualified EasySpec.OptParse.Types as ES
 
 import Development.Shake
 import Development.Shake.Path
@@ -13,25 +14,25 @@ import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Utils
 
 dataFrom ::
-       Path Rel File
+       ES.InputSpec
     -> ES.EasyName
     -> ES.SignatureInferenceStrategy
     -> Action [EvaluatorCsvLine]
-dataFrom file name strat = do
-    dataFile <- dataFileFor file name strat
+dataFrom is name strat = do
+    dataFile <- dataFileFor is name strat
     needP [dataFile]
     readCSV dataFile
 
 dataFromExampleAndName ::
-       Path Rel File -> ES.EasyName -> Action [EvaluatorCsvLine]
-dataFromExampleAndName file name = do
-    dataFile <- dataFileForExampleAndName file name
+       ES.InputSpec -> ES.EasyName -> Action [EvaluatorCsvLine]
+dataFromExampleAndName is name = do
+    dataFile <- dataFileForExampleAndName is name
     needP [dataFile]
     readCSV dataFile
 
-dataFromExample :: Path Rel File -> Action [EvaluatorCsvLine]
-dataFromExample file = do
-    dataFile <- dataFileForExample file
+dataFromExample :: ES.InputSpec -> Action [EvaluatorCsvLine]
+dataFromExample is = do
+    dataFile <- dataFileForExample is
     needP [dataFile]
     readCSV dataFile
 

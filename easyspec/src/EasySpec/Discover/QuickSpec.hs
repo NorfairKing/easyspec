@@ -27,11 +27,9 @@ import EasySpec.Discover.SignatureGeneration
 import EasySpec.Discover.Types
 import EasySpec.Discover.Utils
 
-runEasySpec ::
-       (MonadIO m, MonadReader Settings m)
-    => DiscoverSettings
-    -> InferredSignature
-    -> m [EasyEq]
+runEasySpec
+    :: (MonadIO m, MonadReader Settings m)
+    => DiscoverSettings -> InferredSignature -> m [EasyEq]
 runEasySpec ds iSig = do
     sets <- ask
     liftIO $ do

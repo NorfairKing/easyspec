@@ -62,7 +62,9 @@ addTypeClassTrickery eid = go (expr, idType eid)
                          t')
             _ -> (e, t)
 
-replaceVarsWithQuickspecVars :: Eq l => Type l -> Either String (Type l)
+replaceVarsWithQuickspecVars
+    :: Eq l
+    => Type l -> Either String (Type l)
 replaceVarsWithQuickspecVars et =
     let tvs = getTyVars et
         funcs =
@@ -75,8 +77,9 @@ replaceVarsWithQuickspecVars et =
                 ["A", "B", "C", "D", "E"]
     in replaceTyVars (zip tvs funcs) et
   where
-    replaceTyVars ::
-           Eq l => [(Name l, l -> Type l)] -> Type l -> Either String (Type l)
+    replaceTyVars
+        :: Eq l
+        => [(Name l, l -> Type l)] -> Type l -> Either String (Type l)
     replaceTyVars repls t =
         flip runReaderT False $
         -- Bool says 'whether it's higher-order'

@@ -5,6 +5,8 @@ module EasySpec.Discover.SignatureInference
     , inferSyntacticSimilarityName
     ) where
 
+import Import
+
 import EasySpec.Discover.SignatureInference.EmptyBackground
 import EasySpec.Discover.SignatureInference.FullBackground
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityName
@@ -17,6 +19,7 @@ inferenceStrategies =
     [ inferEmptyBackground
     , inferFullBackground
     , inferSyntacticSimilarityName
+    , inferSyntacticSimilarityEditDistanceName
     , inferSyntacticSimilaritySymbols
     , inferSyntacticSimilarityType
     ]

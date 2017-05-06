@@ -38,12 +38,13 @@ library
     build-depends:
         base >=4.9 && <=5,
         containers >=0.5 && <0.6,
+        edit-distance-vector >=1.0 && <1.1,
         filepath >=1.4 && <1.5,
         ghc >=8.0.1 && <8.1,
         ghc-boot >=8.0.1 && <8.1,
         ghc-paths >=0.1 && <0.2,
-        haskell-src-exts >=1.18 && <1.19,
         hashable >=1.2 && <1.3,
+        haskell-src-exts >=1.18 && <1.19,
         jukebox >=0.2.14,
         mtl >=2.2 && <2.3,
         optparse-applicative >=0.13,
@@ -52,7 +53,8 @@ library
         quickspec >=2 && <3,
         split >=0.2 && <0.3,
         template-haskell >=2.11 && <2.12,
-        unordered-containers >=0.2 && <0.3
+        unordered-containers >=0.2 && <0.3,
+        vector >= 0.11 && <0.12
     default-language: Haskell2010
     default-extensions: NoImplicitPrelude
     hs-source-dirs: src/

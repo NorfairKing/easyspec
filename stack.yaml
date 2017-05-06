@@ -19,4 +19,5 @@ extra-deps:
 - twee-0.1
 - minisat-0.1.2
 - shake-path-0.0.0.0
+- edit-distance-vector-1.0.0.4
 resolver: lts-8.6

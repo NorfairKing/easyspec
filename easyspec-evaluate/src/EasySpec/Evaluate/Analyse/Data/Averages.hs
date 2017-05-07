@@ -2,6 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module EasySpec.Evaluate.Analyse.Data.Averages where
 
@@ -13,7 +14,7 @@ import Data.Csv as CSV hiding ((.=), (.:))
 import Development.Shake
 import Development.Shake.Path
 
-import qualified EasySpec.OptParse.Types as ES
+import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Types
 

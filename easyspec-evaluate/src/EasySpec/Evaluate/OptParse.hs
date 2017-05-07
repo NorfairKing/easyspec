@@ -11,8 +11,8 @@ import System.Environment (getArgs)
 
 import Options.Applicative
 
-import qualified EasySpec.OptParse.Types as ES
-import EasySpec.Utils (isSourceFile)
+import qualified EasySpec.Discover.Types as ES
+import EasySpec.Utils as ES (isSourceFile)
 
 import EasySpec.Evaluate.OptParse.Types
 
@@ -36,10 +36,10 @@ combineToInstructions cmd Flags Configuration = (,) <$> disp <*> pure Settings
                             af <- resolveFile' f
                             rf <- makeRelative bd af
                             pure [rf]
-                        Nothing -> do
-                            (catMaybes .
-                             map (makeRelative bd) . filter isSourceFile . snd) <$>
-                                listDirRecur bd
+                        Nothing ->
+                            (mapMaybe (makeRelative bd) .
+                             filter ES.isSourceFile . snd) <$>
+                            listDirRecur bd
                 pure $ DispatchEvaluate $ map (ES.InputSpec bd) fs
             CommandBuild target -> pure $ DispatchBuild target
 

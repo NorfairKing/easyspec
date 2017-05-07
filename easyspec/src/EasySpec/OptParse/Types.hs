@@ -1,5 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
-
 module EasySpec.OptParse.Types where
 
 import Import
@@ -37,14 +35,6 @@ data DiscoverSettings = DiscoverSettings
     , setDiscFun :: Maybe EasyName
     , setDiscInfStrat :: SignatureInferenceStrategy
     }
-
-data InputSpec = InputSpec
-    { inputSpecBaseDir :: Path Abs Dir
-    , inputSpecFile :: Path Rel File
-    } deriving (Show, Eq)
-
-inputSpecAbsFile :: InputSpec -> Path Abs File
-inputSpecAbsFile InputSpec {..} = inputSpecBaseDir </> inputSpecFile
 
 newtype Settings = Settings
     { setsDebugLevel :: Int

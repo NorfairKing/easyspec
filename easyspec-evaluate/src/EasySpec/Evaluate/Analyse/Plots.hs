@@ -11,7 +11,6 @@ import Import
 import Language.Haskell.Exts.Pretty (prettyPrint)
 
 import qualified EasySpec.Discover.Types as ES
-import qualified EasySpec.OptParse.Types as ES
 
 import Development.Shake
 import Development.Shake.Path

@@ -6,7 +6,6 @@ import System.FilePath (dropExtensions)
 
 import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.Types as ES
-import qualified EasySpec.OptParse.Types as ES
 
 import EasySpec.Utils
 

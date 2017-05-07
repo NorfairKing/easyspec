@@ -11,6 +11,14 @@ import Data.Tree
 import Language.Haskell.Exts.Pretty as H
 import Language.Haskell.Exts.Syntax as H
 
+data InputSpec = InputSpec
+    { inputSpecBaseDir :: Path Abs Dir
+    , inputSpecFile :: Path Rel File
+    } deriving (Show, Eq)
+
+inputSpecAbsFile :: InputSpec -> Path Abs File
+inputSpecAbsFile InputSpec {..} = inputSpecBaseDir </> inputSpecFile
+
 data SignatureInferenceStrategy = SignatureInferenceStrategy
     { sigInfStratName :: String
     , inferSignature :: [EasyId] -> [EasyId] -> InferredSignature

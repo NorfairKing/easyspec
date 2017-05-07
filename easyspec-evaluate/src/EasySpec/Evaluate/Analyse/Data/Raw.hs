@@ -15,7 +15,6 @@ import Development.Shake
 import Development.Shake.Path
 
 import qualified EasySpec.Discover.Types as ES
-import qualified EasySpec.OptParse.Types as ES
 
 import EasySpec.Evaluate.Evaluate
 import EasySpec.Evaluate.Types

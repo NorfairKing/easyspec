@@ -2,7 +2,6 @@ module EasySpec.Discover.SignatureInference.SyntacticSimilarityName where
 
 import Import
 
-import Data.Vector (Vector)
 import qualified Data.Vector as V
 import Data.Vector.Distance
 
@@ -19,7 +18,7 @@ inferSyntacticSimilarityName =
 inferSyntacticSimilarityEditDistanceName :: SignatureInferenceStrategy
 inferSyntacticSimilarityEditDistanceName =
     differenceInferAlg "syntactical-similarity-edit-distance-name" $ \i1 i2 ->
-        let (Sum cost, _) = leastChanges strParams (idVec i1) (idVec i2)
-        in cost
+        let (Sum c, _) = leastChanges strParams (idVec i1) (idVec i2)
+        in c
   where
     idVec = V.fromList . prettyPrintOneLine . idName

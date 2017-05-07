@@ -8,7 +8,6 @@ import Import
 import Data.Csv
 
 import qualified EasySpec.Discover.Types as ES
-import qualified EasySpec.OptParse.Types as ES
 
 type EvaluatorName = String
 
@@ -60,7 +59,7 @@ instance FromNamedRecord EvaluatorCsvLine where
                         , "failed with error:"
                         , show err
                         ]
-                Right r -> pure r
+                Right res -> pure res
 
 instance ToNamedRecord EvaluatorCsvLine where
     toNamedRecord EvaluatorCsvLine {..} =

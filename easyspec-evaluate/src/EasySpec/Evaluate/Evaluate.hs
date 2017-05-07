@@ -18,7 +18,6 @@ import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.CodeUtils as ES
 import qualified EasySpec.Discover.Types as ES
 import qualified EasySpec.OptParse as ES
-import qualified EasySpec.OptParse.Types as ES
 
 import EasySpec.Evaluate.Types
 

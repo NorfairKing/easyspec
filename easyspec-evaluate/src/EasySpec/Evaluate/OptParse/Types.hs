@@ -2,7 +2,7 @@ module EasySpec.Evaluate.OptParse.Types where
 
 import Import
 
-import qualified EasySpec.OptParse.Types as ES
+import qualified EasySpec.Discover.Types as ES
 
 type Arguments = (Command, Flags)
 

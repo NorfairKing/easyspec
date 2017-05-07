@@ -1,9 +1,6 @@
 module EasySpec.Evaluate.Analyse.Data.Content where
 
-import Import
-
 import qualified EasySpec.Discover.Types as ES
-import qualified EasySpec.OptParse.Types as ES
 
 import Development.Shake
 import Development.Shake.Path

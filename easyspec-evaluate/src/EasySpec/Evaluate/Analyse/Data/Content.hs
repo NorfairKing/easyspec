@@ -13,8 +13,8 @@ import EasySpec.Evaluate.Types
 import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Utils
 
-dataFrom
-    :: ES.InputSpec
+dataFrom ::
+       ES.InputSpec
     -> ES.EasyName
     -> ES.SignatureInferenceStrategy
     -> Action [EvaluatorCsvLine]
@@ -23,9 +23,8 @@ dataFrom is name strat = do
     needP [dataFile]
     readCSV dataFile
 
-dataFromExampleAndName :: ES.InputSpec
-                       -> ES.EasyName
-                       -> Action [EvaluatorCsvLine]
+dataFromExampleAndName ::
+       ES.InputSpec -> ES.EasyName -> Action [EvaluatorCsvLine]
 dataFromExampleAndName is name = do
     dataFile <- dataFileForExampleAndName is name
     needP [dataFile]

@@ -24,6 +24,8 @@ png( outPng
   , width=1200
   , bg="white"
   )
+# To draw legend outside of graph
+par(xpd = TRUE, mar=c(4,4,4,15))
 
 basevals <- res[res$strategy == baseline,]
 print(basevals)
@@ -55,7 +57,8 @@ for (i in seq_along(strats)) {
   print(dat$output / basevals$output)
 }
 
-legend("topleft"
+legend("right"
+  , inset=c(-0.5, 0)
   , legend=levels(factor(strats))
   , col=as.numeric(unique(factor(strats)))
   , lty = 1

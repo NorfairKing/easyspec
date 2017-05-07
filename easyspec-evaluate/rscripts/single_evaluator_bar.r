@@ -22,11 +22,13 @@ res$output <- suppressWarnings(as.numeric(as.character(res$output)))
 # Replace NaN with '0'
 res$output <- replace(res$output, is.na(res$output), 0)
 
-png(outPng, height=400, width=1200, bg="white")
+png(outPng, height=900, width=1200, bg="white")
+par(mar=c(35,4.1,4.1,2.1))
 
 # Extra large bottom margin
 barplot(
     res$output
   , names.arg=res$strategy
-  , main=paste("Source:", sourcefile, ", ", "Focus:", funcname, ", ", "Evaluator:", evaluator)
+  , main = paste("Source:", sourcefile, ", ", "Focus:", funcname, ", ", "Evaluator:", evaluator)
+  , las = 2
   )

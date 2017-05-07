@@ -4,8 +4,8 @@ import TestImport
 
 import EasySpec.Utils
 
-forSourceFilesInDir
-    :: Example a
+forSourceFilesInDir ::
+       Example a
     => Path Abs Dir
     -> (Path Rel File -> String)
     -> (Path Rel File -> a)

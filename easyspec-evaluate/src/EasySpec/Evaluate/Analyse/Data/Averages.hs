@@ -32,15 +32,15 @@ averageDataRules = do
     fss <- mapM averageOverNamesAndStrategiesForExampleRules exs
     averageDataRule ~> needP (fs ++ fss)
 
-averageOverNamesPerStrategyForExampleRules :: ES.InputSpec
-                                           -> Rules [Path Abs File]
+averageOverNamesPerStrategyForExampleRules ::
+       ES.InputSpec -> Rules [Path Abs File]
 averageOverNamesPerStrategyForExampleRules is = do
     jf <- averageOverNamesPerStrategyForExampleJSONRules is
     cf <- averageOverNamesPerStrategyForExampleCSVRules is
     pure [jf, cf]
 
-averageOverNamesPerStrategyForExampleJSONRules :: ES.InputSpec
-                                               -> Rules (Path Abs File)
+averageOverNamesPerStrategyForExampleJSONRules ::
+       ES.InputSpec -> Rules (Path Abs File)
 averageOverNamesPerStrategyForExampleJSONRules is = do
     avgF <- averageOverNamesPerStrategyForExampleJSONFile is
     avgF $%> do
@@ -70,8 +70,8 @@ averageOverNamesPerStrategyForExampleJSONRules is = do
         writeJSON avgF avoverNamesPerStrat
     pure avgF
 
-averageOverNamesPerStrategyForExampleCSVRules :: ES.InputSpec
-                                              -> Rules (Path Abs File)
+averageOverNamesPerStrategyForExampleCSVRules ::
+       ES.InputSpec -> Rules (Path Abs File)
 averageOverNamesPerStrategyForExampleCSVRules is = do
     avgcsvF <- averageOverNamesPerStrategyForExampleCSVFile is
     avgcsvF $%> do
@@ -84,15 +84,13 @@ averageOverNamesPerStrategyForExampleCSVRules is = do
         writeCSV avgcsvF ls
     pure avgcsvF
 
-averageOverNamesPerStrategyForExampleJSONFile
-    :: MonadIO m
-    => ES.InputSpec -> m (Path Abs File)
+averageOverNamesPerStrategyForExampleJSONFile ::
+       MonadIO m => ES.InputSpec -> m (Path Abs File)
 averageOverNamesPerStrategyForExampleJSONFile is =
     jsonAverageFileWithComponents (ES.inputSpecFile is) ["average-per-strategy"]
 
-averageOverNamesPerStrategyForExampleCSVFile
-    :: MonadIO m
-    => ES.InputSpec -> m (Path Abs File)
+averageOverNamesPerStrategyForExampleCSVFile ::
+       MonadIO m => ES.InputSpec -> m (Path Abs File)
 averageOverNamesPerStrategyForExampleCSVFile is =
     csvAverageFileWithComponents (ES.inputSpecFile is) ["average-per-strategy"]
 
@@ -132,8 +130,8 @@ instance FromJSON AverageEvaluatorPerStrategyOutput where
             AverageEvaluatorPerStrategyOutput <$> o .: "strategy" <*>
             o .: "average"
 
-averageOverNamesAndStrategiesForExampleRules :: ES.InputSpec
-                                             -> Rules (Path Abs File)
+averageOverNamesAndStrategiesForExampleRules ::
+       ES.InputSpec -> Rules (Path Abs File)
 averageOverNamesAndStrategiesForExampleRules is = do
     avgF <- averageOverNamesAndStrategiesForExampleFile is
     avgF $%> do
@@ -154,22 +152,21 @@ averageOverNamesAndStrategiesForExampleRules is = do
         writeJSON avgF avoverNames
     pure avgF
 
-averagePer
-    :: Eq a
-    => (EvaluatorCsvLine -> a) -> [EvaluatorCsvLine] -> [(a, AverageOutput)]
+averagePer ::
+       Eq a
+    => (EvaluatorCsvLine -> a)
+    -> [EvaluatorCsvLine]
+    -> [(a, AverageOutput)]
 averagePer func ls =
     map (second averageEvaluatorCsvLines) $ groupUnorderedBy func ls
 
-groupUnorderedBy
-    :: Eq b
-    => (a -> b) -> [a] -> [(b, [a])]
+groupUnorderedBy :: Eq b => (a -> b) -> [a] -> [(b, [a])]
 groupUnorderedBy func ls =
     let oups = nub $ map func ls
     in flip map oups $ \oup -> (oup, filter ((== oup) . func) ls)
 
-averageOverNamesAndStrategiesForExampleFile
-    :: MonadIO m
-    => ES.InputSpec -> m (Path Abs File)
+averageOverNamesAndStrategiesForExampleFile ::
+       MonadIO m => ES.InputSpec -> m (Path Abs File)
 averageOverNamesAndStrategiesForExampleFile is =
     jsonAverageFileWithComponents (ES.inputSpecFile is) ["average"]
 
@@ -240,17 +237,16 @@ instance DefaultOrdered AverageCsvLine where
     headerOrder _ =
         header ["base dir", "source", "evaluator", "strategy", "avg", "stddev"]
 
-makeAverageCsvLinesFromAverageOverNamesForExampleAndStrategy :: AverageOverNamesForExampleAndStrategy
-                                                             -> [AverageCsvLine]
+makeAverageCsvLinesFromAverageOverNamesForExampleAndStrategy ::
+       AverageOverNamesForExampleAndStrategy -> [AverageCsvLine]
 makeAverageCsvLinesFromAverageOverNamesForExampleAndStrategy AverageOverNamesForExampleAndStrategy {..} =
     concatMap
         (makeAverageCsvLinesFromAverageEvaluatorPerStrategyOutput
              averageOverNamesForExampleAndStrategyExample)
         averageOverNamesForExampleAndStrategyAverage
 
-makeAverageCsvLinesFromAverageEvaluatorPerStrategyOutput :: ES.InputSpec
-                                                         -> AverageEvaluatorPerStrategyOutput
-                                                         -> [AverageCsvLine]
+makeAverageCsvLinesFromAverageEvaluatorPerStrategyOutput ::
+       ES.InputSpec -> AverageEvaluatorPerStrategyOutput -> [AverageCsvLine]
 makeAverageCsvLinesFromAverageEvaluatorPerStrategyOutput is AverageEvaluatorPerStrategyOutput {..} =
     map
         (makeAverageCsvLinesFromAverageEvaluatorOutput
@@ -258,9 +254,8 @@ makeAverageCsvLinesFromAverageEvaluatorPerStrategyOutput is AverageEvaluatorPerS
              averageEvaluatorPerStrategyStrategy)
         averageEvaluatorPerStrategyAverageEvaluatorOutput
 
-makeAverageCsvLinesFromAverageOverNamesAndStrategiesForExample :: String
-                                                               -> AverageOverNamesAndStrategiesForExample
-                                                               -> [AverageCsvLine]
+makeAverageCsvLinesFromAverageOverNamesAndStrategiesForExample ::
+       String -> AverageOverNamesAndStrategiesForExample -> [AverageCsvLine]
 makeAverageCsvLinesFromAverageOverNamesAndStrategiesForExample stratName AverageOverNamesAndStrategiesForExample {..} =
     map
         (makeAverageCsvLinesFromAverageEvaluatorOutput
@@ -268,10 +263,8 @@ makeAverageCsvLinesFromAverageOverNamesAndStrategiesForExample stratName Average
              stratName)
         averageOverNamesAndStrategiesForExampleAverage
 
-makeAverageCsvLinesFromAverageEvaluatorOutput :: ES.InputSpec
-                                              -> String
-                                              -> AverageEvaluatorOutput
-                                              -> AverageCsvLine
+makeAverageCsvLinesFromAverageEvaluatorOutput ::
+       ES.InputSpec -> String -> AverageEvaluatorOutput -> AverageCsvLine
 makeAverageCsvLinesFromAverageEvaluatorOutput is stratName AverageEvaluatorOutput {..} =
     AverageCsvLine
     { averageCsvLineBaseDir = ES.inputSpecBaseDir is
@@ -281,24 +274,19 @@ makeAverageCsvLinesFromAverageEvaluatorOutput is stratName AverageEvaluatorOutpu
     , averageCsvLineAverage = averageEvaluatorOutputAverage
     }
 
-jsonAverageFileWithComponents
-    :: MonadIO m
-    => Path Rel File -> [String] -> m (Path Abs File)
+jsonAverageFileWithComponents ::
+       MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
 jsonAverageFileWithComponents = averagesFile "json"
 
-csvAverageFileWithComponents
-    :: MonadIO m
-    => Path Rel File -> [String] -> m (Path Abs File)
+csvAverageFileWithComponents ::
+       MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
 csvAverageFileWithComponents = averagesFile "csv"
 
-averagesFile
-    :: MonadIO m
-    => String -> Path Rel File -> [String] -> m (Path Abs File)
+averagesFile ::
+       MonadIO m => String -> Path Rel File -> [String] -> m (Path Abs File)
 averagesFile = fileInDirWithExtensionAndComponents averagesDir
 
-averagesDir
-    :: MonadIO m
-    => m (Path Abs Dir)
+averagesDir :: MonadIO m => m (Path Abs Dir)
 averagesDir = (</> $(mkRelDir "averages")) <$> tmpDir
 
 averageEvaluatorCsvLines :: [EvaluatorCsvLine] -> AverageOutput

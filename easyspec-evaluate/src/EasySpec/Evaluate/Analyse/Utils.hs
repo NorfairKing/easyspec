@@ -16,10 +16,11 @@ import qualified Data.ByteString.Lazy as LB
 import Development.Shake
 import Development.Shake.Path
 
-combineCSVFiles
-    :: forall a.
-       (FromNamedRecord a, ToNamedRecord a, DefaultOrdered a)
-    => Path Abs File -> [Path Abs File] -> Rules ()
+combineCSVFiles ::
+       forall a. (FromNamedRecord a, ToNamedRecord a, DefaultOrdered a)
+    => Path Abs File
+    -> [Path Abs File]
+    -> Rules ()
 combineCSVFiles res ins =
     res $%> do
         needP ins
@@ -31,9 +32,7 @@ combineCSVFiles res ins =
         ls <- concat <$> mapM readCSV ins :: Action [a]
         writeCSV res ls
 
-readCSV
-    :: (FromNamedRecord a, MonadIO m)
-    => Path Abs File -> m [a]
+readCSV :: (FromNamedRecord a, MonadIO m) => Path Abs File -> m [a]
 readCSV file = do
     contents <- liftIO $ LB.readFile $ toFilePath file
     case CSV.decodeByName contents of
@@ -48,17 +47,17 @@ readCSV file = do
                 ]
         Right (_, res) -> pure $ V.toList res
 
-writeCSV
-    :: (ToNamedRecord a, DefaultOrdered a, MonadIO m)
-    => Path Abs File -> [a] -> m ()
+writeCSV ::
+       (ToNamedRecord a, DefaultOrdered a, MonadIO m)
+    => Path Abs File
+    -> [a]
+    -> m ()
 writeCSV file records = do
     ensureDir $ parent file
     liftIO $
         LB.writeFile (toFilePath file) $ CSV.encodeDefaultOrderedByName records
 
-readJSON
-    :: (FromJSON a, MonadIO m)
-    => Path Abs File -> m a
+readJSON :: (FromJSON a, MonadIO m) => Path Abs File -> m a
 readJSON file = do
     contents <- liftIO $ LB.readFile $ toFilePath file
     case JSON.eitherDecode contents of
@@ -72,9 +71,7 @@ readJSON file = do
                 ]
         Right res -> pure res
 
-writeJSON
-    :: (ToJSON a, MonadIO m)
-    => Path Abs File -> a -> m ()
+writeJSON :: (ToJSON a, MonadIO m) => Path Abs File -> a -> m ()
 writeJSON file dat = do
     ensureDir $ parent file
     liftIO $ LB.writeFile (toFilePath file) $ JSON.encodePretty dat

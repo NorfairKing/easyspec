@@ -20,6 +20,9 @@ evaluators =
         , mapMaybe
               (uncurry subtractEvaluators)
               (orderedCombinations baseEvaluators)
+        , mapMaybe
+              (uncurry divideEvaluators)
+              (orderedCombinations baseEvaluators)
         ]
 
 orderedCombinations :: [a] -> [(a, a)]
@@ -38,10 +41,14 @@ addEvaluators e1 e2 =
                  Evaluator
                  { evaluatorName =
                        intercalate
-                           "+"
+                           "-"
                            [evaluatorName e1, "plus", evaluatorName e2]
                  , evaluatorGather =
-                       \ei -> evaluatorGather e1 ei + evaluatorGather e2 ei
+                       \ei ->
+                           liftM2
+                               (+)
+                               (evaluatorGather e1 ei)
+                               (evaluatorGather e2 ei)
                  , evaluatorPretty =
                        \ei ->
                            unwords
@@ -65,7 +72,11 @@ subtractEvaluators e1 e2 =
                            "-"
                            [evaluatorName e1, "minus", evaluatorName e2]
                  , evaluatorGather =
-                       \ei -> evaluatorGather e1 ei - evaluatorGather e2 ei
+                       \ei ->
+                           liftM2
+                               (-)
+                               (evaluatorGather e1 ei)
+                               (evaluatorGather e2 ei)
                  , evaluatorPretty =
                        \ei ->
                            unwords
@@ -78,20 +89,45 @@ subtractEvaluators e1 e2 =
                  }
         else Nothing
 
+divideEvaluators :: Evaluator -> Evaluator -> Maybe Evaluator
+divideEvaluators e1 e2 =
+    Just
+        Evaluator
+        { evaluatorName =
+              intercalate "-" [evaluatorName e1, "divided-by", evaluatorName e2]
+        , evaluatorGather =
+              \ei -> do
+                  n <- evaluatorGather e1 ei
+                  d <- evaluatorGather e2 ei
+                  let l = n / d
+                  if isNaN l
+                      then Nothing
+                      else Just l
+        , evaluatorPretty =
+              \ei -> unwords [evaluatorPretty e1 ei, "/", evaluatorPretty e2 ei]
+        , evaluatorUnit =
+              if evaluatorUnit e1 == evaluatorUnit e2
+                  then "ratio"
+                  else unwords [evaluatorUnit e1, "/", evaluatorUnit e2]
+        , evaluatorQuantity =
+              if evaluatorQuantity e1 == evaluatorQuantity e2
+                  then "1"
+                  else unwords [evaluatorQuantity e1, "/", evaluatorQuantity e2]
+        }
+
 baseEvaluators :: [Evaluator]
 baseEvaluators =
     [ equationsEvaluator
     , runtimeEvaluator
     , relevantEquationsEvaluator
     , irrelevantEquationsEvaluator
-    , relativeRelevantEquationsEvaluator
     ]
 
 equationsEvaluator :: Evaluator
 equationsEvaluator =
     Evaluator
     { evaluatorName = "equations"
-    , evaluatorGather = genericLength . eiDiscoveredEqs
+    , evaluatorGather = Just . genericLength . eiDiscoveredEqs
     , evaluatorPretty = show . length . eiDiscoveredEqs
     , evaluatorUnit = "#"
     , evaluatorQuantity = "equation"
@@ -101,35 +137,17 @@ runtimeEvaluator :: Evaluator
 runtimeEvaluator =
     Evaluator
     { evaluatorName = "runtime"
-    , evaluatorGather = eiRuntime
+    , evaluatorGather = Just . eiRuntime
     , evaluatorPretty = printf "%.3f" . eiRuntime
     , evaluatorUnit = "time"
     , evaluatorQuantity = "seconds"
     }
 
-relativeRelevantEquationsEvaluator :: Evaluator
-relativeRelevantEquationsEvaluator =
-    Evaluator
-    { evaluatorName = "relative-relevant-equations"
-    , evaluatorGather = go
-    , evaluatorPretty = printf "%.2f" . go
-    , evaluatorUnit = "ratio"
-    , evaluatorQuantity = "1"
-    }
-  where
-    go ei =
-        let l =
-                evaluatorGather relevantEquationsEvaluator ei /
-                evaluatorGather equationsEvaluator ei
-        in if isNaN l
-               then 0
-               else l
-
 relevantEquationsEvaluator :: Evaluator
 relevantEquationsEvaluator =
     Evaluator
     { evaluatorName = "relevant-equations"
-    , evaluatorGather = genericLength . go
+    , evaluatorGather = Just . genericLength . go
     , evaluatorPretty = show . length . go
     , evaluatorUnit = "#"
     , evaluatorQuantity = "equation"
@@ -141,7 +159,7 @@ irrelevantEquationsEvaluator :: Evaluator
 irrelevantEquationsEvaluator =
     Evaluator
     { evaluatorName = "irrelevant-equations"
-    , evaluatorGather = genericLength . go
+    , evaluatorGather = Just . genericLength . go
     , evaluatorPretty = show . length . go
     , evaluatorUnit = "#"
     , evaluatorQuantity = "equation"

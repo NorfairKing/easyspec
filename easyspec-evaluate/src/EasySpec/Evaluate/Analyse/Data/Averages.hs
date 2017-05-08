@@ -282,18 +282,20 @@ averagesDir = (</> $(mkRelDir "averages")) <$> tmpDir
 
 averageEvaluatorCsvLines :: [EvaluatorCsvLine] -> AverageOutput
 averageEvaluatorCsvLines ecsvls =
-    let a = averageOrZero $ map eclEvaluatorOutput ecsvls
+    let avg = average $ mapMaybe eclEvaluatorOutput ecsvls
     in AverageOutput
-       { averageOutputAverage = a
+       { averageOutputAverage = avg
        , averageOutputStdDev =
-             sqrt $
-             averageOrZero $
-             map (\e -> (a - eclEvaluatorOutput e) ^ (2 :: Int)) ecsvls
+             do a <- avg
+                sqrt <$>
+                    average
+                        (map (\e -> (a - e) ^ (2 :: Int)) $
+                         mapMaybe eclEvaluatorOutput ecsvls)
        }
 
 data AverageOutput = AverageOutput
-    { averageOutputAverage :: Double
-    , averageOutputStdDev :: Double
+    { averageOutputAverage :: Maybe Double
+    , averageOutputStdDev :: Maybe Double
     } deriving (Show, Eq, Generic)
 
 instance ToJSON AverageOutput where
@@ -308,6 +310,6 @@ instance FromJSON AverageOutput where
         withObject "AverageOutput" $ \o ->
             AverageOutput <$> o .: "average" <*> o .: "standard-deviation"
 
-averageOrZero :: [Double] -> Double
-averageOrZero [] = 0
-averageOrZero ls = sum ls / genericLength ls
+average :: [Double] -> Maybe Double
+average [] = Nothing
+average ls = Just $ sum ls / genericLength ls

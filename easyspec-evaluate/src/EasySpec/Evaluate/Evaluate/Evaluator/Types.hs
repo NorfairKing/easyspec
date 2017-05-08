@@ -8,7 +8,7 @@ type EvaluatorName = String
 
 data Evaluator = Evaluator
     { evaluatorName :: EvaluatorName
-    , evaluatorGather :: EvaluationInput -> Double
+    , evaluatorGather :: EvaluationInput -> Maybe Double
     , evaluatorPretty :: EvaluationInput -> String
     , evaluatorUnit :: String
     , evaluatorQuantity :: String

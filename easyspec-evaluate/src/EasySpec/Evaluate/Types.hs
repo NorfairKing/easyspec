@@ -73,7 +73,7 @@ data EvaluatorCsvLine = EvaluatorCsvLine
     , eclStratName :: String
     , eclFocusFuncName :: String
     , eclEvaluatorName :: ES.EvaluatorName
-    , eclEvaluatorOutput :: Double
+    , eclEvaluatorOutput :: Maybe Double
     } deriving (Show, Eq)
 
 instance FromNamedRecord EvaluatorCsvLine where

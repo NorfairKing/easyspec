@@ -24,9 +24,12 @@ import EasySpec.Evaluate.Types
 runEvaluate :: [ES.InputSpec] -> IO ()
 runEvaluate iss = do
     epointss <- mapM getEvaluationInputPointsFor iss
-    LB8.putStrLn $
-        encodeDefaultOrderedByName $
-        concatMap evaluationInputPointCsvLines $ concat epointss
+    let csvLines =
+            [ evaluationInputPointCsvLine p e
+            | e <- evaluators
+            , p <- concat epointss
+            ]
+    LB8.putStrLn $ encodeDefaultOrderedByName csvLines
 
 namesInSource :: MonadIO m => ES.InputSpec -> m [ES.EasyName]
 namesInSource is =
@@ -86,11 +89,12 @@ showEvaluationReport pointss = showTable $ concatMap go $ concat pointss
             , evaluatorPretty ev ip
             ]
 
-evaluationInputPointCsvLines :: EvaluationInputPoint -> [EvaluatorCsvLine]
-evaluationInputPointCsvLines eip = map line evaluators
+evaluationInputPointCsvLine ::
+       EvaluationInputPoint -> Evaluator -> EvaluatorCsvLine
+evaluationInputPointCsvLine eip ev = line
   where
     ip = pointToInput eip
-    line ev =
+    line =
         EvaluatorCsvLine
         { eclBaseDir = ES.inputSpecBaseDir $ eipInputSpec eip
         , eclFile = ES.inputSpecFile $ eipInputSpec eip

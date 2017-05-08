@@ -12,6 +12,7 @@ data Evaluator = Evaluator
     , evaluatorPretty :: EvaluationInput -> String
     , evaluatorUnit :: String
     , evaluatorQuantity :: String
+    , evaluatorRelevantFiles :: [Path Rel File]
     }
 
 data EvaluationInput = EvaluationInput

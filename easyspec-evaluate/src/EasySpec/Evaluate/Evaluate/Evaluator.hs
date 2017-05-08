@@ -1,14 +1,28 @@
-module EasySpec.Evaluate.Evaluate.Evaluator where
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE TemplateHaskell #-}
+
+module EasySpec.Evaluate.Evaluate.Evaluator
+    ( evaluators
+    , dependOnEvaluator
+    ) where
 
 import Import
 
 import Text.Printf
+
+import Development.Shake
+import Development.Shake.Path
 
 import qualified EasySpec.Discover.CodeUtils as ES
 import qualified EasySpec.Discover.SignatureInference.Utils as ES
 import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
+
+dependOnEvaluator :: Evaluator -> Action ()
+dependOnEvaluator ev = do
+    here <- liftIO getCurrentDir
+    needP $ map (here </>) $ evaluatorRelevantFiles ev
 
 evaluators :: [Evaluator]
 evaluators =
@@ -61,6 +75,8 @@ addEvaluators e1 e2 =
                                ]
                  , evaluatorUnit = evaluatorUnit e1
                  , evaluatorQuantity = evaluatorQuantity e1
+                 , evaluatorRelevantFiles =
+                       evaluatorRelevantFiles e1 ++ evaluatorRelevantFiles e2
                  }
         else Nothing
 
@@ -89,6 +105,8 @@ subtractEvaluators e1 e2 =
                                ]
                  , evaluatorUnit = evaluatorUnit e1
                  , evaluatorQuantity = evaluatorQuantity e1
+                 , evaluatorRelevantFiles =
+                       evaluatorRelevantFiles e1 ++ evaluatorRelevantFiles e2
                  }
         else Nothing
 
@@ -112,6 +130,8 @@ multiplyEvaluators e1 e2 =
               if evaluatorQuantity e1 == evaluatorQuantity e2
                   then evaluatorQuantity e1 ++ "^2"
                   else unwords [evaluatorQuantity e1, "*", evaluatorQuantity e2]
+        , evaluatorRelevantFiles =
+              evaluatorRelevantFiles e1 ++ evaluatorRelevantFiles e2
         }
 
 divideEvaluators :: Evaluator -> Evaluator -> Maybe Evaluator
@@ -138,15 +158,13 @@ divideEvaluators e1 e2 =
               if evaluatorQuantity e1 == evaluatorQuantity e2
                   then "1"
                   else unwords [evaluatorQuantity e1, "/", evaluatorQuantity e2]
+        , evaluatorRelevantFiles =
+              evaluatorRelevantFiles e1 ++ evaluatorRelevantFiles e2
         }
 
 baseEvaluators :: [Evaluator]
 baseEvaluators =
-    [ equationsEvaluator
-    , runtimeEvaluator
-    , relevantEquationsEvaluator
-    , irrelevantEquationsEvaluator
-    ]
+    [equationsEvaluator, runtimeEvaluator, relevantEquationsEvaluator]
 
 equationsEvaluator :: Evaluator
 equationsEvaluator =
@@ -157,6 +175,7 @@ equationsEvaluator =
           \ei -> unwords [show . length . eiDiscoveredEqs $ ei, "equations"]
     , evaluatorUnit = "#"
     , evaluatorQuantity = "equation"
+    , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }
 
 runtimeEvaluator :: Evaluator
@@ -168,6 +187,7 @@ runtimeEvaluator =
           \ei -> unwords [printf "%.3f" . eiRuntime $ ei, "seconds"]
     , evaluatorUnit = "time"
     , evaluatorQuantity = "second"
+    , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }
 
 relevantEquationsEvaluator :: Evaluator
@@ -178,21 +198,10 @@ relevantEquationsEvaluator =
     , evaluatorPretty = \ei -> unwords [show . length . go $ ei, "equations"]
     , evaluatorUnit = "#"
     , evaluatorQuantity = "equation"
+    , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }
   where
     go ei = filter (mentionsEq $ eiFocusFuncName ei) (eiDiscoveredEqs ei)
-
-irrelevantEquationsEvaluator :: Evaluator
-irrelevantEquationsEvaluator =
-    Evaluator
-    { evaluatorName = "irrelevant-equations"
-    , evaluatorGather = Just . genericLength . go
-    , evaluatorPretty = \ei -> unwords [show . length . go $ ei, "equations"]
-    , evaluatorUnit = "#"
-    , evaluatorQuantity = "equation"
-    }
-  where
-    go ei = filter (not . mentionsEq (eiFocusFuncName ei)) (eiDiscoveredEqs ei)
 
 mentionsEq :: ES.EasyName -> ES.EasyEq -> Bool
 mentionsEq n (ES.EasyEq e1 e2) = ES.mentions n e1 || ES.mentions n e2

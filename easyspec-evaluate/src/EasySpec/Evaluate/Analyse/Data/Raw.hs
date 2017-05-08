@@ -17,13 +17,13 @@ import Development.Shake.Path
 import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Evaluate
+import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Types
 
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Utils
 
 import EasySpec.Evaluate.Analyse.Data.Files
-import EasySpec.Evaluate.Analyse.Data.Types
 
 rawDataRule :: String
 rawDataRule = "raw-data"
@@ -86,8 +86,8 @@ rulesForFileNameAndStrat ghciResource is name infStrat = do
         writeJSON jsonF ip
     csvF <- dataFileFor is name infStrat
     csvF $%> do
+        mapM_ dependOnEvaluator evaluators
         needP [jsonF]
-        void (askOracle (Equations ()) :: Action [String]) -- Depend on the list names of evaluators
         ip <- readJSON jsonF
-        writeCSV csvF $ evaluationInputPointCsvLines ip
+        writeCSV csvF $ map (evaluationInputPointCsvLine ip) evaluators
     pure csvF

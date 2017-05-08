@@ -69,6 +69,7 @@ perExampleNameAndEvaluatorBarPlotFor ::
 perExampleNameAndEvaluatorBarPlotFor is name evaluator = do
     plotFile <- singleEvaluatorBarPlotFileForExampleAndName is name evaluator
     plotFile $%> do
+        dependOnEvaluator evaluator
         singleEvaluatorBarScript <- singleEvaluatorBarAnalysisScript
         dataFile <- dataFileForExampleAndName is name
         needP [singleEvaluatorBarScript, dataFile]

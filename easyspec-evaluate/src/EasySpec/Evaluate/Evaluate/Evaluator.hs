@@ -21,6 +21,9 @@ evaluators =
               (uncurry subtractEvaluators)
               (orderedCombinations baseEvaluators)
         , mapMaybe
+              (uncurry multiplyEvaluators)
+              (ES.unorderedCombinations baseEvaluators)
+        , mapMaybe
               (uncurry divideEvaluators)
               (orderedCombinations baseEvaluators)
         ]
@@ -88,6 +91,28 @@ subtractEvaluators e1 e2 =
                  , evaluatorQuantity = evaluatorQuantity e1
                  }
         else Nothing
+
+multiplyEvaluators :: Evaluator -> Evaluator -> Maybe Evaluator
+multiplyEvaluators e1 e2 =
+    Just
+        Evaluator
+        { evaluatorName =
+              intercalate
+                  "-"
+                  [evaluatorName e1, "multiplied-by", evaluatorName e2]
+        , evaluatorGather =
+              \ei -> liftM2 (*) (evaluatorGather e1 ei) (evaluatorGather e2 ei)
+        , evaluatorPretty =
+              \ei -> unwords [evaluatorPretty e1 ei, "*", evaluatorPretty e2 ei]
+        , evaluatorUnit =
+              if evaluatorUnit e1 == evaluatorUnit e2
+                  then evaluatorUnit e1 ++ "^2"
+                  else unwords [evaluatorUnit e1, "*", evaluatorUnit e2]
+        , evaluatorQuantity =
+              if evaluatorQuantity e1 == evaluatorQuantity e2
+                  then evaluatorQuantity e1 ++ "^2"
+                  else unwords [evaluatorQuantity e1, "*", evaluatorQuantity e2]
+        }
 
 divideEvaluators :: Evaluator -> Evaluator -> Maybe Evaluator
 divideEvaluators e1 e2 =

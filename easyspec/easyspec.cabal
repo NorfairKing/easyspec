@@ -23,6 +23,7 @@ library
         EasySpec.Discover.SignatureInference.EmptyBackground
         EasySpec.Discover.SignatureInference.FullBackground
         EasySpec.Discover.SignatureInference.SyntacticSimilarityName
+        EasySpec.Discover.SignatureInference.SyntacticSimilarityEditDistanceName
         EasySpec.Discover.SignatureInference.SyntacticSimilaritySymbols
         EasySpec.Discover.SignatureInference.SyntacticSimilarityType
         EasySpec.Discover.SignatureInference.Utils

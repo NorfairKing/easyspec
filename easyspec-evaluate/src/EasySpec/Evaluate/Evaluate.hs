@@ -57,13 +57,15 @@ getEvaluationInputPoint is funcname strat = do
             , ES.setDiscFun = Just funcname
             , ES.setDiscInfStrat = strat
             }
+    ids <- runReaderT (ES.getEasyIds is) evaluationSettings
     (runtime, eqs) <-
         timeItT $ runReaderT (ES.discoverEquations ds) evaluationSettings
     pure
         EvaluationInputPoint
         { eipInputSpec = is
-        , eipFunc = funcname
         , eipStrat = ES.sigInfStratName strat
+        , eipFunc = funcname
+        , eipScope = ids
         , eipDiscoveredEqs = eqs
         , eipRuntime = runtime
         }

@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
@@ -8,8 +9,10 @@ module EasySpec.Evaluate.Types where
 import Import hiding (Alt)
 
 import qualified Data.Aeson as JSON
-import Data.Aeson (FromJSON, ToJSON)
+import Data.Aeson (FromJSON(..), ToJSON(..))
 import Data.Csv hiding (Name)
+
+import Language.Haskell.Exts.Syntax
 
 import qualified EasySpec.Discover.Types as ES
 import qualified EasySpec.Evaluate.Evaluate.Evaluator.Types as ES
@@ -28,22 +31,45 @@ instance FromJSON ES.InputSpec where
 
 instance ToJSON ES.EasyEq where
     toJSON (ES.EasyEq e1 e2) =
-        JSON.object
-            [ "left-hand side" JSON..= JSON.genericToJSON JSON.defaultOptions e1
-            , "right-hand side" JSON..=
-              JSON.genericToJSON JSON.defaultOptions e2
-            ]
+        JSON.object ["left-hand side" JSON..= e1, "right-hand side" JSON..= e2]
 
 instance FromJSON ES.EasyEq where
     parseJSON =
         JSON.withObject "EasyEq" $ \o ->
-            ES.EasyEq <$> (o JSON..: "left-hand side") <*>
-            (o JSON..: "right-hand side")
+            ES.EasyEq <$> o JSON..: "left-hand side" <*>
+            o JSON..: "right-hand side"
+
+instance ToJSON (ES.Impl ()) where
+    toJSON i =
+        case i of
+            ES.Impl ms -> toJSON $ FunBind () ms
+
+instance FromJSON (ES.Impl ()) where
+    parseJSON v = do
+        d <- parseJSON v
+        case d of
+            FunBind () ms -> pure $ ES.Impl ms
+            _ -> mempty
+
+instance ToJSON (ES.Id ()) where
+    toJSON ES.Id {..} =
+        JSON.object
+            [ "name" JSON..= idName
+            , "type" JSON..= idType
+            , "implementation" JSON..= idImpl
+            ]
+
+instance FromJSON (ES.Id ()) where
+    parseJSON =
+        JSON.withObject "EasyId" $ \o ->
+            ES.Id <$> o JSON..: "name" <*> o JSON..: "type" <*>
+            o JSON..: "implementation"
 
 data EvaluationInputPoint = EvaluationInputPoint
     { eipInputSpec :: ES.InputSpec
-    , eipFunc :: ES.EasyName
     , eipStrat :: String
+    , eipFunc :: ES.EasyName
+    , eipScope :: [ES.EasyId]
     , eipDiscoveredEqs :: [ES.EasyEq]
     , eipRuntime :: Double
     } deriving (Show, Eq, Generic)
@@ -52,8 +78,9 @@ instance ToJSON EvaluationInputPoint where
     toJSON EvaluationInputPoint {..} =
         JSON.object
             [ "input spec" JSON..= eipInputSpec
-            , "focus" JSON..= eipFunc
             , "strategy" JSON..= eipStrat
+            , "focus" JSON..= eipFunc
+            , "scope" JSON..= eipScope
             , "discovered equations" JSON..= eipDiscoveredEqs
             , "runtime" JSON..= eipRuntime
             ]
@@ -62,8 +89,9 @@ instance FromJSON EvaluationInputPoint where
     parseJSON =
         JSON.withObject "EvaluationInputPoint" $ \o ->
             EvaluationInputPoint <$> o JSON..: "input spec" <*>
-            (o JSON..: "focus") <*>
             (o JSON..: "strategy") <*>
+            (o JSON..: "focus") <*>
+            (o JSON..: "scope") <*>
             (o JSON..: "discovered equations") <*>
             (o JSON..: "runtime")
 

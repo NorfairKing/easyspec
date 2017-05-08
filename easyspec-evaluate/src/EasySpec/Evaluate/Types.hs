@@ -102,6 +102,9 @@ data EvaluatorCsvLine = EvaluatorCsvLine
     , eclFocusFuncName :: String
     , eclEvaluatorName :: ES.EvaluatorName
     , eclEvaluatorOutput :: Maybe Double
+    , eclEvaluatorUnit :: String
+    , eclEvaluatorQuantity :: String
+    , eclEvaluatorPrettyOutput :: String
     } deriving (Show, Eq)
 
 instance FromNamedRecord EvaluatorCsvLine where
@@ -110,7 +113,10 @@ instance FromNamedRecord EvaluatorCsvLine where
         r .: "strategy" <*>
         r .: "focus" <*>
         r .: "evaluator" <*>
-        r .: "output"
+        r .: "output" <*>
+        r .: "unit" <*>
+        r .: "quantity" <*>
+        r .: "pretty output"
       where
         p parser key = do
             v <- r .: key
@@ -134,8 +140,21 @@ instance ToNamedRecord EvaluatorCsvLine where
             , "focus" .= eclFocusFuncName
             , "evaluator" .= eclEvaluatorName
             , "output" .= eclEvaluatorOutput
+            , "unit" .= eclEvaluatorUnit
+            , "quantity" .= eclEvaluatorQuantity
+            , "pretty output" .= eclEvaluatorPrettyOutput
             ]
 
 instance DefaultOrdered EvaluatorCsvLine where
     headerOrder _ =
-        header ["base-dir", "file", "strategy", "focus", "evaluator", "output"]
+        header
+            [ "base-dir"
+            , "file"
+            , "strategy"
+            , "focus"
+            , "evaluator"
+            , "output"
+            , "unit"
+            , "quantity"
+            , "pretty output"
+            ]

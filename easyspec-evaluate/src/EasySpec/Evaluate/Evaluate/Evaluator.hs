@@ -153,7 +153,8 @@ equationsEvaluator =
     Evaluator
     { evaluatorName = "equations"
     , evaluatorGather = Just . genericLength . eiDiscoveredEqs
-    , evaluatorPretty = show . length . eiDiscoveredEqs
+    , evaluatorPretty =
+          \ei -> unwords [show . length . eiDiscoveredEqs $ ei, "equations"]
     , evaluatorUnit = "#"
     , evaluatorQuantity = "equation"
     }
@@ -163,9 +164,10 @@ runtimeEvaluator =
     Evaluator
     { evaluatorName = "runtime"
     , evaluatorGather = Just . eiRuntime
-    , evaluatorPretty = printf "%.3f" . eiRuntime
+    , evaluatorPretty =
+          \ei -> unwords [printf "%.3f" . eiRuntime $ ei, "seconds"]
     , evaluatorUnit = "time"
-    , evaluatorQuantity = "seconds"
+    , evaluatorQuantity = "second"
     }
 
 relevantEquationsEvaluator :: Evaluator
@@ -173,7 +175,7 @@ relevantEquationsEvaluator =
     Evaluator
     { evaluatorName = "relevant-equations"
     , evaluatorGather = Just . genericLength . go
-    , evaluatorPretty = show . length . go
+    , evaluatorPretty = \ei -> unwords [show . length . go $ ei, "equations"]
     , evaluatorUnit = "#"
     , evaluatorQuantity = "equation"
     }
@@ -185,7 +187,7 @@ irrelevantEquationsEvaluator =
     Evaluator
     { evaluatorName = "irrelevant-equations"
     , evaluatorGather = Just . genericLength . go
-    , evaluatorPretty = show . length . go
+    , evaluatorPretty = \ei -> unwords [show . length . go $ ei, "equations"]
     , evaluatorUnit = "#"
     , evaluatorQuantity = "equation"
     }

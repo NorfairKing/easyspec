@@ -98,6 +98,9 @@ evaluationInputPointCsvLines eip = map line evaluators
         , eclFocusFuncName = prettyPrint $ eipFunc eip
         , eclEvaluatorName = evaluatorName ev
         , eclEvaluatorOutput = evaluatorGather ev ip
+        , eclEvaluatorUnit = evaluatorUnit ev
+        , eclEvaluatorQuantity = evaluatorQuantity ev
+        , eclEvaluatorPrettyOutput = evaluatorPretty ev ip
         }
 
 showTable :: [[String]] -> String

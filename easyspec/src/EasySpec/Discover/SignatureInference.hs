@@ -19,13 +19,7 @@ import EasySpec.Discover.Types
 inferenceStrategies :: [SignatureInferenceStrategy]
 inferenceStrategies = basicInferenceStrategies ++ unions
   where
-    unions =
-        concatMap
-            (\t ->
-                 case t of
-                     [] -> []
-                     (s1:s2s) -> map (unionInferAlg s1) s2s)
-            (tails basicInferenceStrategies)
+    unions = map (uncurry unionInferAlg) $ unorderedCombinations basicInferenceStrategies
 
 basicInferenceStrategies :: [SignatureInferenceStrategy]
 basicInferenceStrategies =

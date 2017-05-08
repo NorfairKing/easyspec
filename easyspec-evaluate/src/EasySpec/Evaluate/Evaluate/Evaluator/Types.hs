@@ -9,7 +9,9 @@ type EvaluatorName = String
 data Evaluator = Evaluator
     { evaluatorName :: EvaluatorName
     , evaluatorGather :: EvaluationInput -> Double
-    , evaluatorPretty :: Double -> String
+    , evaluatorPretty :: Double -> String -- TODO make this EvaluationInput -> String
+    , evaluatorUnit :: String
+    , evaluatorQuantity :: String
     }
 
 data EvaluationInput = EvaluationInput

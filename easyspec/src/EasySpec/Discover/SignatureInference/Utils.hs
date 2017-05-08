@@ -13,6 +13,15 @@ import EasySpec.Discover.Types
 
 {-# ANN module "HLint: ignore Collapse lambdas" #-}
 
+unorderedCombinations :: [a] -> [(a, a)]
+unorderedCombinations ls =
+    concatMap
+        (\t ->
+             case t of
+                 [] -> []
+                 (l1:l2s) -> map ((,) l1) l2s) $
+    tails ls
+
 unionInferAlg ::
        SignatureInferenceStrategy
     -> SignatureInferenceStrategy

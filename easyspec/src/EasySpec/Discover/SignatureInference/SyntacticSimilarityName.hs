@@ -12,5 +12,6 @@ import EasySpec.Discover.Types
 inferSyntacticSimilarityName :: SignatureInferenceStrategy
 inferSyntacticSimilarityName =
     similarityInferAlg
-        "syntactical-similarity-name" [$(mkRelFile __FILE__)]
+        "syntactical-similarity-name"
+        [$(mkRelFile __FILE__)]
         (prettyPrintOneLine . idName)

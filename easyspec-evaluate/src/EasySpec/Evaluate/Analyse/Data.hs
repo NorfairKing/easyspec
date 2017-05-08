@@ -25,5 +25,5 @@ dataRules = do
     dataRule ~> need [rawDataRule, averageDataRule]
 
 addEquationsOracle :: Rules ()
-addEquationsOracle = void $
-    addOracle $ \(Equations ()) -> pure $ map evaluatorName evaluators
+addEquationsOracle =
+    void $ addOracle $ \(Equations ()) -> pure $ map evaluatorName evaluators

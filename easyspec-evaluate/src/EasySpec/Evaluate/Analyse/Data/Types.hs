@@ -1,5 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+
 module EasySpec.Evaluate.Analyse.Data.Types where
 
 import Import

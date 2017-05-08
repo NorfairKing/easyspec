@@ -19,7 +19,9 @@ import EasySpec.Discover.Types
 inferenceStrategies :: [SignatureInferenceStrategy]
 inferenceStrategies = basicInferenceStrategies ++ unions
   where
-    unions = map (uncurry unionInferAlg) $ unorderedCombinations basicInferenceStrategies
+    unions =
+        map (uncurry unionInferAlg) $
+        unorderedCombinations basicInferenceStrategies
 
 basicInferenceStrategies :: [SignatureInferenceStrategy]
 basicInferenceStrategies =

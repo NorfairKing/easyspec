@@ -81,7 +81,7 @@ showEvaluationReport pointss = showTable $ concatMap go $ concat pointss
             , eipStrat eip
             , prettyPrint $ eipFunc eip
             , evaluatorName ev
-            , evaluate ip ev
+            , evaluatorPretty ev ip
             ]
 
 evaluationInputPointCsvLines :: EvaluationInputPoint -> [EvaluatorCsvLine]

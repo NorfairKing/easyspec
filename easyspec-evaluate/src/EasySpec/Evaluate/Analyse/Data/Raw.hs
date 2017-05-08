@@ -65,7 +65,8 @@ rulesForFileNameAndStrat ghciResource is name infStrat = do
     jsonF <- rawDataFileFor is name infStrat
     jsonF $%> do
         sourceDir <- getEasyspecSourceDir
-        let relevantFiles = map (sourceDir </>) $ ES.sigInfRelevantSources infStrat
+        let relevantFiles =
+                map (sourceDir </>) $ ES.sigInfRelevantSources infStrat
         let absFile = ES.inputSpecAbsFile is
         needP $ absFile : relevantFiles
         ip <-
@@ -86,7 +87,7 @@ rulesForFileNameAndStrat ghciResource is name infStrat = do
     csvF <- dataFileFor is name infStrat
     csvF $%> do
         needP [jsonF]
-        void $ (askOracle (Equations ()) :: Action [String]) -- Depend on the list names of evaluators
+        void (askOracle (Equations ()) :: Action [String]) -- Depend on the list names of evaluators
         ip <- readJSON jsonF
         writeCSV csvF $ evaluationInputPointCsvLines ip
     pure csvF

@@ -26,7 +26,7 @@ rawDataFileFor ::
     -> m (Path Abs File)
 rawDataFileFor is name strat =
     jsonDataFileWithComponents
-        (ES.inputSpecFile is)
+        ($(mkRelDir "raw") </> ES.inputSpecFile is)
         [prettyPrint name, ES.sigInfStratName strat]
 
 jsonDataFileWithComponents ::
@@ -41,17 +41,15 @@ dataFileFor ::
     -> m (Path Abs File)
 dataFileFor is name strat =
     csvDataFileWithComponents
-        (ES.inputSpecFile is)
+        ($(mkRelDir "evaluated") </> ES.inputSpecFile is)
         [prettyPrint name, ES.sigInfStratName strat]
 
 dataFileForExampleAndName ::
        MonadIO m => ES.InputSpec -> ES.EasyName -> m (Path Abs File)
 dataFileForExampleAndName is name =
-    csvDataFileWithComponents (ES.inputSpecFile is) [prettyPrint name]
-
-csvDataFileWithComponents ::
-       MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
-csvDataFileWithComponents = dataFileWithComponents "csv"
+    csvDataFileWithComponents
+        ($(mkRelDir "combined-per-example-per-name") </> ES.inputSpecFile is)
+        [prettyPrint name]
 
 dataFilesForExampleAndName ::
        MonadIO m => ES.InputSpec -> ES.EasyName -> m [Path Abs File]
@@ -59,7 +57,14 @@ dataFilesForExampleAndName is name =
     forM signatureInferenceStrategies $ dataFileFor is name
 
 dataFileForExample :: MonadIO m => ES.InputSpec -> m (Path Abs File)
-dataFileForExample is = csvDataFileWithComponents (ES.inputSpecFile is) []
+dataFileForExample is =
+    csvDataFileWithComponents
+        ($(mkRelDir "combined-per-example") </> ES.inputSpecFile is)
+        []
+
+csvDataFileWithComponents ::
+       MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
+csvDataFileWithComponents = dataFileWithComponents "csv"
 
 dataFilesForExample :: MonadIO m => ES.InputSpec -> m [Path Abs File]
 dataFilesForExample is = do

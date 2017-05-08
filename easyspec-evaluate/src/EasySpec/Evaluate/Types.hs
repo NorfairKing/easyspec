@@ -1,105 +1,20 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module EasySpec.Evaluate.Types where
 
 import Import hiding (Alt)
 
-import Language.Haskell.Exts.Syntax
-
 import qualified Data.Aeson as JSON
 import Data.Aeson (FromJSON, ToJSON)
-import Data.Aeson.TH
 import Data.Csv hiding (Name)
 
 import qualified EasySpec.Discover.Types as ES
 import qualified EasySpec.Evaluate.Evaluate.Evaluator.Types as ES
 
--- JSON instances for all of the syntax
-$(fmap concat $
-  mapM
-      (deriveJSON defaultOptions)
-      [ ''Activation
-      , ''Alt
-      , ''Annotation
-      , ''Assoc
-      , ''Asst
-      , ''BangType
-      , ''Binds
-      , ''BooleanFormula
-      , ''Boxed
-      , ''Bracket
-      , ''CName
-      , ''CallConv
-      , ''ClassDecl
-      , ''ConDecl
-      , ''Context
-      , ''DataOrNew
-      , ''Decl
-      , ''DeclHead
-      , ''Deriving
-      , ''EWildcard
-      , ''Exp
-      , ''ExportSpec
-      , ''ExportSpecList
-      , ''FieldDecl
-      , ''FieldUpdate
-      , ''FunDep
-      , ''GadtDecl
-      , ''GuardedRhs
-      , ''IPBind
-      , ''IPName
-      , ''ImportDecl
-      , ''ImportSpec
-      , ''ImportSpecList
-      , ''InjectivityInfo
-      , ''InstDecl
-      , ''InstHead
-      , ''InstRule
-      , ''Kind
-      , ''Literal
-      , ''Match
-      , ''Module
-      , ''ModuleHead
-      , ''ModuleName
-      , ''ModulePragma
-      , ''Name
-      , ''Namespace
-      , ''Op
-      , ''Overlap
-      , ''PXAttr
-      , ''Pat
-      , ''PatField
-      , ''PatternSynDirection
-      , ''Promoted
-      , ''QName
-      , ''QOp
-      , ''QualConDecl
-      , ''QualStmt
-      , ''RPat
-      , ''RPatOp
-      , ''ResultSig
-      , ''Rhs
-      , ''Role
-      , ''Rule
-      , ''RuleVar
-      , ''Safety
-      , ''Sign
-      , ''SpecialCon
-      , ''Splice
-      , ''Stmt
-      , ''Tool
-      , ''TyVarBind
-      , ''Type
-      , ''TypeEqn
-      , ''Unpackedness
-      , ''WarningText
-      , ''XAttr
-      , ''XName
-      ])
+import qualified EasySpec.Evaluate.HaskellJSON ()
 
 instance ToJSON ES.InputSpec where
     toJSON ES.InputSpec {..} =

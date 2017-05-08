@@ -20,7 +20,8 @@ similarityInferAlg ::
     -> (EasyId -> f a)
     -> SignatureInferenceStrategy
 similarityInferAlg name fs distil =
-    differenceInferAlg name ($(mkRelFile __FILE__) : fs) $ \e1 e2 -> dictDiff (dictOf e1) (dictOf e2)
+    differenceInferAlg name ($(mkRelFile __FILE__) : fs) $ \e1 e2 ->
+        dictDiff (dictOf e1) (dictOf e2)
   where
     dictOf = letterDict . distil
 

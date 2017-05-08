@@ -14,7 +14,9 @@ import EasySpec.Discover.Types
 
 inferSyntacticSimilarityEditDistanceName :: SignatureInferenceStrategy
 inferSyntacticSimilarityEditDistanceName =
-    differenceInferAlg "syntactical-similarity-edit-distance-name" [$(mkRelFile __FILE__)]$ \i1 i2 ->
+    differenceInferAlg
+        "syntactical-similarity-edit-distance-name"
+        [$(mkRelFile __FILE__)] $ \i1 i2 ->
         let (Sum c, _) = leastChanges strParams (idVec i1) (idVec i2)
         in c
   where

@@ -2,8 +2,8 @@ module Import
     ( module X
     ) where
 
-import Prelude as X
 import Debug.Trace as X
+import Prelude as X
 
 import Data.List as X
 import Data.Maybe as X

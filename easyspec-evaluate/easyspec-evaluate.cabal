@@ -21,6 +21,7 @@ library
         EasySpec.Evaluate.Analyse.Data.Content
         EasySpec.Evaluate.Analyse.Data.Files
         EasySpec.Evaluate.Analyse.Data.Raw
+        EasySpec.Evaluate.Analyse.Data.Types
         EasySpec.Evaluate.Analyse.Plots
         EasySpec.Evaluate.Analyse.Plots.Files
         EasySpec.Evaluate.Analyse.Utils
@@ -43,6 +44,7 @@ library
         path >=0.5 && <0.6,
         path-io >=1.2 && <1.3,
         mtl >=2.2 && <2.3,
+        text >= 1.2 && <1.3,
         timeit >=1.0 && <1.1,
         haskell-src-exts >=1.18 && <1.19,
         shake >=0.15 && <0.16,

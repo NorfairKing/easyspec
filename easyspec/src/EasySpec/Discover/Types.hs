@@ -70,7 +70,7 @@ type EasyPat = H.Pat ()
 data EasyEq =
     EasyEq EasyExp
            EasyExp
-    deriving (Show, Eq)
+    deriving (Show, Eq, Generic)
 
 prettyEasyEq :: EasyEq -> String
 prettyEasyEq (EasyEq e1 e2) = unwords [H.prettyPrint e1, "=", H.prettyPrint e2]

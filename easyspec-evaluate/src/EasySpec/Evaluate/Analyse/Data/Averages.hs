@@ -2,7 +2,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module EasySpec.Evaluate.Analyse.Data.Averages where
 
@@ -175,15 +174,6 @@ data AverageOverNamesAndStrategiesForExample = AverageOverNamesAndStrategiesForE
     { averageOverNamesAndStrategiesForExampleExample :: ES.InputSpec
     , averageOverNamesAndStrategiesForExampleAverage :: [AverageEvaluatorOutput]
     } deriving (Show, Eq, Generic)
-
-instance ToJSON ES.InputSpec where
-    toJSON ES.InputSpec {..} =
-        object ["base dir" .= inputSpecBaseDir, "file" .= inputSpecFile]
-
-instance FromJSON ES.InputSpec where
-    parseJSON =
-        withObject "InputSpec" $ \o ->
-            ES.InputSpec <$> o .: "base dir" <*> o .: "file"
 
 instance ToJSON AverageOverNamesAndStrategiesForExample where
     toJSON AverageOverNamesAndStrategiesForExample {..} =

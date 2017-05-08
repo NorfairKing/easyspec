@@ -23,6 +23,7 @@ import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Utils
 
 import EasySpec.Evaluate.Analyse.Data.Files
+import EasySpec.Evaluate.Analyse.Data.Types
 
 rawDataRule :: String
 rawDataRule = "raw-data"
@@ -61,8 +62,8 @@ rulesForFileNameAndStrat ::
     -> ES.SignatureInferenceStrategy
     -> Rules (Path Abs File)
 rulesForFileNameAndStrat ghciResource is name infStrat = do
-    csvF <- dataFileFor is name infStrat
-    csvF $%> do
+    jsonF <- rawDataFileFor is name infStrat
+    jsonF $%> do
         let absFile = ES.inputSpecAbsFile is
         needP [absFile]
         ip <-
@@ -70,7 +71,7 @@ rulesForFileNameAndStrat ghciResource is name infStrat = do
                 putLoud $
                     unwords
                         [ "Building data file"
-                        , toFilePath csvF
+                        , toFilePath jsonF
                         , "by running 'easyspec-evaluate' on"
                         , toFilePath absFile
                         , "with focus:"
@@ -79,5 +80,11 @@ rulesForFileNameAndStrat ghciResource is name infStrat = do
                         , ES.sigInfStratName infStrat
                         ]
                 liftIO $ getEvaluationInputPoint is name infStrat
+        writeJSON jsonF ip
+    csvF <- dataFileFor is name infStrat
+    csvF $%> do
+        needP [jsonF]
+        void $ (askOracle (Equations ()) :: Action [String]) -- Depend on the list names of evaluators
+        ip <- readJSON jsonF
         writeCSV csvF $ evaluationInputPointCsvLines ip
     pure csvF

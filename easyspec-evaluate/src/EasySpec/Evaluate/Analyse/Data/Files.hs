@@ -15,6 +15,21 @@ import EasySpec.Evaluate.Analyse.Common
 dataDir :: MonadIO m => m (Path Abs Dir)
 dataDir = (</> $(mkRelDir "data")) <$> tmpDir
 
+rawDataFileFor ::
+       MonadIO m
+    => ES.InputSpec
+    -> ES.EasyName
+    -> ES.SignatureInferenceStrategy
+    -> m (Path Abs File)
+rawDataFileFor is name strat =
+    jsonDataFileWithComponents
+        (ES.inputSpecFile is)
+        [prettyPrint name, ES.sigInfStratName strat]
+
+jsonDataFileWithComponents ::
+       MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
+jsonDataFileWithComponents = dataFileWithComponents "json"
+
 dataFileFor ::
        MonadIO m
     => ES.InputSpec
@@ -33,7 +48,7 @@ dataFileForExampleAndName is name =
 
 csvDataFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
-csvDataFileWithComponents = fileInDirWithExtensionAndComponents dataDir "csv"
+csvDataFileWithComponents = dataFileWithComponents "csv"
 
 dataFilesForExampleAndName ::
        MonadIO m => ES.InputSpec -> ES.EasyName -> m [Path Abs File]
@@ -50,3 +65,7 @@ dataFilesForExample is = do
 
 allDataFile :: MonadIO m => m (Path Abs File)
 allDataFile = (</> $(mkRelFile "all.csv")) <$> dataDir
+
+dataFileWithComponents ::
+       MonadIO m => String -> Path Rel File -> [String] -> m (Path Abs File)
+dataFileWithComponents = fileInDirWithExtensionAndComponents dataDir

@@ -63,7 +63,7 @@ getEvaluationInputPoint is funcname strat = do
         EvaluationInputPoint
         { eipInputSpec = is
         , eipFunc = funcname
-        , eipStrat = strat
+        , eipStrat = ES.sigInfStratName strat
         , eipDiscoveredEqs = eqs
         , eipRuntime = runtime
         }
@@ -78,7 +78,7 @@ showEvaluationReport pointss = showTable $ concatMap go $ concat pointss
         line ev =
             [ toFilePath $ ES.inputSpecBaseDir $ eipInputSpec eip
             , toFilePath $ ES.inputSpecFile $ eipInputSpec eip
-            , ES.sigInfStratName $ eipStrat eip
+            , eipStrat eip
             , prettyPrint $ eipFunc eip
             , evaluatorName ev
             , evaluate ip ev
@@ -92,7 +92,7 @@ evaluationInputPointCsvLines eip = map line evaluators
         EvaluatorCsvLine
         { eclBaseDir = ES.inputSpecBaseDir $ eipInputSpec eip
         , eclFile = ES.inputSpecFile $ eipInputSpec eip
-        , eclStratName = ES.sigInfStratName $ eipStrat eip
+        , eclStratName = eipStrat eip
         , eclFocusFuncName = prettyPrint $ eipFunc eip
         , eclEvaluatorName = evaluatorName ev
         , eclEvaluatorOutput = evaluatorGather ev ip

@@ -21,6 +21,7 @@ import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Utils
 
 import EasySpec.Evaluate.Analyse.Data.Content
+import EasySpec.Evaluate.Analyse.Data.Files
 
 averageDataRule :: String
 averageDataRule = "average-data"
@@ -278,7 +279,7 @@ averagesFile ::
 averagesFile = fileInDirWithExtensionAndComponents averagesDir
 
 averagesDir :: MonadIO m => m (Path Abs Dir)
-averagesDir = (</> $(mkRelDir "averages")) <$> tmpDir
+averagesDir = (</> $(mkRelDir "averages")) <$> dataDir
 
 averageEvaluatorCsvLines :: [EvaluatorCsvLine] -> AverageOutput
 averageEvaluatorCsvLines ecsvls =

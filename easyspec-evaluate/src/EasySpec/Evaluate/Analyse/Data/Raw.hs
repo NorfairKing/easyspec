@@ -78,9 +78,9 @@ rulesForFileNameAndStrat ghciResource is name infStrat = do
                         , "by running 'easyspec-evaluate' on"
                         , toFilePath absFile
                         , "with focus:"
-                        , prettyPrint name
+                        , show $ prettyPrint name
                         , "and signature inference strategy:"
-                        , ES.sigInfStratName infStrat
+                        , show $ ES.sigInfStratName infStrat
                         ]
                 liftIO $ getEvaluationInputPoint is name infStrat
         writeJSON jsonF ip

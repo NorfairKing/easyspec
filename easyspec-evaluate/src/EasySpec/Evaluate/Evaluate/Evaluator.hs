@@ -144,10 +144,7 @@ divideEvaluators e1 e2 =
               \ei -> do
                   n <- evaluatorGather e1 ei
                   d <- evaluatorGather e2 ei
-                  let l = n / d
-                  if isNaN l
-                      then Nothing
-                      else Just l
+                  divMaybe n d
         , evaluatorPretty =
               \ei -> unwords [evaluatorPretty e1 ei, "/", evaluatorPretty e2 ei]
         , evaluatorUnit =
@@ -161,6 +158,13 @@ divideEvaluators e1 e2 =
         , evaluatorRelevantFiles =
               evaluatorRelevantFiles e1 ++ evaluatorRelevantFiles e2
         }
+
+divMaybe :: (RealFloat a, Fractional a) => a -> a -> Maybe a
+divMaybe n d =
+    let l = n / d
+    in if isNaN l || isInfinite l
+           then Nothing
+           else Just l
 
 baseEvaluators :: [Evaluator]
 baseEvaluators =

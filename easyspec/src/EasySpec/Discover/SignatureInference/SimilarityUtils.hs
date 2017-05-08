@@ -1,3 +1,6 @@
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module EasySpec.Discover.SignatureInference.SimilarityUtils where
 
 import Import
@@ -13,10 +16,11 @@ import EasySpec.Discover.Types
 similarityInferAlg ::
        (Eq a, Ord a, Foldable f)
     => String
+    -> [Path Rel File]
     -> (EasyId -> f a)
     -> SignatureInferenceStrategy
-similarityInferAlg name distil =
-    differenceInferAlg name $ \e1 e2 -> dictDiff (dictOf e1) (dictOf e2)
+similarityInferAlg name fs distil =
+    differenceInferAlg name ($(mkRelFile __FILE__) : fs) $ \e1 e2 -> dictDiff (dictOf e1) (dictOf e2)
   where
     dictOf = letterDict . distil
 
@@ -24,10 +28,11 @@ similarityInferAlg name distil =
 differenceInferAlg ::
        (Ord n, Show n, Num n)
     => String
+    -> [Path Rel File]
     -> (EasyId -> EasyId -> n)
     -> SignatureInferenceStrategy
-differenceInferAlg name diff =
-    splitInferAlg name $ \focus scope ->
+differenceInferAlg name fs diff =
+    splitInferAlg name ($(mkRelFile __FILE__) : fs) $ \focus scope ->
         take 5 $ sortOn (\f -> sum $ map (diff f) focus) scope
 
 letterDict :: (Eq a, Ord a, Foldable f) => f a -> Map a Int

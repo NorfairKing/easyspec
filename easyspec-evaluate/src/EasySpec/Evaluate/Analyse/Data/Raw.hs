@@ -64,8 +64,10 @@ rulesForFileNameAndStrat ::
 rulesForFileNameAndStrat ghciResource is name infStrat = do
     jsonF <- rawDataFileFor is name infStrat
     jsonF $%> do
+        sourceDir <- getEasyspecSourceDir
+        let relevantFiles = map (sourceDir </>) $ ES.sigInfRelevantSources infStrat
         let absFile = ES.inputSpecAbsFile is
-        needP [absFile]
+        needP $ absFile : relevantFiles
         ip <-
             withResource ghciResource 1 $ do
                 putLoud $

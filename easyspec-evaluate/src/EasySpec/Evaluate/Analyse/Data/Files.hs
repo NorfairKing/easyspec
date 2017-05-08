@@ -12,6 +12,9 @@ import EasySpec.Evaluate.Evaluate
 
 import EasySpec.Evaluate.Analyse.Common
 
+getEasyspecSourceDir :: MonadIO m => m (Path Abs Dir)
+getEasyspecSourceDir = liftIO $ resolveDir' "../easyspec"
+
 dataDir :: MonadIO m => m (Path Abs Dir)
 dataDir = (</> $(mkRelDir "data")) <$> tmpDir
 

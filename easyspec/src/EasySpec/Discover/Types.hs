@@ -21,6 +21,7 @@ inputSpecAbsFile InputSpec {..} = inputSpecBaseDir </> inputSpecFile
 
 data SignatureInferenceStrategy = SignatureInferenceStrategy
     { sigInfStratName :: String
+    , sigInfRelevantSources :: [Path Rel File]
     , inferSignature :: [EasyId] -> [EasyId] -> InferredSignature
     }
 

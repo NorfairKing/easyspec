@@ -1,3 +1,6 @@
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module EasySpec.Discover.SignatureInference.SyntacticSimilaritySymbols where
 
 import Import
@@ -10,7 +13,7 @@ import EasySpec.Discover.Types
 
 inferSyntacticSimilaritySymbols :: SignatureInferenceStrategy
 inferSyntacticSimilaritySymbols =
-    differenceInferAlg "syntactical-similarity-symbols" diffIdImpl
+    differenceInferAlg "syntactical-similarity-symbols" [$(mkRelFile __FILE__)]diffIdImpl
 
 diffIdImpl :: EasyId -> EasyId -> Double
 diffIdImpl i1 i2 =

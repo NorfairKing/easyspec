@@ -5,7 +5,6 @@ import Import
 import Text.Printf
 
 import qualified EasySpec.Discover.CodeUtils as ES
-import qualified EasySpec.Discover.SignatureInference.Utils as ES
 import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Evaluate.Evaluator.Types

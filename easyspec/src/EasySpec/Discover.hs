@@ -47,9 +47,8 @@ discoverEquations ds = do
     ids <- getEasyIds $ setDiscInputSpec ds
     debug1 "Gathered signature:"
     debug1 $ unlines $ map prettyEasyId ids
-    let SignatureInferenceStrategy _ inferStrat = setDiscInfStrat ds
     let (focusIds, bgIds) = splitFocus ds ids
-    let iSig = inferStrat focusIds bgIds
+    let iSig = inferSignature (setDiscInfStrat ds) focusIds bgIds
     allEqs <- runEasySpec ds iSig
     pure $ nub allEqs
 

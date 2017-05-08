@@ -6,7 +6,6 @@ module EasySpec.Evaluate.Evaluate where
 import Import
 
 import System.TimeIt
-import Text.Printf
 
 import Data.Csv
 
@@ -15,10 +14,11 @@ import qualified Data.ByteString.Lazy.Char8 as LB8
 import Language.Haskell.Exts.Pretty (prettyPrint)
 
 import qualified EasySpec.Discover as ES
-import qualified EasySpec.Discover.CodeUtils as ES
 import qualified EasySpec.Discover.Types as ES
 import qualified EasySpec.OptParse as ES
 
+import EasySpec.Evaluate.Evaluate.Evaluator
+import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Types
 
 runEvaluate :: [ES.InputSpec] -> IO ()
@@ -68,15 +68,6 @@ getEvaluationInputPoint is funcname strat = do
         , eipRuntime = runtime
         }
 
-evaluators :: [Evaluator]
-evaluators =
-    [ equationsEvaluator
-    , runtimeEvaluator
-    , relevantEquationsEvaluator
-    , irrelevantEquationsEvaluator
-    , relativeRelevantEquationsEvaluator
-    ]
-
 showEvaluationReport :: [[EvaluationInputPoint]] -> String
 showEvaluationReport pointss = showTable $ concatMap go $ concat pointss
   where
@@ -122,9 +113,6 @@ pad c i s
     | length s < i = s ++ replicate (i - length s) c
     | otherwise = s
 
-evaluate :: EvaluationInput -> Evaluator -> String
-evaluate ei e = evaluatorPretty e $ evaluatorGather e ei
-
 pointToInput :: EvaluationInputPoint -> EvaluationInput
 pointToInput EvaluationInputPoint {..} =
     EvaluationInput
@@ -132,39 +120,3 @@ pointToInput EvaluationInputPoint {..} =
     , eiRuntime = eipRuntime
     , eiFocusFuncName = eipFunc
     }
-
-equationsEvaluator :: Evaluator
-equationsEvaluator =
-    Evaluator "equations" (genericLength . eiDiscoveredEqs) show
-
-runtimeEvaluator :: Evaluator
-runtimeEvaluator = Evaluator "runtime" eiRuntime (printf "%.3f")
-
-relativeRelevantEquationsEvaluator :: Evaluator
-relativeRelevantEquationsEvaluator =
-    Evaluator "relative-relevant-equations" go (printf "%.2f")
-  where
-    go ei =
-        let l =
-                evaluatorGather relevantEquationsEvaluator ei /
-                evaluatorGather equationsEvaluator ei
-        in if isNaN l
-               then 0
-               else l
-
-relevantEquationsEvaluator :: Evaluator
-relevantEquationsEvaluator = Evaluator "relevant-equations" go show
-  where
-    go ei =
-        genericLength $
-        filter (mentionsEq $ eiFocusFuncName ei) (eiDiscoveredEqs ei)
-
-irrelevantEquationsEvaluator :: Evaluator
-irrelevantEquationsEvaluator = Evaluator "irrelevant-equations" go show
-  where
-    go ei =
-        genericLength $
-        filter (not . mentionsEq (eiFocusFuncName ei)) (eiDiscoveredEqs ei)
-
-mentionsEq :: ES.EasyName -> ES.EasyEq -> Bool
-mentionsEq n (ES.EasyEq e1 e2) = ES.mentions n e1 || ES.mentions n e2

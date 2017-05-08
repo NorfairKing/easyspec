@@ -9,7 +9,7 @@ import Data.Csv
 
 import qualified EasySpec.Discover.Types as ES
 
-type EvaluatorName = String
+import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
 data EvaluationInputPoint = EvaluationInputPoint
     { eipInputSpec :: ES.InputSpec
@@ -18,18 +18,6 @@ data EvaluationInputPoint = EvaluationInputPoint
     , eipDiscoveredEqs :: [ES.EasyEq]
     , eipRuntime :: Double
     } deriving (Show, Eq)
-
-data EvaluationInput = EvaluationInput
-    { eiFocusFuncName :: ES.EasyName
-    , eiDiscoveredEqs :: [ES.EasyEq]
-    , eiRuntime :: Double
-    } deriving (Show, Eq)
-
-data Evaluator = Evaluator
-    { evaluatorName :: EvaluatorName
-    , evaluatorGather :: EvaluationInput -> Double
-    , evaluatorPretty :: Double -> String
-    }
 
 data EvaluatorCsvLine = EvaluatorCsvLine
     { eclBaseDir :: Path Abs Dir

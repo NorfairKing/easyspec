@@ -16,7 +16,8 @@ import Development.Shake
 import Development.Shake.Path
 
 import EasySpec.Evaluate.Evaluate
-import EasySpec.Evaluate.Types
+import EasySpec.Evaluate.Evaluate.Evaluator
+import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Files

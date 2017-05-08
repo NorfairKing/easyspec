@@ -13,7 +13,6 @@ author: Tom Sydney Kerckhove
 library
     exposed-modules:
         EasySpec.Evaluate
-        EasySpec.Evaluate.Build
         EasySpec.Evaluate.Analyse
         EasySpec.Evaluate.Analyse.Archive
         EasySpec.Evaluate.Analyse.Common
@@ -25,7 +24,10 @@ library
         EasySpec.Evaluate.Analyse.Plots
         EasySpec.Evaluate.Analyse.Plots.Files
         EasySpec.Evaluate.Analyse.Utils
+        EasySpec.Evaluate.Build
         EasySpec.Evaluate.Evaluate
+        EasySpec.Evaluate.Evaluate.Evaluator
+        EasySpec.Evaluate.Evaluate.Evaluator.Types
         EasySpec.Evaluate.OptParse
         EasySpec.Evaluate.OptParse.Types
         EasySpec.Evaluate.Types

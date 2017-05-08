@@ -11,9 +11,9 @@ import Language.Haskell.Exts.Pretty (prettyPrint)
 
 import qualified EasySpec.Discover.Types as ES
 
-import EasySpec.Evaluate.Types
-
 import EasySpec.Evaluate.Analyse.Common
+
+import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
 plotsDir :: MonadIO m => m (Path Abs Dir)
 plotsDir = (</> $(mkRelDir "plots")) <$> tmpDir

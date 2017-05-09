@@ -1,12 +1,15 @@
 args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) != 3) {
-  stop("Usage: lines.r input.csv output.png evaluator")
+if (length(args) != 4) {
+  stop("Usage: common.r lines.r input.csv output.png evaluator")
 }
 
-inFile <- args[1]
-outPng <- args[2]
-evaluator <- args[3]
+common <- args[1]
+inFile <- args[2]
+outPng <- args[3]
+evaluator <- args[4]
+
+source(common)
 
 res = read.csv(inFile, header=TRUE)
 
@@ -19,13 +22,12 @@ res <- res[res$evaluator == evaluator,]
 # Merge the 'source' and 'focus' collumns to 'origin'.
 res$origin <- paste(res$path, res$focus)
 
-png( outPng
-  , height=400
-  , width=1200
-  , bg="white"
-  )
-
 if (length(res$output) != 0) { 
+  png( outPng
+    , height=400
+    , width=1200
+    , bg="white"
+    )
   # To draw legend outside of graph
   par(xpd = TRUE, mar=c(4,4,4,15))
 
@@ -64,5 +66,5 @@ if (length(res$output) != 0) {
     , lty = 1
     )
 } else {
-  plot(1, 1, main="No image could be generated: No non-NA data.")
+  invalidDataPng(outPng)
 }

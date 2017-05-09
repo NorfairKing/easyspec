@@ -1,16 +1,18 @@
 args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) != 6) {
-  stop("Usage: single_evaluator_bar.r input.csv output.png basedir sourcefile funcname evaluator")
+if (length(args) != 7) {
+  stop("Usage: single_evaluator_bar.r common.r input.csv output.png basedir sourcefile funcname evaluator")
 }
 
-inFile <- args[1]
-outPng <- args[2]
-basedir <- args[3]
-sourcefile <- args[4]
-funcname <- args[5]
-evaluator <- args[6]
+common <- args[1]
+inFile <- args[2]
+outPng <- args[3]
+basedir <- args[4]
+sourcefile <- args[5]
+funcname <- args[6]
+evaluator <- args[7]
 
+source(common)
 
 res = read.csv(inFile, header=TRUE)
 res <- res[res$focus == funcname,]
@@ -22,9 +24,9 @@ res$output <- suppressWarnings(as.numeric(as.character(res$output)))
 # Replace NaN with '0'
 res$output <- replace(res$output, is.na(res$output), 0)
 
-png(outPng, height=900, width=1200, bg="white")
 
 if(length(res$output != 0)) {
+  png(outPng, height=900, width=1200, bg="white")
   par(mar=c(35,4.1,4.1,2.1))
 
   # Extra large bottom margin
@@ -35,5 +37,5 @@ if(length(res$output != 0)) {
     , las = 2
     )
 } else {
-  plot(1, 1, main="No image could be generated: No non-NA data.")
+  invalidDataPng(outPng)
 }

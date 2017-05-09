@@ -15,6 +15,9 @@ import EasySpec.Evaluate.Analyse.Common
 
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
+commonRFile :: MonadIO m => m (Path Abs File)
+commonRFile = scriptFile "common.r"
+
 plotsDir :: MonadIO m => m (Path Abs Dir)
 plotsDir = (</> $(mkRelDir "plots")) <$> tmpDir
 

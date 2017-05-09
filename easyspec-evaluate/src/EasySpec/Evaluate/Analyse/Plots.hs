@@ -42,9 +42,11 @@ plotsRulesForLinesPlotWithEvaluator ev = do
     plotF $%> do
         dataF <- allDataFile
         scriptF <- linesPlotAnalysisScript
-        needP [dataF, scriptF]
+        commonR <- commonRFile
+        needP [dataF, scriptF, commonR]
         cmd
             "Rscript"
+            (toFilePath commonR)
             (toFilePath scriptF)
             (toFilePath dataF)
             (toFilePath plotF)
@@ -72,9 +74,11 @@ perExampleNameAndEvaluatorBarPlotFor is name evaluator = do
         dependOnEvaluator evaluator
         singleEvaluatorBarScript <- singleEvaluatorBarAnalysisScript
         dataFile <- dataFileForExampleAndName is name
-        needP [singleEvaluatorBarScript, dataFile]
+        commonR <- commonRFile
+        needP [singleEvaluatorBarScript, dataFile, commonR]
         cmd
             "Rscript"
+            (toFilePath commonR)
             (toFilePath singleEvaluatorBarScript)
             (toFilePath dataFile)
             (toFilePath plotFile)
@@ -91,9 +95,11 @@ perExampleAndEvaluatorAverageBoxPlotFor is evaluator = do
     plotF $%> do
         scriptF <- singleEvaluatorAverageBoxAnalysisScript
         dataF <- dataFileForExample is
-        needP [scriptF, dataF]
+        commonR <- commonRFile
+        needP [scriptF, dataF, commonR]
         cmd
             "Rscript"
+            (toFilePath commonR)
             (toFilePath scriptF)
             (toFilePath dataF)
             (toFilePath plotF)

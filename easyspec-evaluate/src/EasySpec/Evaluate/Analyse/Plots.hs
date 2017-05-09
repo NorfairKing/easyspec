@@ -42,15 +42,13 @@ plotsRulesForLinesPlotWithEvaluator ev = do
     plotF $%> do
         dataF <- allDataFile
         scriptF <- linesPlotAnalysisScript
-        commonR <- commonRFile
-        needP [dataF, scriptF, commonR]
-        cmd
-            "Rscript"
-            (toFilePath commonR)
-            (toFilePath scriptF)
-            (toFilePath dataF)
-            (toFilePath plotF)
-            (evaluatorName ev)
+        needP [dataF, scriptF]
+        rscript
+            [ toFilePath scriptF
+            , toFilePath dataF
+            , toFilePath plotF
+            , evaluatorName ev
+            ]
     pure plotF
 
 plotsRulesForExample :: ES.InputSpec -> Rules [Path Abs File]
@@ -74,18 +72,16 @@ perExampleNameAndEvaluatorBarPlotFor is name evaluator = do
         dependOnEvaluator evaluator
         singleEvaluatorBarScript <- singleEvaluatorBarAnalysisScript
         dataFile <- dataFileForExampleAndName is name
-        commonR <- commonRFile
-        needP [singleEvaluatorBarScript, dataFile, commonR]
-        cmd
-            "Rscript"
-            (toFilePath commonR)
-            (toFilePath singleEvaluatorBarScript)
-            (toFilePath dataFile)
-            (toFilePath plotFile)
-            (toFilePath $ ES.inputSpecBaseDir is)
-            (toFilePath $ ES.inputSpecFile is)
-            (prettyPrint name)
-            (evaluatorName evaluator)
+        needP [singleEvaluatorBarScript, dataFile]
+        rscript
+            [ toFilePath singleEvaluatorBarScript
+            , toFilePath dataFile
+            , toFilePath plotFile
+            , toFilePath $ ES.inputSpecBaseDir is
+            , toFilePath $ ES.inputSpecFile is
+            , prettyPrint name
+            , evaluatorName evaluator
+            ]
     pure plotFile
 
 perExampleAndEvaluatorAverageBoxPlotFor ::
@@ -95,15 +91,19 @@ perExampleAndEvaluatorAverageBoxPlotFor is evaluator = do
     plotF $%> do
         scriptF <- singleEvaluatorAverageBoxAnalysisScript
         dataF <- dataFileForExample is
-        commonR <- commonRFile
-        needP [scriptF, dataF, commonR]
-        cmd
-            "Rscript"
-            (toFilePath commonR)
-            (toFilePath scriptF)
-            (toFilePath dataF)
-            (toFilePath plotF)
-            (toFilePath $ ES.inputSpecBaseDir is)
-            (toFilePath $ ES.inputSpecFile is)
-            (evaluatorName evaluator)
+        needP [scriptF, dataF]
+        rscript
+            [ toFilePath scriptF
+            , toFilePath dataF
+            , toFilePath plotF
+            , toFilePath $ ES.inputSpecBaseDir is
+            , toFilePath $ ES.inputSpecFile is
+            , evaluatorName evaluator
+            ]
     pure plotF
+
+rscript :: [String] -> Action ()
+rscript args = do
+    commonR <- commonRFile
+    needP [commonR]
+    cmd "Rscript" (toFilePath commonR) args

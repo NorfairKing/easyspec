@@ -7,7 +7,7 @@ module EasySpec.Evaluate.Evaluate.Evaluator.Combinators
 
 import Import
 
-import Data.Tuple(swap)
+import Data.Tuple (swap)
 
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 

@@ -88,6 +88,14 @@ rulesForFileNameAndStrat ghciResource is name infStrat = do
     csvF $%> do
         mapM_ dependOnEvaluator evaluators
         needP [jsonF]
+        putLoud $
+            unwords
+                [ "Building data file"
+                , toFilePath csvF
+                , "by evaluating the results in"
+                , toFilePath jsonF
+                , "with all evaluators."
+                ]
         ip <- readJSON jsonF
         writeCSV csvF $ map (evaluationInputPointCsvLine ip) evaluators
     pure csvF

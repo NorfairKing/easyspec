@@ -72,7 +72,7 @@ dataFilesForExample is = do
     fmap concat $ forM names $ dataFilesForExampleAndName is
 
 allDataFile :: MonadIO m => m (Path Abs File)
-allDataFile = (</> $(mkRelFile "all.csv")) <$> dataDir
+allDataFile = (</> $(mkRelFile "evaluated/all.csv")) <$> dataDir
 
 dataFileWithComponents ::
        MonadIO m => String -> Path Rel File -> [String] -> m (Path Abs File)

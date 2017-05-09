@@ -8,8 +8,6 @@ module EasySpec.Evaluate.Analyse.Plots
 
 import Import
 
-import Language.Haskell.Exts.Pretty (prettyPrint)
-
 import qualified EasySpec.Discover.Types as ES
 
 import Development.Shake
@@ -17,12 +15,11 @@ import Development.Shake.Path
 
 import EasySpec.Evaluate.Evaluate
 import EasySpec.Evaluate.Evaluate.Evaluator
-import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
 import EasySpec.Evaluate.Analyse.Common
-import EasySpec.Evaluate.Analyse.Data.Files
-import EasySpec.Evaluate.Analyse.Plots.Files
-import EasySpec.Evaluate.Analyse.R
+import EasySpec.Evaluate.Analyse.Plots.RelativeLines
+import EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar
+import EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
 
 plotsRule :: String
 plotsRule = "plots"
@@ -37,68 +34,14 @@ plotsRules = do
 plotsRulesForAllData :: Rules [Path Abs File]
 plotsRulesForAllData = mapM plotsRulesForLinesPlotWithEvaluator evaluators
 
-plotsRulesForLinesPlotWithEvaluator :: Evaluator -> Rules (Path Abs File)
-plotsRulesForLinesPlotWithEvaluator ev = do
-    plotF <- linesPlotForEvaluator ev
-    plotF $%> do
-        dataF <- allDataFile
-        scriptF <- linesPlotAnalysisScript
-        needP [dataF, scriptF]
-        rscript
-            [ toFilePath scriptF
-            , toFilePath dataF
-            , toFilePath plotF
-            , evaluatorName ev
-            ]
-    pure plotF
-
 plotsRulesForExample :: ES.InputSpec -> Rules [Path Abs File]
 plotsRulesForExample is = do
     names <- namesInSource is
     bars <- fmap concat $ forM names $ plotsRulesForExampleAndName is
-    boxes <-
-        forM evaluators $ \ev -> perExampleAndEvaluatorAverageBoxPlotFor is ev
+    boxes <- forM evaluators $ perExampleAndEvaluatorAverageBoxPlotFor is
     pure $ bars ++ boxes
 
 plotsRulesForExampleAndName ::
        ES.InputSpec -> ES.EasyName -> Rules [Path Abs File]
 plotsRulesForExampleAndName is name =
     forM evaluators $ perExampleNameAndEvaluatorBarPlotFor is name
-
-perExampleNameAndEvaluatorBarPlotFor ::
-       ES.InputSpec -> ES.EasyName -> Evaluator -> Rules (Path Abs File)
-perExampleNameAndEvaluatorBarPlotFor is name evaluator = do
-    plotFile <- singleEvaluatorBarPlotFileForExampleAndName is name evaluator
-    plotFile $%> do
-        dependOnEvaluator evaluator
-        singleEvaluatorBarScript <- singleEvaluatorBarAnalysisScript
-        dataFile <- dataFileForExampleAndName is name
-        needP [singleEvaluatorBarScript, dataFile]
-        rscript
-            [ toFilePath singleEvaluatorBarScript
-            , toFilePath dataFile
-            , toFilePath plotFile
-            , toFilePath $ ES.inputSpecBaseDir is
-            , toFilePath $ ES.inputSpecFile is
-            , prettyPrint name
-            , evaluatorName evaluator
-            ]
-    pure plotFile
-
-perExampleAndEvaluatorAverageBoxPlotFor ::
-       ES.InputSpec -> Evaluator -> Rules (Path Abs File)
-perExampleAndEvaluatorAverageBoxPlotFor is evaluator = do
-    plotF <- singleEvaluatorAverageBoxPlotFileForExample is evaluator
-    plotF $%> do
-        scriptF <- singleEvaluatorAverageBoxAnalysisScript
-        dataF <- dataFileForExample is
-        needP [scriptF, dataF]
-        rscript
-            [ toFilePath scriptF
-            , toFilePath dataF
-            , toFilePath plotF
-            , toFilePath $ ES.inputSpecBaseDir is
-            , toFilePath $ ES.inputSpecFile is
-            , evaluatorName evaluator
-            ]
-    pure plotF

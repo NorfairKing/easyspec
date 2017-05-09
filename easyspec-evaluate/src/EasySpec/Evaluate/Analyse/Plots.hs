@@ -22,6 +22,7 @@ import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
+import EasySpec.Evaluate.Analyse.R
 
 plotsRule :: String
 plotsRule = "plots"
@@ -101,9 +102,3 @@ perExampleAndEvaluatorAverageBoxPlotFor is evaluator = do
             , evaluatorName evaluator
             ]
     pure plotF
-
-rscript :: [String] -> Action ()
-rscript args = do
-    commonR <- commonRFile
-    needP [commonR]
-    cmd "Rscript" (toFilePath commonR) args

@@ -24,6 +24,7 @@ library
         EasySpec.Evaluate.Analyse.Data.Types
         EasySpec.Evaluate.Analyse.Plots
         EasySpec.Evaluate.Analyse.Plots.Files
+        EasySpec.Evaluate.Analyse.R
         EasySpec.Evaluate.Analyse.Utils
         EasySpec.Evaluate.Build
         EasySpec.Evaluate.Evaluate

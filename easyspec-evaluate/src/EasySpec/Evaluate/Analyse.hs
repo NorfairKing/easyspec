@@ -5,6 +5,7 @@ import Import
 import EasySpec.Evaluate.Analyse.Archive
 import EasySpec.Evaluate.Analyse.Data
 import EasySpec.Evaluate.Analyse.Plots
+import EasySpec.Evaluate.Analyse.R
 
 import Development.Shake
 
@@ -13,6 +14,7 @@ analyseRule = "analyse"
 
 analyseRules :: Rules ()
 analyseRules = do
+    rRules
     dataRules
     plotsRules
     archiveRules

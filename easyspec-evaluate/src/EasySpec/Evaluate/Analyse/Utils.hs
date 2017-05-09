@@ -75,3 +75,6 @@ writeJSON :: (ToJSON a, MonadIO m) => Path Abs File -> a -> m ()
 writeJSON file dat = do
     ensureDir $ parent file
     liftIO $ LB.writeFile (toFilePath file) $ JSON.encodePretty dat
+
+byCopying :: Path Abs File -> Path Abs File -> Rules ()
+byCopying t f = t $%> copyFileChanged (toFilePath f) (toFilePath t)

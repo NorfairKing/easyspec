@@ -17,9 +17,11 @@ import EasySpec.Evaluate.Evaluate
 import EasySpec.Evaluate.Evaluate.Evaluator
 
 import EasySpec.Evaluate.Analyse.Common
+import EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
 import EasySpec.Evaluate.Analyse.Plots.RelativeLines
 import EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar
 import EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
+import EasySpec.Evaluate.Analyse.Utils
 
 plotsRule :: String
 plotsRule = "plots"
@@ -32,7 +34,12 @@ plotsRules = do
     plotsRule ~> needP (allDataPlotsFs ++ plotsFs)
 
 plotsRulesForAllData :: Rules [Path Abs File]
-plotsRulesForAllData = mapM plotsRulesForLinesPlotWithEvaluator evaluators
+plotsRulesForAllData = do
+    lfs <- mapM plotsRulesForLinesPlotWithEvaluator evaluators
+    pfs <-
+        mapM (uncurry plotsRulesForPointsPlotWithEvaluators) $
+        unorderedCombinationsWithoutSelfCombinations evaluators
+    pure $ lfs ++ pfs
 
 plotsRulesForExample :: ES.InputSpec -> Rules [Path Abs File]
 plotsRulesForExample is = do

@@ -7,8 +7,7 @@ module EasySpec.Evaluate.Evaluate.Evaluator.Combinators
 
 import Import
 
-import Data.Tuple (swap)
-
+import EasySpec.Evaluate.Analyse.Utils
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
 makeCombinationsOf :: [Evaluator] -> [Evaluator]
@@ -27,20 +26,6 @@ makeCombinationsOf baseEvaluators =
               (uncurry divideEvaluators)
               (orderedCombinationsWithoutSelfCombinations baseEvaluators)
         ]
-
-orderedCombinationsWithoutSelfCombinations :: [a] -> [(a, a)]
-orderedCombinationsWithoutSelfCombinations xs =
-    unorderedCombinationsWithoutSelfCombinations xs ++
-    map swap (unorderedCombinationsWithoutSelfCombinations xs)
-
-unorderedCombinationsWithoutSelfCombinations :: [a] -> [(a, a)]
-unorderedCombinationsWithoutSelfCombinations ls =
-    concatMap
-        (\t ->
-             case t of
-                 [] -> []
-                 (l1:l2s) -> map ((,) l1) l2s)
-        (tails ls)
 
 addEvaluators :: Evaluator -> Evaluator -> Maybe Evaluator
 addEvaluators e1 e2 =

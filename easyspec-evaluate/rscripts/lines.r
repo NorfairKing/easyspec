@@ -1,7 +1,7 @@
 args <- commandArgs(trailingOnly=TRUE)
 
 if (length(args) != 4) {
-  stop("Usage: common.r lines.r input.csv output.png evaluator")
+  stop("Usage: lines.r common.r input.csv output.png evaluator")
 }
 
 common <- args[1]

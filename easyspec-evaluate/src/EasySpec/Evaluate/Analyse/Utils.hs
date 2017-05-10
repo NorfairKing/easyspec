@@ -5,6 +5,8 @@ module EasySpec.Evaluate.Analyse.Utils where
 
 import Import
 
+import Data.Tuple (swap)
+
 import Data.Aeson as JSON
 import Data.Aeson.Encode.Pretty as JSON
 import Data.Csv as CSV
@@ -78,3 +80,17 @@ writeJSON file dat = do
 
 byCopying :: Path Abs File -> Path Abs File -> Rules ()
 byCopying t f = t $%> copyFileChanged (toFilePath f) (toFilePath t)
+
+orderedCombinationsWithoutSelfCombinations :: [a] -> [(a, a)]
+orderedCombinationsWithoutSelfCombinations xs =
+    unorderedCombinationsWithoutSelfCombinations xs ++
+    map swap (unorderedCombinationsWithoutSelfCombinations xs)
+
+unorderedCombinationsWithoutSelfCombinations :: [a] -> [(a, a)]
+unorderedCombinationsWithoutSelfCombinations ls =
+    concatMap
+        (\t ->
+             case t of
+                 [] -> []
+                 (l1:l2s) -> map ((,) l1) l2s)
+        (tails ls)

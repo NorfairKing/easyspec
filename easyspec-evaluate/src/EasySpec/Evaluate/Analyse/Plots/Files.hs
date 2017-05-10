@@ -35,6 +35,16 @@ linesPlotForEvaluator ev =
 linesPlotAnalysisScript :: MonadIO m => m (Path Abs File)
 linesPlotAnalysisScript = scriptFile "lines.r"
 
+pointsPlotForEvaluators ::
+       MonadIO m => Evaluator -> Evaluator -> m (Path Abs File)
+pointsPlotForEvaluators e1 e2 =
+    pngPlotFileWithComponents
+        $(mkRelFile "points/points-plot")
+        [evaluatorName e1, evaluatorName e2]
+
+pointsPlotAnalysisScript :: MonadIO m => m (Path Abs File)
+pointsPlotAnalysisScript = scriptFile "points.r"
+
 singleEvaluatorBarPlotFileForExampleAndName ::
        MonadIO m
     => ES.InputSpec

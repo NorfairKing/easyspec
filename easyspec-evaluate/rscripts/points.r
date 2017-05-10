@@ -21,6 +21,8 @@ res2 <- res[res$evaluator == e2,]
 
 
 dat <- merge(res1, res2, by = "origin")
+dat <- dat[!is.na(dat$output.x),]
+dat <- dat[!is.na(dat$output.y),]
 
 png( outPng
   , height=600
@@ -35,6 +37,7 @@ plot(dat$output.x
   , xlab = e1
   , ylab = e2
   , type = "n" # Don't plot yet.
+  , main = paste("Correlation:", format(round(cor(dat$output.x, dat$output.y), 2), nsmall = 2))
   )
 
 strats = unique(res$strategy)

@@ -3,6 +3,10 @@
 
 module EasySpec.Evaluate.Evaluate.Evaluator.Combinators
     ( makeCombinationsOf
+    , addEvaluators
+    , subtractEvaluators
+    , multiplyEvaluators
+    , divideEvaluators
     ) where
 
 import Import

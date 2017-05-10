@@ -2,6 +2,7 @@
 
 module EasySpec.Evaluate.Evaluate.Evaluator
     ( evaluators
+    , evenMoreEvaluators
     , dependOnEvaluator
     ) where
 
@@ -23,7 +24,12 @@ dependOnEvaluator ev = do
     needP $ map (here </>) $ evaluatorRelevantFiles ev
 
 evaluators :: [Evaluator]
-evaluators = baseEvaluators ++ makeCombinationsOf baseEvaluators
+evaluators =
+    baseEvaluators ++
+    catMaybes
+        [ equationsEvaluator `subtractEvaluators` relevantEquationsEvaluator
+        , relevantEquationsEvaluator `divideEvaluators` runtimeEvaluator
+        ]
 
 baseEvaluators :: [Evaluator]
 baseEvaluators =
@@ -32,3 +38,6 @@ baseEvaluators =
     , relevantEquationsEvaluator
     , relevantFunctionsEvaluator
     ]
+
+evenMoreEvaluators :: [Evaluator]
+evenMoreEvaluators = evaluators ++ makeCombinationsOf evaluators

@@ -16,7 +16,8 @@ data Evaluator = Evaluator
     }
 
 data EvaluationInput = EvaluationInput
-    { eiFocusFuncName :: ES.EasyName
+    { eiScope :: [ES.EasyId]
+    , eiFocusFuncName :: ES.EasyName
     , eiDiscoveredEqs :: [ES.EasyEq]
     , eiRuntime :: Double
     } deriving (Show, Eq)

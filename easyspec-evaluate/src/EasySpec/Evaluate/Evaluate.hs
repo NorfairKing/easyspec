@@ -125,7 +125,8 @@ pad c i s
 pointToInput :: EvaluationInputPoint -> EvaluationInput
 pointToInput EvaluationInputPoint {..} =
     EvaluationInput
-    { eiDiscoveredEqs = eipDiscoveredEqs
-    , eiRuntime = eipRuntime
+    { eiScope = eipScope
     , eiFocusFuncName = eipFunc
+    , eiDiscoveredEqs = eipDiscoveredEqs
+    , eiRuntime = eipRuntime
     }

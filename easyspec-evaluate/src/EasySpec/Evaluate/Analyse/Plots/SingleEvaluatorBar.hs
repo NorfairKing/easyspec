@@ -27,12 +27,12 @@ perExampleNameAndEvaluatorBarPlotFor is name evaluator = do
     plotFile <- singleEvaluatorBarPlotFileForExampleAndName is name evaluator
     plotFile $%> do
         dependOnEvaluator evaluator
-        singleEvaluatorBarScript <- singleEvaluatorBarAnalysisScript
         dataFile <- dataFileForExampleAndName is name
-        needP [singleEvaluatorBarScript, dataFile]
+        singleEvaluatorBarScript <- singleEvaluatorBarAnalysisScript
+        needP [dataFile]
         rscript
-            [ toFilePath singleEvaluatorBarScript
-            , toFilePath dataFile
+            singleEvaluatorBarScript
+            [ toFilePath dataFile
             , toFilePath plotFile
             , toFilePath $ ES.inputSpecBaseDir is
             , toFilePath $ ES.inputSpecFile is

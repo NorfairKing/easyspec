@@ -25,12 +25,12 @@ perExampleAndEvaluatorAverageBoxPlotFor is evaluator = do
     plotF <- singleEvaluatorAverageBoxPlotFileForExample is evaluator
     plotF $%> do
         dependOnEvaluator evaluator
-        scriptF <- singleEvaluatorAverageBoxAnalysisScript
         dataF <- dataFileForExample is
-        needP [scriptF, dataF]
+        needP [dataF]
+        scriptF <- singleEvaluatorAverageBoxAnalysisScript
         rscript
-            [ toFilePath scriptF
-            , toFilePath dataF
+            scriptF
+            [ toFilePath dataF
             , toFilePath plotF
             , toFilePath $ ES.inputSpecBaseDir is
             , toFilePath $ ES.inputSpecFile is

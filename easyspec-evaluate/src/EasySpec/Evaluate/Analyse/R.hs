@@ -13,18 +13,18 @@ import Development.Shake.Path
 
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Plots.Files
-import EasySpec.Evaluate.Analyse.Utils
 
-rscript :: [String] -> Action ()
-rscript args = do
+rscript :: Path Abs File -> [String] -> Action ()
+rscript scriptF args = do
     commonR <- commonRFile
     rBin <- rBinary
-    needP [commonR, rBin]
+    needP [commonR, rBin, scriptF]
     needRLibs ["ggplot2"]
     libDir <- rlibdir
     cmd
         (toFilePath rBin)
         (AddEnv "R_LIBS" $ toFilePath libDir)
+        (toFilePath scriptF)
         (toFilePath commonR)
         args
 
@@ -40,7 +40,7 @@ rArchive :: MonadIO m => m (Path Abs File)
 rArchive = (</> $(mkRelFile "R.tar.gz")) <$> rTmpDir
 
 rVersion :: String
-rVersion = "R-3.2.0"
+rVersion = "R-3.4.0"
 
 rLink :: FilePath
 rLink = "https://cran.r-project.org/src/base/R-3/" ++ rVersion ++ ".tar.gz"
@@ -49,7 +49,7 @@ rDir :: MonadIO m => m (Path Abs Dir)
 rDir = (</> $(mkRelDir "R")) <$> rTmpDir
 
 rBinary :: MonadIO m => m (Path Abs File)
-rBinary = (</> $(mkRelFile "Rscript")) <$> rTmpDir
+rBinary = rBinInMakeDir
 
 rMakeDir :: MonadIO m => m (Path Abs Dir)
 rMakeDir = do
@@ -103,8 +103,6 @@ buildRRules = do
     [binInMakeDir, installBinInMakeDir] $&%> do
         needP [makeFile]
         cmd (Cwd $ toFilePath makeDir) "make" "--jobs"
-    bin <- rBinary
-    bin `byCopying` binInMakeDir
 
 rLibTarget :: MonadIO m => String -> m (Path Abs File)
 rLibTarget name = do

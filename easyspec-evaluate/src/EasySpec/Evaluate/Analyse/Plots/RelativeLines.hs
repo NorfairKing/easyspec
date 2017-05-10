@@ -23,12 +23,9 @@ plotsRulesForLinesPlotWithEvaluator evaluator = do
     plotF $%> do
         dependOnEvaluator evaluator
         dataF <- allDataFile
+        needP [dataF]
         scriptF <- linesPlotAnalysisScript
-        needP [dataF, scriptF]
         rscript
-            [ toFilePath scriptF
-            , toFilePath dataF
-            , toFilePath plotF
-            , evaluatorName evaluator
-            ]
+            scriptF
+            [toFilePath dataF, toFilePath plotF, evaluatorName evaluator]
     pure plotF

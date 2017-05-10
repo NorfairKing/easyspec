@@ -3,6 +3,7 @@ module EasySpec.Discover.SignatureInference
     , inferEmptyBackground
     , inferFullBackground
     , inferSyntacticSimilarityName
+    , evenMoreInferenceStrategies
     ) where
 
 import Import
@@ -17,11 +18,14 @@ import EasySpec.Discover.SignatureInference.Utils
 import EasySpec.Discover.Types
 
 inferenceStrategies :: [SignatureInferenceStrategy]
-inferenceStrategies = basicInferenceStrategies ++ unions
-  where
-    unions =
-        map (uncurry unionInferAlg) $
-        unorderedCombinations basicInferenceStrategies
+inferenceStrategies =
+    basicInferenceStrategies ++
+    [ inferSyntacticSimilarityName `unionInferAlg`
+      inferSyntacticSimilaritySymbols
+    , inferSyntacticSimilarityName `unionInferAlg` inferSyntacticSimilarityType
+    , inferSyntacticSimilaritySymbols `unionInferAlg`
+      inferSyntacticSimilarityType
+    ]
 
 basicInferenceStrategies :: [SignatureInferenceStrategy]
 basicInferenceStrategies =
@@ -32,3 +36,10 @@ basicInferenceStrategies =
     , inferSyntacticSimilaritySymbols
     , inferSyntacticSimilarityType
     ]
+
+evenMoreInferenceStrategies :: [SignatureInferenceStrategy]
+evenMoreInferenceStrategies = basicInferenceStrategies ++ unions
+  where
+    unions =
+        map (uncurry unionInferAlg) $
+        unorderedCombinations basicInferenceStrategies

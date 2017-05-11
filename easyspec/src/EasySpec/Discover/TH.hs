@@ -16,6 +16,8 @@ import EasySpec.Discover.Types
 
 instance Lift (HSE.Exp ())
 
+instance Lift (HSE.Type ())
+
 easyExp :: String -> Q TH.Exp
 easyExp s =
     case HSE.parseExp s of
@@ -26,6 +28,23 @@ easyExp s =
             fail $
             unwords
                 [ "parse of expression"
+                , show s
+                , "failed at:"
+                , show srcLoc
+                , "with error:"
+                , err
+                ]
+
+easyType :: String -> Q TH.Exp
+easyType s =
+    case HSE.parseType s of
+        ParseOk a ->
+            let b = () <$ a :: EasyType
+            in [|b|]
+        ParseFailed srcLoc err ->
+            fail $
+            unwords
+                [ "parse of type"
                 , show s
                 , "failed at:"
                 , show srcLoc

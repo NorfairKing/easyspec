@@ -3,16 +3,14 @@
 module Reachability where
 
 import Data.Char (chr)
-import Prelude (Char, Int, length, Double, String, id, (+))
+import Prelude
+       (length, Double, String, id, (+), Bool(True), Ordering())
 
-f :: Int -> Char
-f = chr
+f :: Ordering -> ()
+f _ = ()
 
-g :: Char -> ()
-g _ = ()
-
-h :: String -> Int
-h = length
+g :: () -> Bool
+g () = True
 
 i :: Double -> Double
 i = (+ 1)
@@ -31,3 +29,15 @@ m = (+ 5)
 
 n :: Double -> Double
 n = (+ 6)
+
+o :: Double -> Double
+o = (+ 7)
+
+p :: Double -> Double
+p = (+ 8)
+
+q :: Double -> Double
+q = (+ 9)
+
+r :: Double -> Double
+r = (+ 10)

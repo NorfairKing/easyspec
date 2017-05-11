@@ -132,37 +132,39 @@ runQuickspecOn iSig = do
                 die $ unwords ["failed to coerce the string result of", expStr]
             Just res ->
                 forM res $ \s ->
-                    case splitOn " = " s of
-                        [lhs, rhs] ->
-                            case (,) <$> parseExp lhs <*> parseExp rhs of
-                                ParseFailed srcloc err ->
-                                    liftIO $
-                                    die $
-                                    unwords
-                                        [ "Failed to parse one of two expressions:"
-                                        , show lhs
-                                        , "and"
-                                        , show rhs
-                                        , "at"
-                                        , show srcloc
-                                        , "with error:"
-                                        , err
-                                        ]
-                                ParseOk (lh, rh) ->
-                                    pure $ EasyEq (() <$ lh) (() <$ rh)
-                        ss ->
-                            liftIO $
-                            die $
-                            unwords
-                                [ "failed to split an equation"
-                                , s
-                                , "into two pieces"
-                                , s
-                                , "on \" = \""
-                                , "got"
-                                , show ss
-                                , "instead."
-                                ]
+                    let splitStr = " = "
+                    in case splitOn splitStr s of
+                           [lhs, rhs] ->
+                               case (,) <$> parseExp lhs <*> parseExp rhs of
+                                   ParseFailed srcloc err ->
+                                       liftIO $
+                                       die $
+                                       unwords
+                                           [ "Failed to parse one of two expressions:"
+                                           , show lhs
+                                           , "and"
+                                           , show rhs
+                                           , "at"
+                                           , show srcloc
+                                           , "with error:"
+                                           , err
+                                           ]
+                                   ParseOk (lh, rh) ->
+                                       pure $ EasyEq (() <$ lh) (() <$ rh)
+                           ss ->
+                               liftIO $
+                               die $
+                               unwords
+                                   [ "failed to split an equation"
+                                   , s
+                                   , "into two pieces"
+                                   , s
+                                   , "on"
+                                   , show splitStr
+                                   , "got"
+                                   , show ss
+                                   , "instead."
+                                   ]
 
 bindTo :: EasyName -> EasyExp -> EasyStmt
 bindTo n = Generator mempty (PVar mempty n)

@@ -1,9 +1,7 @@
 module EasySpec.Discover.SignatureInference
     ( inferenceStrategies
-    , inferEmptyBackground
-    , inferFullBackground
-    , inferSyntacticSimilarityName
     , evenMoreInferenceStrategies
+    , inferFullBackground
     ) where
 
 import Import
@@ -14,6 +12,7 @@ import EasySpec.Discover.SignatureInference.SyntacticSimilarityEditDistanceName
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityName
 import EasySpec.Discover.SignatureInference.SyntacticSimilaritySymbols
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityType
+import EasySpec.Discover.SignatureInference.TypeReachability
 import EasySpec.Discover.SignatureInference.Utils
 import EasySpec.Discover.Types
 
@@ -35,6 +34,7 @@ basicInferenceStrategies =
     , inferSyntacticSimilarityEditDistanceName
     , inferSyntacticSimilaritySymbols
     , inferSyntacticSimilarityType
+    , inferTypeReachability
     ]
 
 evenMoreInferenceStrategies :: [SignatureInferenceStrategy]

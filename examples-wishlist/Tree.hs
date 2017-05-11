@@ -4,7 +4,7 @@
 module Tree where
 
 import GHC.Generics (Generic)
-import Prelude ((++), Eq, Show, (<$>), (<*>), pure)
+import Prelude ((++), Eq, Show, (<$>), (<*>), pure, Bool(..))
 
 import Test.QuickCheck (Arbitrary(arbitrary), oneof, Gen)
 
@@ -20,3 +20,7 @@ instance Arbitrary Tree where
 subtrees :: Tree -> [Tree]
 subtrees Leaf = []
 subtrees (Branch t1 t2) = subtrees t1 ++ subtrees t2
+
+isLeaf :: Tree -> Bool
+isLeaf Leaf = True
+isLeaf _ = False

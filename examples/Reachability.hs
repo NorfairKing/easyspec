@@ -4,7 +4,7 @@ module Reachability where
 
 import Data.Char (chr)
 import Prelude
-       (length, Double, String, id, (+), Bool(True), Ordering())
+       (length, Int, String, id, (+), Bool(True), Ordering())
 
 f :: Ordering -> ()
 f _ = ()
@@ -12,32 +12,32 @@ f _ = ()
 g :: () -> Bool
 g () = True
 
-i :: Double -> Double
+i :: Int -> Int
 i = (+ 1)
 
-j :: Double -> Double
+j :: Int -> Int
 j = (+ 2)
 
-k :: Double -> Double
+k :: Int -> Int
 k = (+ 3)
 
-l :: Double -> Double
+l :: Int -> Int
 l = (+ 4)
 
-m :: Double -> Double
+m :: Int -> Int
 m = (+ 5)
 
-n :: Double -> Double
+n :: Int -> Int
 n = (+ 6)
 
-o :: Double -> Double
+o :: Int -> Int
 o = (+ 7)
 
-p :: Double -> Double
+p :: Int -> Int
 p = (+ 8)
 
-q :: Double -> Double
+q :: Int -> Int
 q = (+ 9)
 
-r :: Double -> Double
+r :: Int -> Int
 r = (+ 10)

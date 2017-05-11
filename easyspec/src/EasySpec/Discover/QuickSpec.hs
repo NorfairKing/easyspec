@@ -14,6 +14,7 @@ import DynFlags hiding (Settings)
 import GHC hiding (Qual, Name)
 import GHC.LanguageExtensions
 import GHC.Paths (libdir)
+import Name
 
 import Language.Haskell.Exts.Parser
 import Language.Haskell.Exts.Pretty
@@ -90,6 +91,18 @@ runQuickspecOn iSig = do
         modify (+ 1)
         pure $ Ident mempty $ "s" ++ show num
     -- go :: GhcMonad m => Tree EasyExp -> StateT Int (WriterT [EasyEq] (ReaderT Settings m) EasyExp
+    exec s = do
+        debug1 s
+        res <- liftGHC $ execStmt s execOptions
+        case res of
+            ExecComplete eres _ -> do
+                debug1 "Done:"
+                case eres of
+                    Left e -> liftIO $ print e
+                    Right ns -> debug1 $ show $ map Name.getOccString ns
+            ExecBreak ns _ -> do
+                debug1 "Broke:"
+                debug1 $ show $ map Name.getOccString ns
     go (Node curSigExp others) = do
         bgExps <- mapM go others
         let sigExp = mconcatSigsExp $ curSigExp : bgExps
@@ -100,7 +113,7 @@ runQuickspecOn iSig = do
         let quickSpecExp = runQuickspecExp sigExp
         resName <- nextSigExpName
         let stmt = bindTo resName quickSpecExp
-        void $ liftGHC $ execStmt (prettyPrintOneLine stmt) execOptions
+        exec $ prettyPrintOneLine stmt
         let resExp = Var mempty (UnQual mempty resName)
         eqs <- getEqs resExp
         tell eqs

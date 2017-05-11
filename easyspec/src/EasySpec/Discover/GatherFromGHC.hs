@@ -4,13 +4,13 @@ module EasySpec.Discover.GatherFromGHC where
 
 import Import
 
+import ConLike
 import DataCon
 import GHC
 import GHC.Paths (libdir)
 import OccName
 import RdrName
 import TcRnTypes
-import TyCon
 
 import EasySpec.Discover.Types
 import EasySpec.Discover.Utils
@@ -58,9 +58,5 @@ getGHCIdsFromTcModule tmod = do
                         -- If it's a function, return it
                     Just (AnId i) -> [i]
                         -- If it's a data declaration, get its constructors as functions
-                    Just (ATyCon tc) ->
-                        if isVanillaAlgTyCon tc
-                            then flip map (tyConDataCons tc) $ \dc ->
-                                     dataConWorkId dc
-                            else []
+                    Just (AConLike (RealDataCon dc)) -> [dataConWorkId dc]
                     Just _ -> []

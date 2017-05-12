@@ -39,7 +39,14 @@ pointsPlotForEvaluators ::
        MonadIO m => Evaluator -> Evaluator -> m (Path Abs File)
 pointsPlotForEvaluators e1 e2 =
     pngPlotFileWithComponents
-        $(mkRelFile "points/points-plot")
+        $(mkRelFile "points/global/points-plot")
+        [evaluatorName e1, evaluatorName e2]
+
+pointsPlotForEvaluatorsPerExample ::
+       MonadIO m => ES.InputSpec -> Evaluator -> Evaluator -> m (Path Abs File)
+pointsPlotForEvaluatorsPerExample is e1 e2 =
+    pngPlotFileWithComponents
+        ($(mkRelDir "points/points-plot/per-example") </> ES.inputSpecFile is)
         [evaluatorName e1, evaluatorName e2]
 
 pointsPlotAnalysisScript :: MonadIO m => m (Path Abs File)

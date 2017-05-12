@@ -8,10 +8,10 @@ module EasySpec.Evaluate.Analyse.Plots
 
 import Import
 
-import qualified EasySpec.Discover.Types as ES
-
 import Development.Shake
 import Development.Shake.Path
+
+import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Evaluate
 import EasySpec.Evaluate.Evaluate.Evaluator
@@ -46,7 +46,10 @@ plotsRulesForExample is = do
     names <- namesInSource is
     bars <- fmap concat $ forM names $ plotsRulesForExampleAndName is
     boxes <- forM evaluators $ perExampleAndEvaluatorAverageBoxPlotFor is
-    pure $ bars ++ boxes
+    points <-
+        mapM (uncurry (plotsRulesForPointsPlotWithEvaluatorsPerExample is)) $
+        unorderedCombinationsWithoutSelfCombinations evaluators
+    pure $ bars ++ boxes ++ points
 
 plotsRulesForExampleAndName ::
        ES.InputSpec -> ES.EasyName -> Rules [Path Abs File]

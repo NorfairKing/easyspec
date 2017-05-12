@@ -1,6 +1,6 @@
 args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) != 5) {
+if (length(args) != 6) {
   stop("Usage: points.r common.r input.csv output.png evaluator1 evaluator2")
 }
 
@@ -9,6 +9,7 @@ inFile <- args[2]
 outPng <- args[3]
 e1 <- args[4]
 e2 <- args[5]
+name <- args[6]
 
 source(common)
 
@@ -37,7 +38,7 @@ plot(dat$output.x
   , xlab = e1
   , ylab = e2
   , type = "n" # Don't plot yet.
-  , main = paste("Correlation:", format(round(cor(dat$output.x, dat$output.y), 2), nsmall = 2))
+  , main = paste(name, "Correlation:", format(round(cor(dat$output.x, dat$output.y), 2), nsmall = 2))
   )
 
 strats = unique(res$strategy)

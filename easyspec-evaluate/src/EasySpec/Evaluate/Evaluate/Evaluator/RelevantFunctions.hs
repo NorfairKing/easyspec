@@ -20,6 +20,7 @@ relevantFunctionsEvaluator =
     , evaluatorPretty = \ei -> unwords [show . length . go $ ei, "functions"]
     , evaluatorUnit = "#"
     , evaluatorQuantity = "function"
+    , evaluatorIndication = GreaterIsBetter
     , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }
   where

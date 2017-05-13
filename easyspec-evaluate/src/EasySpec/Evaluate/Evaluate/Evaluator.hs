@@ -2,7 +2,6 @@
 
 module EasySpec.Evaluate.Evaluate.Evaluator
     ( evaluators
-    , evenMoreEvaluators
     , dependOnEvaluator
     ) where
 
@@ -27,7 +26,10 @@ evaluators :: [Evaluator]
 evaluators =
     baseEvaluators ++
     catMaybes
-        [ equationsEvaluator `subtractEvaluators` relevantEquationsEvaluator
+        [ subtractEvaluators
+              SmallerIsBetter
+              equationsEvaluator
+              relevantEquationsEvaluator
         , relevantEquationsEvaluator `divideEvaluators` runtimeEvaluator
         ]
 
@@ -38,6 +40,3 @@ baseEvaluators =
     , relevantEquationsEvaluator
     , relevantFunctionsEvaluator
     ]
-
-evenMoreEvaluators :: [Evaluator]
-evenMoreEvaluators = evaluators ++ makeCombinationsOf evaluators

@@ -1,13 +1,14 @@
 args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) != 4) {
-  stop("Usage: lines.r common.r input.csv output.png evaluator")
+if (length(args) != 5) {
+  stop("Usage: lines.r common.r input.csv output.png evaluator indication")
 }
 
 common <- args[1]
 inFile <- args[2]
 outPng <- args[3]
 evaluator <- args[4]
+indication <- args[5]
 
 source(common)
 
@@ -36,7 +37,7 @@ if (length(res$output) != 0) {
 
   plot( basevals$output / basevals$output
     , type = "n" # Lines
-    , main = paste("Evaluator:", evaluator) # Title
+    , main = paste("Evaluator:", evaluator, paste("(", indication, ")", sep="")) # Title
     , ylim = c(0, 2)
     , axes = FALSE
     , xlab = "source, focus"

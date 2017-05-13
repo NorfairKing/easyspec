@@ -37,6 +37,8 @@ plotsRulesForPointsPlotWithEvaluatorsPerExample is e1 e2 = do
             , evaluatorName e1
             , evaluatorName e2
             , toFilePath $ ES.inputSpecFile is
+            , prettyIndication $ evaluatorIndication e1
+            , prettyIndication $ evaluatorIndication e2
             ]
     pure plotF
 
@@ -57,5 +59,7 @@ plotsRulesForPointsPlotWithEvaluators e1 e2 = do
             , evaluatorName e1
             , evaluatorName e2
             , "Global"
+            , prettyIndication $ evaluatorIndication e1
+            , prettyIndication $ evaluatorIndication e2
             ]
     pure plotF

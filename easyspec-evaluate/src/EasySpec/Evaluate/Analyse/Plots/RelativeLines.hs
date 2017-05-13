@@ -27,5 +27,9 @@ plotsRulesForLinesPlotWithEvaluator evaluator = do
         scriptF <- linesPlotAnalysisScript
         rscript
             scriptF
-            [toFilePath dataF, toFilePath plotF, evaluatorName evaluator]
+            [ toFilePath dataF
+            , toFilePath plotF
+            , evaluatorName evaluator
+            , prettyIndication $ evaluatorIndication evaluator
+            ]
     pure plotF

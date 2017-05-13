@@ -20,5 +20,6 @@ runtimeEvaluator =
           \ei -> unwords [printf "%.3f" . eiRuntime $ ei, "seconds"]
     , evaluatorUnit = "time"
     , evaluatorQuantity = "second"
+    , evaluatorIndication = SmallerIsBetter
     , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }

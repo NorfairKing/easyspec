@@ -38,5 +38,6 @@ perExampleNameAndEvaluatorBarPlotFor is name evaluator = do
             , toFilePath $ ES.inputSpecFile is
             , prettyPrint name
             , evaluatorName evaluator
+            , prettyIndication $ evaluatorIndication evaluator
             ]
     pure plotFile

@@ -1,7 +1,7 @@
 args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) != 7) {
-  stop("Usage: single_evaluator_bar.r common.r input.csv output.png basedir sourcefile funcname evaluator")
+if (length(args) != 8) {
+  stop("Usage: single_evaluator_bar.r common.r input.csv output.png basedir sourcefile funcname evaluator indication")
 }
 
 common <- args[1]
@@ -11,6 +11,7 @@ basedir <- args[4]
 sourcefile <- args[5]
 funcname <- args[6]
 evaluator <- args[7]
+indication <- args[8]
 
 source(common)
 
@@ -33,7 +34,7 @@ if(length(res$output != 0)) {
   barplot(
       res$output
     , names.arg=res$strategy
-    , main = paste("Source:", sourcefile, ", ", "Focus:", funcname, ", ", "Evaluator:", evaluator)
+    , main = paste("Source:", sourcefile, ", ", "Focus:", funcname, ", ", "Evaluator:", evaluator, paste("(", indication, ")", sep=""))
     , las = 2
     )
 } else {

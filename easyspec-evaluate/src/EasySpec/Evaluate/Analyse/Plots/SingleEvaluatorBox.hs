@@ -35,5 +35,6 @@ perExampleAndEvaluatorAverageBoxPlotFor is evaluator = do
             , toFilePath $ ES.inputSpecBaseDir is
             , toFilePath $ ES.inputSpecFile is
             , evaluatorName evaluator
+            , prettyIndication $ evaluatorIndication evaluator
             ]
     pure plotF

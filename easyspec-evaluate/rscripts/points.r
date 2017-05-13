@@ -1,7 +1,7 @@
 args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) != 6) {
-  stop("Usage: points.r common.r input.csv output.png evaluator1 evaluator2")
+if (length(args) != 8) {
+  stop("Usage: points.r common.r input.csv output.png evaluator1 evaluator2 name indication1 indication2")
 }
 
 common <- args[1]
@@ -10,6 +10,8 @@ outPng <- args[3]
 e1 <- args[4]
 e2 <- args[5]
 name <- args[6]
+i1 <- args[7]
+i2 <- args[8]
 
 source(common)
 
@@ -35,8 +37,8 @@ par(xpd=TRUE, mar=c(4,4,4,35))
 
 plot(dat$output.x
   , dat$output.y
-  , xlab = e1
-  , ylab = e2
+  , xlab = paste(e1, paste("(", i1, ")", sep=""))
+  , ylab = paste(e2, paste("(", i2, ")", sep=""))
   , type = "n" # Don't plot yet.
   , main = paste(name, "Correlation:", format(round(cor(dat$output.x, dat$output.y), 2), nsmall = 2))
   )

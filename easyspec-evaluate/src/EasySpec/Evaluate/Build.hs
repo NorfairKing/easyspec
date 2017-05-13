@@ -18,9 +18,18 @@ runBuild :: String -> IO ()
 runBuild target = do
     here <- getCurrentDir
     fs <- snd <$> listDir here
-    case find ((== $(mkRelFile "easyspec-evaluate.cabal")) . filename) fs of
+    let groundFileName = $(mkRelFile "easyspec-evaluate.cabal")
+    case find ((== groundFileName) . filename) fs of
         Nothing ->
-            die "easyspec-evaluate build is being run in the wrong directory."
+            die $
+            unlines
+                [ "easyspec-evaluate build is being run in the wrong directory."
+                , concat
+                      [ "It must be run in the directory where you find "
+                      , toFilePath groundFileName
+                      , "."
+                      ]
+                ]
         Just _ ->
             withArgs ["--color", target] $
             shakeArgs

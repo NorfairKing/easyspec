@@ -4,7 +4,7 @@ Easyspec: Automatic functional property discovery in Haskell
 
 # Disclaimer
 
-This is a proof-of-concept of the automation and the signature inference strategies described in the master thesis 'Signature inference for functional property discovery and test generation'.
+This is a proof-of-concept of the automation and the signature inference strategies described in [the master thesis 'Signature inference for functional property discovery and test generation'](https://github.com/NorfairKing/thesis).
 Because this software was built within the constraints of a master thesis, corners were cut to ensure that the research could be done.
 This is by no means production-ready.
 There are a lot of wrinkles to be ironed out before this can be used in practice, but you can already start to play with it.
@@ -73,7 +73,7 @@ This function `mySort` is called the 'focus function'.
 Now you can run `stack exec easyspec -- discover MySort.hs mySort` to discover the properties of `mySort` with respect to the functions that are in scope.
 The output should look something like the following:
 
-``` shell
+```
 $ ls MySort.hs 
 MySort.hs
 $ stack exec easyspec -- discover MySort.hs mySort
@@ -87,7 +87,7 @@ If you don't specify a focus function, `easyspec` will find the properties of _a
 Take care, this may take a lot longer.
 The output should look something like the following:
 
-``` shell
+```
 $ stack exec easyspec -- discover MySort.hs      
 otherwise = True
 x && x = x
@@ -108,3 +108,28 @@ mySort xs <= xs = True
 
 As part of the research, multiple signature inference strategies were developed.
 You can try them out as well using the `--strategy` flag.
+
+# Evaluating strategies and experimenting with strategies using `easyspec-evaluate`
+
+`easyspec-evaluate` is a tool that is used to evaluate the different signature inference strategies, generate plots, and eventually hopefully draw helpful conclusions.
+
+The main component is a build system that knows how to make, evaluate and plot data.
+You can use it with `stack exec easyspec-evaluate -- build myTarget`.
+To build all plots, and transitive dependencies of those plots, use `stack exec easyspec-evaluate -- build analyse`.
+
+
+# Contributions
+
+Contributions are welcome in many forms (vaguely in the order of time investment):
+
+- An issue suggesting an improvement
+- An issue that brings a bug to the attention
+- A PR with a file in `examples` that shows functionality that is not shown by other examples.
+- A PR with a file in `examples-wishlist` that shows me that certain functionality is missing.
+- A PR with a failing test case
+- A PR with a bugfix
+- A PR with a new signature inference strategy evaluator
+- A PR with a new signature inference strategy
+- Any work that gets this project closer to being used in production.
+
+Make sure to [install the `zift.hs` script](https://github.com/NorfairKing/zifter) and that any PR passes the continuous integration.

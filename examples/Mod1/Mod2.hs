@@ -2,6 +2,8 @@
 
 module Mod1.Mod2 where
 
+import Prelude (Bool(..), Int)
+
 g :: Int -> Bool
-g True = 0
-g False = 1
+g 0 = True
+g 1 = False

@@ -11,6 +11,7 @@ import Data.Monoid as X
 
 import Control.Arrow as X
 import Control.Monad as X
+import Control.Monad.Catch as X
 import Control.Monad.Reader as X
 
 import Path as X

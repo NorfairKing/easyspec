@@ -66,7 +66,8 @@ csvDataFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
 csvDataFileWithComponents = dataFileWithComponents "csv"
 
-dataFilesForExample :: MonadIO m => ES.InputSpec -> m [Path Abs File]
+dataFilesForExample ::
+       (MonadIO m, MonadMask m) => ES.InputSpec -> m [Path Abs File]
 dataFilesForExample is = do
     names <- namesInSource is
     fmap concat $ forM names $ dataFilesForExampleAndName is

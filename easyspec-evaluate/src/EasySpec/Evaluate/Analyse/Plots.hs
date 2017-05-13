@@ -43,7 +43,7 @@ plotsRulesForAllData = do
 
 plotsRulesForExample :: ES.InputSpec -> Rules [Path Abs File]
 plotsRulesForExample is = do
-    names <- namesInSource is
+    names <- liftIO $ namesInSource is
     bars <- fmap concat $ forM names $ plotsRulesForExampleAndName is
     boxes <- forM evaluators $ perExampleAndEvaluatorAverageBoxPlotFor is
     points <-

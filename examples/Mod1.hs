@@ -2,9 +2,9 @@
 
 module Mod1 where
 
-import Prelude (Bool(..), not)
+import Prelude (Bool(..), not, Int)
 
-import Mod2
+import Mod1.Mod2
 
 f :: Bool -> Int
 f True = 1

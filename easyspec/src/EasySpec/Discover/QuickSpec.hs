@@ -42,7 +42,12 @@ runEasySpec ds iSig = do
             dflags <- getSessionDynFlags
             let intdfflags =
                     (addTypeClassExts $ prepareFlags dflags)
-                    {hscTarget = HscInterpreted, ghcLink = LinkInMemory}
+                    { hscTarget = HscInterpreted
+                    , ghcLink = LinkInMemory
+                    , importPaths =
+                          importPaths dflags ++
+                          [toFilePath $ inputSpecBaseDir $ setDiscInputSpec ds]
+                    }
             setDFlagsNoLinking intdfflags
                 -- This star is necessary so GHC uses the sources instead of the already compiled .o files.
                 -- See these:

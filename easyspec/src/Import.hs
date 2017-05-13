@@ -8,6 +8,7 @@ import Prelude as X hiding (return)
 import System.Exit as X
 
 import Control.Monad as X
+import Control.Monad.Catch as X
 import Control.Monad.IO.Class as X
 
 import Data.Data as X

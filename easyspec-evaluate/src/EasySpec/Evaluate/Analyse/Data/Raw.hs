@@ -39,7 +39,7 @@ rawDataRules = do
 
 dataRulesForExample :: Resource -> ES.InputSpec -> Rules (Path Abs File)
 dataRulesForExample ghciResource is = do
-    names <- namesInSource is
+    names <- liftIO $ namesInSource is
     csvFs <- forM names $ rulesForFileAndName ghciResource is
     combF <- dataFileForExample is
     combineCSVFiles @EvaluatorCsvLine combF csvFs

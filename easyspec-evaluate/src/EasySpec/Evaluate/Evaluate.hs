@@ -31,7 +31,7 @@ runEvaluate iss = do
             ]
     LB8.putStrLn $ encodeDefaultOrderedByName csvLines
 
-namesInSource :: MonadIO m => ES.InputSpec -> m [ES.EasyName]
+namesInSource :: (MonadIO m, MonadMask m) => ES.InputSpec -> m [ES.EasyName]
 namesInSource is =
     map ES.idName <$> runReaderT (ES.getEasyIds is) evaluationSettings
 

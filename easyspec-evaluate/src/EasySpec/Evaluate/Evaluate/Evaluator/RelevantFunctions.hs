@@ -7,7 +7,7 @@ module EasySpec.Evaluate.Evaluate.Evaluator.RelevantFunctions
 
 import Import
 
-import qualified EasySpec.Discover.CodeUtils as ES
+import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
@@ -32,10 +32,7 @@ relevantFunctionsEvaluator =
             (\scopeF ->
                  any
                      (\eq ->
-                          mentionsEq (eiFocusFuncName ei) eq &&
-                          mentionsEq (ES.idName scopeF) eq)
+                          ES.mentionsEq (eiFocusFuncName ei) eq &&
+                          ES.mentionsEq (ES.idName scopeF) eq)
                      (eiDiscoveredEqs ei))
             (eiScope ei)
-
-mentionsEq :: ES.EasyName -> ES.EasyEq -> Bool
-mentionsEq n (ES.EasyEq e1 e2) = ES.mentions n e1 || ES.mentions n e2

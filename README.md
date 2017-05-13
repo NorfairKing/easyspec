@@ -1,22 +1,110 @@
 Easyspec: Automatic functional property discovery in Haskell
 ============================================================
 
-# Installation
 
-`stack install` should do the trick.
+# Disclaimer
+
+This is a proof-of-concept of the automation and the signature inference strategies described in the master thesis 'Signature inference for functional property discovery and test generation'.
+Because this software was built within the constraints of a master thesis, corners were cut to ensure that the research could be done.
+This is by no means production-ready.
+There are a lot of wrinkles to be ironed out before this can be used in practice, but you can already start to play with it.
+There is more research to be done on this subject, but more importantly more real software engineering.
+Please [contact the author](https://cs-syd.eu/contact) if you would like to get involved.
+
+# Installing `easyspec` from source
+
+First, get the source:
+
+``` shell
+git clone https://github.com/NorfairKing/easyspec
+```
+
+Then, use [`stack`](https://haskellstack.org/) to install `easyspec`:
+
+``` shell
+cd easyspec
+stack install
+```
 
 # Usage
 
 Running `easyspec` without arguments or `easyspec --help` will show you the usage of `easyspec`.
 
-
 ## Discovering properties
 
-To discover properties, ghc must have access to `QuickSpec`.
-You can either install quickspec globally with `cabal install quickspec`, or you can have `stack` arrange everything for you by using `stack exec` to run the commands described below.
-For example, instead of running `easyspec discover MyFile.hs`, you would have to run `stack exec easyspec discover MyFile.hs`.
-
+To discover properties, ghc must have access to `QuickSpec`, among other dependencies.
+You can either install `quickspec` globally with `cabal install quickspec`, or you can have `stack` arrange everything for you by using `stack exec` to run the commands described below.
+For example, instead of running `easyspec discover MyFile.hs`, you would have to run `stack exec easyspec -- discover MyFile.hs`.
 
 To discover the properties of a function `func` in a file `File.hs`, you can run `easyspec discover File.hs func`.
 Easyspec will find all the functions that are in scope at the top-level of a module (including all the imported functions).
 Then it performs its magic and uses `quickspec` to discover the properties of the chosen function with respect to all the other functions in scope.
+
+### Example
+
+There are plenty of examples in the `examples` directory, but here is a worked example:
+
+Suppose you have the file `MySort.hs` in your working directory with the following contents:
+
+``` Haskell
+{-# LANGUAGE NoImplicitPrelude #-}
+
+module MySort where
+
+import Prelude (Bool(True), otherwise, (&&), Ord((<=)))
+
+mySort :: Ord a => [a] -> [a]
+mySort [] = []
+mySort (x:xs) = insert (mySort xs)
+  where
+    insert [] = [x]
+    insert (y:ys)
+        | x <= y = x : y : ys
+        | otherwise = y : insert ys
+
+myIsSorted :: Ord a => [a] -> Bool
+myIsSorted [] = True
+myIsSorted [_] = True
+myIsSorted (x:y:ls) = x <= y && myIsSorted (y : ls)
+```
+
+... and suppose you are interested in the properties of the `mySort` function in this file.
+This function `mySort` is called the 'focus function'.
+Now you can run `stack exec easyspec -- discover MySort.hs mySort` to discover the properties of `mySort` with respect to the functions that are in scope.
+The output should look something like the following:
+
+``` shell
+$ ls MySort.hs 
+MySort.hs
+$ stack exec easyspec -- discover MySort.hs mySort
+myIsSorted (mySort xs) = True
+mySort (mySort xs) = mySort xs
+xs <= mySort xs = myIsSorted xs
+mySort xs <= xs = True
+```
+
+If you don't specify a focus function, `easyspec` will find the properties of _all_ the functions in scope.
+Take care, this may take a lot longer.
+The output should look something like the following:
+
+``` shell
+$ stack exec easyspec -- discover MySort.hs      
+otherwise = True
+x && x = x
+x && True = x
+True && x = x
+y && x = x && y
+y <= y = True
+y <= True = True
+True <= x = x
+x && (x && y) = x && y
+(x && y) && z = x && (y && z)
+myIsSorted (mySort xs) = True
+mySort (mySort xs) = mySort xs
+(y && y) <= z = y <= (y && z)
+xs <= mySort xs = myIsSorted xs
+mySort xs <= xs = True
+```
+
+As part of the research, multiple signature inference strategies were developed.
+You can try them out as well using the `--strategy` flag.

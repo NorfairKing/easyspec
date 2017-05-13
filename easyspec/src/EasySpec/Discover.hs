@@ -16,6 +16,7 @@ module EasySpec.Discover
     , discoverEquations
     , getEasyIds
     , inferenceStrategies
+    , mentionsEq
     ) where
 
 import Import
@@ -24,6 +25,7 @@ import Language.Haskell.Exts.Pretty (prettyPrint)
 
 import EasySpec.OptParse.Types
 
+import EasySpec.Discover.CodeUtils
 import EasySpec.Discover.GatherFromGHC
 import EasySpec.Discover.QuickSpec
 import EasySpec.Discover.SignatureInference
@@ -33,13 +35,24 @@ import EasySpec.Discover.Types
 import EasySpec.Utils
 
 discover :: (MonadIO m, MonadReader Settings m) => DiscoverSettings -> m ()
-discover ds = do
-    res <- discoverEquations ds
+discover ids = do
+    let ds =
+            case setDiscFun ids of
+                Nothing -> ids {setDiscInfStrat = inferFullBackground}
+                _ -> ids
+    allEqs <- discoverEquations ds
+    let res =
+            case setDiscFun ds of
+                Nothing -> allEqs
+                Just focus -> filter (mentionsEq focus) allEqs
     liftIO $
         mapM_
             (\(EasyEq lh rh) ->
                  putStrLn $ prettyPrint lh ++ " = " ++ prettyPrint rh)
             res
+
+mentionsEq :: EasyName -> EasyEq -> Bool
+mentionsEq n (EasyEq e1 e2) = mentions n e1 || mentions n e2
 
 discoverEquations ::
        (MonadIO m, MonadReader Settings m) => DiscoverSettings -> m [EasyEq]

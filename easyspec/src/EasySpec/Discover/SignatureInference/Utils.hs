@@ -60,7 +60,7 @@ splitInferAlg name fs func =
                   makeNamedExps funcs =
                       rights $ map convertToUsableNamedExp funcs
                   fgNExps = makeNamedExps focus
-                  bgNExps = makeNamedExps bgSigFuncs
+                  bgNExps = makeNamedExps bgSigFuncs \\ fgNExps
               in InferredSignature [Node fgNExps [Node bgNExps []]]
     }
 

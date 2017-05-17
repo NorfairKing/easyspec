@@ -189,8 +189,8 @@ getExpSymbols =
         (\_ as -> concatMap getAltSymbols as)
         (\_ -> [])
 
-foldPat ::
-       (l -> Name l -> b)
+foldPat
+    :: (l -> Name l -> b)
     -> (l -> Sign l -> Literal l -> b)
     -> (l -> Name l -> Integer -> b)
     -> (l -> b -> QName l -> b -> b)
@@ -243,8 +243,8 @@ foldPat f01 f02 f03 f04 f05 f06 f07 f08 f09 f10 f11 f12 f13 f14 f15 f16 f17 f18 
 foldRPatVars :: RPat l -> b
 foldRPatVars = undefined
 
-foldType ::
-       (l -> Maybe [TyVarBind l] -> Maybe (Context l) -> b -> b)
+foldType
+    :: (l -> Maybe [TyVarBind l] -> Maybe (Context l) -> b -> b)
     -> (l -> b -> b -> b)
     -> (l -> Boxed -> [b] -> b)
     -> (l -> b -> b)
@@ -283,7 +283,9 @@ foldType ffa ff ft fl fpa fa fv fc fp fi fk fpr fe fspl fbng fwc fqq = go
     go (TyWildCard l mn) = fwc l mn
     go (TyQuasiQuote l s1 s2) = fqq l s1 s2
 
-mentions :: Eq l => Name l -> Exp l -> Bool
+mentions
+    :: Eq l
+    => Name l -> Exp l -> Bool
 mentions n =
     foldExp
         (\_ qn -> q qn)
@@ -346,8 +348,8 @@ mentions n =
     q (Qual _ _ n') = n == n'
     q (Special _ _) = False
 
-foldExp ::
-       (l -> QName l -> b)
+foldExp
+    :: (l -> QName l -> b)
     -> (l -> String -> b)
     -> (l -> IPName l -> b)
     -> (l -> QName l -> b)
@@ -463,6 +465,8 @@ foldExp ff1 ff2 ff3 ff4 ff5 ff6 ff7 ff8 ff9 ff10 ff11 ff12 ff13 ff14 ff15 ff16 f
     go (LCase l as) = ff54 l as
     go (ExprHole l) = ff55 l
 
-prettyPrintOneLine :: Pretty a => a -> String
+prettyPrintOneLine
+    :: Pretty a
+    => a -> String
 prettyPrintOneLine =
     prettyPrintStyleMode (style {mode = OneLineMode}) defaultMode

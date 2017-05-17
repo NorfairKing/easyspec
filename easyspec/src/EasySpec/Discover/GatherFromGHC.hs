@@ -8,6 +8,7 @@ import ConLike
 import DataCon
 import GHC
 import GHC.Paths (libdir)
+import HscTypes
 import OccName
 import RdrName
 import TcRnTypes
@@ -19,7 +20,9 @@ data IdData =
     IdData GHC.Id
            [GHC.ModuleName]
 
-getGHCIds :: MonadIO m => InputSpec -> m [IdData]
+getGHCIds
+    :: MonadIO m
+    => InputSpec -> m [IdData]
 getGHCIds is =
     liftIO $
     runGhc (Just libdir) $ do
@@ -40,9 +43,12 @@ getGHCIds is =
         modSum <- getModSummary targetModName
         parsedModule <- parseModule modSum
         tmod <- typecheckModule parsedModule
+        getInstancesFromTcmodule tmod
         getGHCIdsFromTcModule tmod
 
-getGHCIdsFromTcModule :: GhcMonad m => TypecheckedModule -> m [IdData]
+getGHCIdsFromTcModule
+    :: GhcMonad m
+    => TypecheckedModule -> m [IdData]
 getGHCIdsFromTcModule tmod = do
     let (tcenv, _) = tm_internals_ tmod
         -- Get the global reader elementss out of the global env
@@ -60,3 +66,13 @@ getGHCIdsFromTcModule tmod = do
                         -- If it's a data declaration, get its constructors as functions
                     Just (AConLike (RealDataCon dc)) -> [dataConWorkId dc]
                     Just _ -> []
+
+getInstancesFromTcmodule
+    :: GhcMonad m
+    => TypecheckedModule -> m ()
+getInstancesFromTcmodule tmod = do
+    let (tcenv, md) = tm_internals_ tmod
+    let insts = tcg_insts tcenv
+    printO insts
+    printO $ md_insts md
+    printO $ tcg_inst_env tcenv

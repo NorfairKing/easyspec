@@ -35,7 +35,9 @@ showPrettyBackgroundExp =
               , "(QuickSpec.Signature.background sig)"
               ])
 
-runQuickspecWithBackgroundExp :: Monoid m => Exp m -> Exp m -> Exp m
+runQuickspecWithBackgroundExp
+    :: Monoid m
+    => Exp m -> Exp m -> Exp m
 runQuickspecWithBackgroundExp bgsig =
     App
         mempty
@@ -76,7 +78,9 @@ mconcatSigsExp es =
                   (Ident mempty "mconcat")))
         (List mempty es)
 
-createQuickspecSig :: (Eq m, Monoid m) => [NamedExp m] -> Exp m
+createQuickspecSig
+    :: (Eq m, Monoid m)
+    => [NamedExp m] -> Exp m
 createQuickspecSig nexps =
     RecConstr
         mempty
@@ -120,7 +124,9 @@ createQuickspecSig nexps =
                         (Ident mempty "True")))
         ]
 
-signatureComponent :: (Eq m, Monoid m) => NamedExp m -> Exp m
+signatureComponent
+    :: (Eq m, Monoid m)
+    => NamedExp m -> Exp m
 signatureComponent (NamedExp funNameStr funExp) =
     App
         mempty

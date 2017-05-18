@@ -33,10 +33,14 @@ rRules = do
     buildRRules
     rLibsRules
 
-rTmpDir :: MonadIO m => m (Path Abs Dir)
+rTmpDir
+    :: MonadIO m
+    => m (Path Abs Dir)
 rTmpDir = (</> $(mkRelDir "r")) <$> tmpDir
 
-rArchive :: MonadIO m => m (Path Abs File)
+rArchive
+    :: MonadIO m
+    => m (Path Abs File)
 rArchive = (</> $(mkRelFile "R.tar.gz")) <$> rTmpDir
 
 rVersion :: String
@@ -45,13 +49,19 @@ rVersion = "R-3.4.0"
 rLink :: FilePath
 rLink = "https://cran.r-project.org/src/base/R-3/" ++ rVersion ++ ".tar.gz"
 
-rDir :: MonadIO m => m (Path Abs Dir)
+rDir
+    :: MonadIO m
+    => m (Path Abs Dir)
 rDir = (</> $(mkRelDir "R")) <$> rTmpDir
 
-rBinary :: MonadIO m => m (Path Abs File)
+rBinary
+    :: MonadIO m
+    => m (Path Abs File)
 rBinary = rBinInMakeDir
 
-rMakeDir :: MonadIO m => m (Path Abs Dir)
+rMakeDir
+    :: MonadIO m
+    => m (Path Abs Dir)
 rMakeDir = do
     rVersionDir <- liftIO $ parseRelDir rVersion
     rd <- rDir
@@ -60,21 +70,31 @@ rMakeDir = do
 rConfigureScriptName :: Path Rel File
 rConfigureScriptName = $(mkRelFile "configure")
 
-rConfigureScript :: MonadIO m => m (Path Abs File)
+rConfigureScript
+    :: MonadIO m
+    => m (Path Abs File)
 rConfigureScript = (</> rConfigureScriptName) <$> rMakeDir
 
-rMakefile :: MonadIO m => m (Path Abs File)
+rMakefile
+    :: MonadIO m
+    => m (Path Abs File)
 rMakefile = (</> $(mkRelFile "Makefile")) <$> rMakeDir
 
-rBinInMakeDir :: MonadIO m => m (Path Abs File)
+rBinInMakeDir
+    :: MonadIO m
+    => m (Path Abs File)
 rBinInMakeDir =
     (</> ($(mkRelDir "bin") </> $(mkRelFile "Rscript"))) <$> rMakeDir
 
-rInstallBinInMakeDir :: MonadIO m => m (Path Abs File)
+rInstallBinInMakeDir
+    :: MonadIO m
+    => m (Path Abs File)
 rInstallBinInMakeDir =
     (</> ($(mkRelDir "bin") </> $(mkRelFile "R"))) <$> rMakeDir
 
-rlibdir :: MonadIO m => m (Path Abs Dir)
+rlibdir
+    :: MonadIO m
+    => m (Path Abs Dir)
 rlibdir = (</> $(mkRelDir "library")) <$> rMakeDir
 
 buildRRules :: Rules ()
@@ -104,7 +124,9 @@ buildRRules = do
         needP [makeFile]
         cmd (Cwd $ toFilePath makeDir) "make" "--jobs"
 
-rLibTarget :: MonadIO m => String -> m (Path Abs File)
+rLibTarget
+    :: MonadIO m
+    => String -> m (Path Abs File)
 rLibTarget name = do
     libDir <- rlibdir
     dir <- liftIO $ parseRelDir name

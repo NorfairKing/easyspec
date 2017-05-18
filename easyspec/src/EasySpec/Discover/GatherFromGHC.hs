@@ -19,7 +19,9 @@ data IdData =
     IdData GHC.Id
            [GHC.ModuleName]
 
-getGHCIds :: MonadIO m => InputSpec -> m [IdData]
+getGHCIds
+    :: MonadIO m
+    => InputSpec -> m [IdData]
 getGHCIds is =
     liftIO $
     runGhc (Just libdir) $ do
@@ -42,7 +44,9 @@ getGHCIds is =
         tmod <- typecheckModule parsedModule
         getGHCIdsFromTcModule tmod
 
-getGHCIdsFromTcModule :: GhcMonad m => TypecheckedModule -> m [IdData]
+getGHCIdsFromTcModule
+    :: GhcMonad m
+    => TypecheckedModule -> m [IdData]
 getGHCIdsFromTcModule tmod = do
     let (tcenv, _) = tm_internals_ tmod
         -- Get the global reader elementss out of the global env

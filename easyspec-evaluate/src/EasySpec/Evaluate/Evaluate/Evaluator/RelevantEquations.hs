@@ -7,20 +7,18 @@ module EasySpec.Evaluate.Evaluate.Evaluator.RelevantEquations
 
 import Import
 
-import qualified EasySpec.Discover as ES
-
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
+import EasySpec.Evaluate.Evaluate.Evaluator.Utils
 
 relevantEquationsEvaluator :: Evaluator
 relevantEquationsEvaluator =
     Evaluator
     { evaluatorName = "relevant-equations"
-    , evaluatorGather = Just . genericLength . go
-    , evaluatorPretty = \ei -> unwords [show . length . go $ ei, "equations"]
+    , evaluatorGather = Just . genericLength . relevantEquations
+    , evaluatorPretty =
+          \ei -> unwords [show . length . relevantEquations $ ei, "equations"]
     , evaluatorUnit = "#"
     , evaluatorQuantity = "equation"
     , evaluatorIndication = GreaterIsBetter
     , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }
-  where
-    go ei = filter (ES.mentionsEq $ eiFocusFuncName ei) (eiDiscoveredEqs ei)

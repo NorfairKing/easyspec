@@ -25,8 +25,8 @@ unorderedCombinations ls =
                  (l1:l2s) -> map ((,) l1) l2s) $
     tails ls
 
-unionInferAlg ::
-       SignatureInferenceStrategy
+unionInferAlg
+    :: SignatureInferenceStrategy
     -> SignatureInferenceStrategy
     -> SignatureInferenceStrategy
 unionInferAlg si1 si2 =
@@ -45,8 +45,8 @@ unionInferAlg si1 si2 =
               in InferredSignature $ s1 ++ s2
     }
 
-splitInferAlg ::
-       String
+splitInferAlg
+    :: String
     -> [Path Rel File]
     -> ([EasyId] -> [EasyId] -> [EasyId]) -- ^ Something that chooses the background ids.
     -> SignatureInferenceStrategy
@@ -100,7 +100,9 @@ addTypeClassTrickery eid = go (expr, idType eid)
                          t')
             _ -> (e, t)
 
-replaceVarsWithQuickspecVars :: Eq l => Type l -> Either String (Type l)
+replaceVarsWithQuickspecVars
+    :: Eq l
+    => Type l -> Either String (Type l)
 replaceVarsWithQuickspecVars et =
     let tvs = getTyVars et
         funcs =
@@ -113,8 +115,9 @@ replaceVarsWithQuickspecVars et =
                 ["A", "B", "C", "D", "E"]
     in replaceTyVars (zip tvs funcs) et
   where
-    replaceTyVars ::
-           Eq l => [(Name l, l -> Type l)] -> Type l -> Either String (Type l)
+    replaceTyVars
+        :: Eq l
+        => [(Name l, l -> Type l)] -> Type l -> Either String (Type l)
     replaceTyVars repls t =
         flip runReaderT False $
         -- Bool says 'whether it's higher-order'

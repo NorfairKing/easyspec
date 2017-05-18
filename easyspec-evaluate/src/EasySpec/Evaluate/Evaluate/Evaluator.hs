@@ -12,6 +12,7 @@ import Development.Shake.Path
 
 import EasySpec.Evaluate.Evaluate.Evaluator.Combinators
 import EasySpec.Evaluate.Evaluate.Evaluator.Equations
+import EasySpec.Evaluate.Evaluate.Evaluator.MaximumRelatedEquations
 import EasySpec.Evaluate.Evaluate.Evaluator.RelevantEquations
 import EasySpec.Evaluate.Evaluate.Evaluator.RelevantFunctions
 import EasySpec.Evaluate.Evaluate.Evaluator.Runtime
@@ -39,4 +40,5 @@ baseEvaluators =
     , runtimeEvaluator
     , relevantEquationsEvaluator
     , relevantFunctionsEvaluator
+    , maximumRelatedEquationsEvaluator
     ]

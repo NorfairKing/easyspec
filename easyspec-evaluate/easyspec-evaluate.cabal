@@ -35,10 +35,12 @@ library
         EasySpec.Evaluate.Evaluate.Evaluator
         EasySpec.Evaluate.Evaluate.Evaluator.Combinators
         EasySpec.Evaluate.Evaluate.Evaluator.Equations
+        EasySpec.Evaluate.Evaluate.Evaluator.MaximumRelatedEquations
         EasySpec.Evaluate.Evaluate.Evaluator.RelevantEquations
         EasySpec.Evaluate.Evaluate.Evaluator.RelevantFunctions
         EasySpec.Evaluate.Evaluate.Evaluator.Runtime
         EasySpec.Evaluate.Evaluate.Evaluator.Types
+        EasySpec.Evaluate.Evaluate.Evaluator.Utils
         EasySpec.Evaluate.HaskellJSON
         EasySpec.Evaluate.OptParse
         EasySpec.Evaluate.OptParse.Types

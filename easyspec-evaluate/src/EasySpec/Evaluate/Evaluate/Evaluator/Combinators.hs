@@ -160,7 +160,9 @@ divideEvaluators e1 e2 =
                  }
         else Nothing
 
-divMaybe :: (RealFloat a, Fractional a) => a -> a -> Maybe a
+divMaybe
+    :: (RealFloat a, Fractional a)
+    => a -> a -> Maybe a
 divMaybe n d =
     let l = n / d
     in if isNaN l || isInfinite l

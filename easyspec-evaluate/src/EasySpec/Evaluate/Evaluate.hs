@@ -31,9 +31,7 @@ runEvaluate iss = do
             ]
     LB8.putStrLn $ encodeDefaultOrderedByName csvLines
 
-namesInSource
-    :: (MonadIO m, MonadMask m)
-    => ES.InputSpec -> m [ES.EasyName]
+namesInSource :: (MonadIO m, MonadMask m) => ES.InputSpec -> m [ES.EasyName]
 namesInSource is =
     map ES.idName <$> runReaderT (ES.getEasyIds is) evaluationSettings
 
@@ -42,17 +40,16 @@ getEvaluationInputPointsFor is = do
     names <- namesInSource is
     fmap concat $ forM names $ getEvaluationInputPointsForName is
 
-getEvaluationInputPointsForName :: ES.InputSpec
-                                -> ES.EasyName
-                                -> IO [EvaluationInputPoint]
+getEvaluationInputPointsForName ::
+       ES.InputSpec -> ES.EasyName -> IO [EvaluationInputPoint]
 getEvaluationInputPointsForName is funcname =
     forM ES.inferenceStrategies $ getEvaluationInputPoint is funcname
 
 evaluationSettings :: ES.Settings
 evaluationSettings = ES.Settings {ES.setsDebugLevel = 0}
 
-getEvaluationInputPoint
-    :: ES.InputSpec
+getEvaluationInputPoint ::
+       ES.InputSpec
     -> ES.EasyName
     -> ES.SignatureInferenceStrategy
     -> IO EvaluationInputPoint
@@ -92,9 +89,8 @@ showEvaluationReport pointss = showTable $ concatMap go $ concat pointss
             , evaluatorPretty ev ip
             ]
 
-evaluationInputPointCsvLine :: EvaluationInputPoint
-                            -> Evaluator
-                            -> EvaluatorCsvLine
+evaluationInputPointCsvLine ::
+       EvaluationInputPoint -> Evaluator -> EvaluatorCsvLine
 evaluationInputPointCsvLine eip ev = line
   where
     ip = pointToInput eip

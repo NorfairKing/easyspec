@@ -10,5 +10,4 @@ import EasySpec.Discover.Types
 
 inferFullBackground :: SignatureInferenceStrategy
 inferFullBackground =
-    splitInferAlg "full-background" [$(mkRelFile __FILE__)] $ \focus scope ->
-        scope \\ focus
+    splitInferAlg "full-background" [$(mkRelFile __FILE__)] (flip (\\))

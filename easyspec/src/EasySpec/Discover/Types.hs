@@ -43,7 +43,7 @@ data Id m = Id
     { idName :: Name m
     , idType :: Type m
     , idImpl :: Maybe (Impl m)
-    } deriving (Show, Eq, Generic)
+    } deriving (Show, Eq, Ord, Generic)
 
 type EasyId = Id ()
 
@@ -54,7 +54,7 @@ prettyEasyId Id {..} =
 data NamedExp m = NamedExp
     { neName :: String
     , neExp :: Exp m
-    } deriving (Show, Eq)
+    } deriving (Show, Eq, Ord)
 
 type EasyNamedExp = NamedExp ()
 
@@ -78,7 +78,7 @@ prettyEasyEq (EasyEq e1 e2) = unwords [H.prettyPrint e1, "=", H.prettyPrint e2]
 
 newtype Impl l =
     Impl [H.Match l]
-    deriving (Show, Eq, Functor)
+    deriving (Show, Eq, Ord, Functor)
 
 type EasyImpl = Impl ()
 

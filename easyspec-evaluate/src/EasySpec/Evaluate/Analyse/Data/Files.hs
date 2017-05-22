@@ -62,6 +62,21 @@ dataFileForExample is =
         ($(mkRelDir "combined-per-example") </> ES.inputSpecFile is)
         []
 
+dataFilesForStrategy ::
+       MonadIO m => ES.SignatureInferenceStrategy -> m [Path Abs File]
+dataFilesForStrategy strat = do
+    exs <- examples
+    fmap concat $
+        forM exs $ \is -> do
+            names <- liftIO $ namesInSource is
+            forM names $ \name -> dataFileFor is name strat
+
+dataFileForStrategy ::
+       MonadIO m => ES.SignatureInferenceStrategy -> m (Path Abs File)
+dataFileForStrategy strat = do
+    fn <- liftIO $ parseRelFile $ ES.sigInfStratName strat
+    csvDataFileWithComponents ($(mkRelDir "combined-per-strategy") </> fn) []
+
 csvDataFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
 csvDataFileWithComponents = dataFileWithComponents "csv"

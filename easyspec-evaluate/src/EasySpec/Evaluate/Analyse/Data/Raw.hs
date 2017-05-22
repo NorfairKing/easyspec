@@ -35,7 +35,17 @@ rawDataRules = do
     csvFs <- mapM (dataRulesForExample ghciResource) es
     combF <- allDataFile
     combineCSVFiles @EvaluatorCsvLine combF csvFs
-    rawDataRule ~> needP [combF]
+    perStrats <- mapM dataRulesForStrategy signatureInferenceStrategies
+    rawDataRule ~> needP (combF : perStrats)
+
+dataRulesForStrategy :: ES.SignatureInferenceStrategy -> Rules (Path Abs File)
+dataRulesForStrategy strat = do
+    let rule = ES.sigInfStratName strat
+    csvF <- dataFilesForStrategy strat
+    combF <- dataFileForStrategy strat
+    combineCSVFiles @EvaluatorCsvLine combF csvF
+    rule ~> needP [combF]
+    pure combF
 
 dataRulesForExample :: Resource -> ES.InputSpec -> Rules (Path Abs File)
 dataRulesForExample ghciResource is = do

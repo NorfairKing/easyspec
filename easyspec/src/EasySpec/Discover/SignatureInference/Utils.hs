@@ -64,6 +64,38 @@ splitInferAlg name fs func =
               in InferredSignature [Node fgNExps [Node bgNExps []]]
     }
 
+breakThroughSplitInferAlg ::
+       String
+    -> [Path Rel File]
+    -> ([EasyId] -> [EasyId] -> [EasyId])
+    -> Int
+    -> SignatureInferenceStrategy
+breakThroughSplitInferAlg name fs func maxDistinctOtherFuncs =
+    SignatureInferenceStrategy
+    { sigInfStratName = name
+    , sigInfRelevantSources = $(mkRelFile __FILE__) : fs
+    , inferSignature =
+          \focus scope ->
+              let scope' = scope \\ focus :: [EasyId]
+              in InferredSignature $
+                 flip map (func' focus scope') $ \funcs -> Node funcs []
+    }
+  where
+    makeNamedExps funcs = rights $ map convertToUsableNamedExp funcs
+    func' :: [EasyId] -> [EasyId] -> [[EasyNamedExp]]
+    func' focus scope = do
+        grp <- groupsOf maxDistinctOtherFuncs (makeNamedExps $ func focus scope)
+        ff <- makeNamedExps focus
+        pure $ ff : grp
+
+-- groupsOf 1 ls == map (:[]) ls
+groupsOf :: (Eq a, Ord a) => Int -> [a] -> [[a]]
+groupsOf 0 _ = [[]]
+groupsOf n fs = do
+    rest <- nub $ sort <$> groupsOf (n - 1) fs
+    new <- [f | f <- fs, f `notElem` rest]
+    pure $ new : rest
+
 convertToUsableNamedExp :: EasyId -> Either String EasyNamedExp
 convertToUsableNamedExp i = do
     let (e, t) = addTypeClassTrickery i

@@ -8,6 +8,7 @@ import Import
 
 import EasySpec.Discover.SignatureInference.EmptyBackground
 import EasySpec.Discover.SignatureInference.FullBackground
+import EasySpec.Discover.SignatureInference.FullBreakthrough
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityEditDistanceName
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityName
 import EasySpec.Discover.SignatureInference.SyntacticSimilaritySymbols
@@ -30,6 +31,7 @@ basicInferenceStrategies :: [SignatureInferenceStrategy]
 basicInferenceStrategies =
     [ inferEmptyBackground
     , inferFullBackground
+    , inferFullBreakthrough
     , inferSyntacticSimilarityName
     , inferSyntacticSimilarityEditDistanceName
     , inferSyntacticSimilaritySymbols

@@ -37,7 +37,7 @@ differenceInferAlg name fs diff =
         take 5 $ sortOn (\f -> sum $ map (diff f) focus) scope
 
 letterDict :: (Eq a, Ord a, Foldable f) => f a -> Map a Int
-letterDict = foldl go M.empty
+letterDict = foldl' go M.empty
   where
     go hm k = M.alter u k hm
       where

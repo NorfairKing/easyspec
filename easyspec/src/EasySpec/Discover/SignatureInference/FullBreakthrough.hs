@@ -10,10 +10,10 @@ import Import
 import EasySpec.Discover.SignatureInference.Utils
 import EasySpec.Discover.Types
 
-inferFullBreakthrough :: SignatureInferenceStrategy
-inferFullBreakthrough =
+inferFullBreakthrough :: Int -> SignatureInferenceStrategy
+inferFullBreakthrough i =
     breakThroughSplitInferAlg
-        "full-breakthrough"
+        ("full-breakthrough-" ++ show i)
         [$(mkRelFile __FILE__)]
         (flip (\\))
-        1
+        i

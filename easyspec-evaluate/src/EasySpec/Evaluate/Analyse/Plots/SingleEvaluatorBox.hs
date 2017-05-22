@@ -3,6 +3,7 @@
 
 module EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
     ( perExampleAndEvaluatorAverageBoxPlotFor
+    , perEvaluatorGlobalAverageBoxPlotFor
     ) where
 
 import Import
@@ -35,6 +36,23 @@ perExampleAndEvaluatorAverageBoxPlotFor is evaluator = do
             , toFilePath plotF
             , toFilePath $ ES.inputSpecBaseDir is
             , toFilePath $ ES.inputSpecFile is
+            , evaluatorName evaluator
+            , prettyIndication $ evaluatorIndication evaluator
+            ]
+    pure plotF
+
+perEvaluatorGlobalAverageBoxPlotFor :: Evaluator -> Rules (Path Abs File)
+perEvaluatorGlobalAverageBoxPlotFor evaluator = do
+    plotF <- singleEvaluatorAverageGlobalBoxPlotFileForExample evaluator
+    plotF $%> do
+        dependOnEvaluator evaluator
+        dataF <- allDataFile
+        needP [dataF]
+        scriptF <- singleEvaluatorAverageBoxGlobalAnalysisScript
+        rscript
+            scriptF
+            [ toFilePath dataF
+            , toFilePath plotF
             , evaluatorName evaluator
             , prettyIndication $ evaluatorIndication evaluator
             ]

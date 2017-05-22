@@ -85,11 +85,22 @@ singleEvaluatorAverageBoxPlotFileForExample
     => ES.InputSpec -> Evaluator -> m (Path Abs File)
 singleEvaluatorAverageBoxPlotFileForExample is ev =
     pngPlotFileWithComponents
-        ($(mkRelDir "single-evaluator-box") </> ES.inputSpecFile is)
-        ["average", evaluatorName ev]
+        ($(mkRelDir "single-evaluator-per-example-box") </> ES.inputSpecFile is)
+        [evaluatorName ev]
 
 singleEvaluatorAverageBoxAnalysisScript
     :: MonadIO m
     => m (Path Abs File)
 singleEvaluatorAverageBoxAnalysisScript =
     scriptFile "single_evaluator_boxplot_average.r"
+
+singleEvaluatorAverageGlobalBoxPlotFileForExample ::
+       MonadIO m => Evaluator -> m (Path Abs File)
+singleEvaluatorAverageGlobalBoxPlotFileForExample ev =
+    pngPlotFileWithComponents
+        ($(mkRelDir "single-evaluator-global-box") </> $(mkRelFile "global"))
+        [evaluatorName ev]
+
+singleEvaluatorAverageBoxGlobalAnalysisScript :: MonadIO m => m (Path Abs File)
+singleEvaluatorAverageBoxGlobalAnalysisScript =
+    scriptFile "single_evaluator_boxplot_average_global.r"

@@ -39,7 +39,8 @@ plotsRulesForAllData = do
     pfs <-
         mapM (uncurry plotsRulesForPointsPlotWithEvaluators) $
         unorderedCombinationsWithoutSelfCombinations evaluators
-    pure $ lfs ++ pfs
+    bfs <- mapM perEvaluatorGlobalAverageBoxPlotFor evaluators
+    pure $ lfs ++ pfs ++ bfs
 
 plotsRulesForExample :: ES.InputSpec -> Rules [Path Abs File]
 plotsRulesForExample is = do

@@ -33,7 +33,11 @@ runBuild target = do
         Just _ ->
             withArgs ["--color", target] $
             shakeArgs
-                shakeOptions {shakeVerbosity = Loud, shakeThreads = 0}
+                shakeOptions
+                { shakeVerbosity = Loud
+                , shakeThreads = 0
+                , shakeReport = ["report.trace"]
+                }
                 shakeBuild
 
 shakeBuild :: Rules ()

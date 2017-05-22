@@ -3,6 +3,7 @@
 tmp/
 out/
 data/
+*.trace
 *.css
 *.js
 *.pdf

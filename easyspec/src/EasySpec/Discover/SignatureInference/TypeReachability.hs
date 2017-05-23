@@ -12,10 +12,10 @@ import EasySpec.Discover.Types
 
 {-# ANN module "HLint: ignore Use ||" #-}
 
-inferTypeReachability :: SignatureInferenceStrategy
-inferTypeReachability =
-    splitInferAlg "type-reachability" [$(mkRelFile __FILE__)] $
-    depthNReachableViaComposition 7
+inferTypeReachability :: Int -> SignatureInferenceStrategy
+inferTypeReachability i =
+    splitInferAlg ("type-reachability-" ++ show i) [$(mkRelFile __FILE__)] $
+    depthNReachableViaComposition i
 
 depthNReachableViaComposition :: Int -> [EasyId] -> [EasyId] -> [EasyId]
 depthNReachableViaComposition = depthNReachable reachableViaComposition

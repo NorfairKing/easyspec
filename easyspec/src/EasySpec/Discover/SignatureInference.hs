@@ -37,7 +37,7 @@ basicInferenceStrategies =
     , inferSyntacticSimilarityEditDistanceName
     , inferSyntacticSimilaritySymbols
     , inferSyntacticSimilarityType
-    , inferTypeReachability
+    , inferTypeReachability 7
     ]
 
 evenMoreInferenceStrategies :: [SignatureInferenceStrategy]

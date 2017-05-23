@@ -98,6 +98,7 @@ test-suite easyspec-test
         TestImport
         TestUtils
         EasySpec.Discover.SignatureInference.TypeReachabilitySpec
+        EasySpec.Discover.SignatureInference.MonomorphisationSpec
         EasySpec.GatherSpec
         EasySpecSpec
         Language.Haskell.Exts.Gen

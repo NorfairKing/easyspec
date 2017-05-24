@@ -58,34 +58,59 @@ fillIn env t =
            (\_ _ _ -> [])
            t
 
+newtype ContextM l = ContextM
+    { unContextM :: Context l
+    } deriving (Show, Eq, Ord)
+
+instance Monoid l => Monoid (ContextM l) where
+    mempty = ContextM $ CxEmpty mempty
+    mappend (ContextM c1) (ContextM c2) =
+        ContextM $
+        case (c1, c2) of
+            (CxEmpty _, _) -> c2
+            (_, CxEmpty _) -> c1
+            (CxSingle l1 ast1, CxSingle l2 ast2) ->
+                CxTuple (l1 `mappend` l2) [ast1, ast2]
+            (CxSingle l1 asth, CxTuple l2 asts) ->
+                CxTuple (l1 `mappend` l2) (asth : asts)
+            (CxTuple l1 asts, CxSingle l2 astl) ->
+                CxTuple (l1 `mappend` l2) (asts ++ [astl])
+            (CxTuple l1 asts1, CxTuple l2 asts2) ->
+                CxTuple (l1 `mappend` l2) (asts1 ++ asts2)
+
 getKindedTyVars :: (Eq l, Monoid l) => Type l -> ([(Name l, Kind l)], Context l)
 getKindedTyVars t =
-    ( nub $
-      runReader
-          (foldType
-               (\_ _ _ -> id)
-               (\_ -> liftA2 (++))
-               (\_ _ bs -> concat <$> sequence bs)
-               (\_ -> id)
-               (\_ -> id)
-               (\_ rt1 rt2 -- app
-                 -> do
-                    t1 <- local (KindFn mempty (KindStar mempty)) rt1
-                    t2 <- rt2
-                    pure $ t1 ++ t2)
-               (\_ n -> do
-                    k <- ask
-                    pure [(n, k)])
-               (\_ _ -> pure [])
-               (\_ -> id)
-               (\_ v1 _ v2 -> (++) <$> v1 <*> v2)
-               (\_ vs k -> local (const k) vs)
-               (\_ _ -> pure [])
-               (\_ -> liftA2 (++))
-               (\_ _ -> pure [])
-               (\_ _ _ -> id)
-               (\_ _ -> pure [])
-               (\_ _ _ -> pure [])
-               t)
-          (KindStar mempty)
-    , CxEmpty mempty)
+    let (tups, ContextM ctx) =
+            runWriter $
+            runReaderT
+                (foldType
+                     (\_ _ mctx b -> do
+                          case mctx of
+                              Nothing -> pure ()
+                              Just c -> tell $ ContextM c
+                          b)
+                     (\_ -> liftA2 (++))
+                     (\_ _ bs -> concat <$> sequence bs)
+                     (\_ -> id)
+                     (\_ -> id)
+                     (\_ rt1 rt2 -- app
+                       -> do
+                          t1 <- local (KindFn mempty (KindStar mempty)) rt1
+                          t2 <- rt2
+                          pure $ t1 ++ t2)
+                     (\_ n -> do
+                          k <- ask
+                          pure [(n, k)])
+                     (\_ _ -> pure [])
+                     (\_ -> id)
+                     (\_ v1 _ v2 -> (++) <$> v1 <*> v2)
+                     (\_ vs k -> local (const k) vs)
+                     (\_ _ -> pure [])
+                     (\_ -> liftA2 (++))
+                     (\_ _ -> pure [])
+                     (\_ _ _ -> id)
+                     (\_ _ -> pure [])
+                     (\_ _ _ -> pure [])
+                     t)
+                (KindStar mempty)
+    in (nub tups, ctx)

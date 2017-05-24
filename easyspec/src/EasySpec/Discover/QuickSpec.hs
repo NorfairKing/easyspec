@@ -5,7 +5,6 @@ module EasySpec.Discover.QuickSpec where
 import Import
 
 import Control.Monad.State
-import Control.Monad.Writer
 import Data.Dynamic
 import Data.List.Split
 import Data.Tree

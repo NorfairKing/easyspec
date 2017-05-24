@@ -26,8 +26,9 @@ spec =
             getKindedTyVars $(easyType "m Int -> m String") `shouldBe`
             ( [(Ident () "m", KindFn () (KindStar ()) (KindStar ()))]
             , CxEmpty mempty)
-        -- it
-        --     "works on this example of a function that is polymorphic in the monad" $
-        --     getKindedTyVars $(easyType "Monad m => m Int") `shouldBe`
-        --     ( [(Ident () "m", KindFn () (KindStar ()) (KindStar ()))]
-        --     , CxEmpty mempty)
+        it
+            "works on this example of a function that is polymorphic in the monad" $
+            getKindedTyVars $(easyType "Monad m => m Int") `shouldBe`
+            ( [(Ident () "m", KindFn () (KindStar ()) (KindStar ()))]
+            , CxSingle () $
+              ClassA () (UnQual () (Ident () "Monad")) [$(easyType "m")])

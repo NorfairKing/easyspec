@@ -13,7 +13,7 @@ import EasySpec.Discover.SignatureInference.Monomorphisation
 import EasySpec.Discover.TH
 
 spec :: Spec
-spec =
+spec = do
     describe "getKindedTyVars" $ do
         it "works on these simple examples with kind * type variables" $ do
             getKindedTyVars $(easyType "a -> String") `shouldBe`
@@ -32,3 +32,7 @@ spec =
             ( [(Ident () "m", KindFn () (KindStar ()) (KindStar ()))]
             , CxSingle () $
               ClassA () (UnQual () (Ident () "Monad")) [$(easyType "m")])
+
+    describe "monomorphise" $ do
+        it "works on this simple example with a kind * type variable without constraints" $
+            monomorphise [$(easyType "Int"), $(easyType "String")] $(easyType "a") `shouldBe` [$(easyType"Int"), $(easyType "String")]

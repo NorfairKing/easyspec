@@ -32,7 +32,12 @@ spec = do
             ( [(Ident () "m", KindFn () (KindStar ()) (KindStar ()))]
             , CxSingle () $
               ClassA () (UnQual () (Ident () "Monad")) [$(easyType "m")])
-
-    describe "monomorphise" $ do
-        it "works on this simple example with a kind * type variable without constraints" $
-            monomorphise [$(easyType "Int"), $(easyType "String")] $(easyType "a") `shouldBe` [$(easyType"Int"), $(easyType "String")]
+    describe " findAllTypesAndSubtypes" $
+        it "works on these examples of simple constructors" $
+        findAllTypesAndSubtypes [$(easyType "Int")] `shouldBe`
+        [($(easyType "Int"), KindStar ())]
+    describe "monomorphise" $
+        it
+            "works on this simple example with a kind * type variable without constraints" $
+        monomorphise [$(easyType "Int"), $(easyType "String")] $(easyType "a") `shouldBe`
+        [$(easyType "Int"), $(easyType "String")]

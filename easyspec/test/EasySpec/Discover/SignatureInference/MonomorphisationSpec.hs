@@ -16,6 +16,8 @@ spec :: Spec
 spec = do
     describe "getKindedTyVars" $ do
         it "works on these simple examples with kind * type variables" $ do
+            getKindedTyVars $(easyType "a") `shouldBe`
+                ([(Ident () "a", KindStar ())], CxEmpty mempty)
             getKindedTyVars $(easyType "a -> String") `shouldBe`
                 ([(Ident () "a", KindStar ())], CxEmpty mempty)
             getKindedTyVars $(easyType "a -> b") `shouldBe`
@@ -34,7 +36,7 @@ spec = do
               ClassA () (UnQual () (Ident () "Monad")) [$(easyType "m")])
     describe " findAllTypesAndSubtypes" $
         it "works on these examples of simple constructors" $
-        findAllTypesAndSubtypes [$(easyType "Int")] `shouldBe`
+        findAllTypesAndSubtypes $(easyType "Int") `shouldBe`
         [($(easyType "Int"), KindStar ())]
     describe "monomorphise" $
         it

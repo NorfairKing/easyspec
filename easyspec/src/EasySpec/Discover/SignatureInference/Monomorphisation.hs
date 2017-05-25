@@ -9,18 +9,26 @@ import EasySpec.Discover.CodeUtils
 {-# ANN module "HLint: ignore Use const" #-}
 
 monomorphise ::
-       (Eq l, Monoid l)
+       (Show l, Eq l, Monoid l)
     => [Type l] -- Full types available for monomorphisation
     -> Type l -- Type to monomorphise
     -> [Type l] -- The possible monomorphisations. Currently only completely free variables
-monomorphise ts = fillIn (findAllTypesAndSubtypes ts)
+monomorphise ts = fillIn (nub $ concatMap findAllTypesAndSubtypes ts)
 
 -- All types and subtypes
-findAllTypesAndSubtypes :: (Eq l, Monoid l) => [Type l] -> [(Type l, Kind l)]
-findAllTypesAndSubtypes = undefined
+findAllTypesAndSubtypes ::
+       (Show l, Eq l, Monoid l) => Type l -> [(Type l, Kind l)]
+findAllTypesAndSubtypes = go
+  where
+    go t =
+        case t of
+            TyForall _ _ _ t' -> go t'
+            TyFun _ t1 t2 -> go t1 ++ go t2
+            TyCon l _ -> [(t, KindStar l)]
+            _ -> []
 
 fillIn ::
-       (Eq l, Monoid l)
+       (Show l, Eq l, Monoid l)
     => [(Type l, Kind l)] -- Exact types available for monomorphisation
     -> Type l -- Type to monomorphise
     -> [Type l] -- The possible monomorphisations. Currently only completely free variables
@@ -42,8 +50,8 @@ fillIn env t =
                             case ctx of
                                 CxEmpty _ ->
                                     if rk == k
-                                        then Nothing
-                                        else Just rt
+                                        then Just rt
+                                        else Nothing
                                 _ -> Nothing -- TODO check if the context is satisfiable by the replacements, then do the above
             )
            (\_ _ -> [])

@@ -26,7 +26,9 @@ maximumRelatedFunctionsEvaluator =
     , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }
   where
-    go :: (Num a, Ord a) => EvaluationInput -> a
+    go
+        :: (Num a, Ord a)
+        => EvaluationInput -> a
     go ei =
         case map (genericLength . nub . mentionedFrom (eiScope ei)) $
              relevantEquations ei of

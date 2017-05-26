@@ -34,10 +34,9 @@ import EasySpec.Discover.TypeTranslation
 import EasySpec.Discover.Types
 import EasySpec.Utils
 
-discover ::
-       (MonadIO m, MonadMask m, MonadReader Settings m)
-    => DiscoverSettings
-    -> m ()
+discover
+    :: (MonadIO m, MonadMask m, MonadReader Settings m)
+    => DiscoverSettings -> m ()
 discover ids = do
     let ds =
             case setDiscFun ids of
@@ -58,10 +57,9 @@ discover ids = do
 mentionsEq :: EasyName -> EasyEq -> Bool
 mentionsEq n (EasyEq e1 e2) = mentions n e1 || mentions n e2
 
-discoverEquations ::
-       (MonadIO m, MonadMask m, MonadReader Settings m)
-    => DiscoverSettings
-    -> m [EasyEq]
+discoverEquations
+    :: (MonadIO m, MonadMask m, MonadReader Settings m)
+    => DiscoverSettings -> m [EasyEq]
 discoverEquations ds = do
     ids <- getEasyIds $ setDiscInputSpec ds
     debug1 "Gathered signature:"
@@ -71,10 +69,9 @@ discoverEquations ds = do
     allEqs <- runEasySpec ds iSig
     pure $ nub allEqs
 
-getEasyIds ::
-       (MonadIO m, MonadMask m, MonadReader Settings m)
-    => InputSpec
-    -> m [EasyId]
+getEasyIds
+    :: (MonadIO m, MonadMask m, MonadReader Settings m)
+    => InputSpec -> m [EasyId]
 getEasyIds is = do
     idDatas <- getGHCIds is
     tups <-

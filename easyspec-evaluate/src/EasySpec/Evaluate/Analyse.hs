@@ -4,6 +4,7 @@ import Import
 
 import EasySpec.Evaluate.Analyse.Archive
 import EasySpec.Evaluate.Analyse.Data
+import EasySpec.Evaluate.Analyse.Hackage
 import EasySpec.Evaluate.Analyse.Plots
 import EasySpec.Evaluate.Analyse.R
 
@@ -18,6 +19,7 @@ analyseRules = do
     dataRules
     plotsRules
     archiveRules
+    hackageRules
     analyseRule ~> do
-        need [dataRule, plotsRule]
+        need [dataRule, plotsRule, hackageRule]
         need [archiveRule] -- needs to be seperate

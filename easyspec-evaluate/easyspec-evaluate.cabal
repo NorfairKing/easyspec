@@ -22,6 +22,7 @@ library
         EasySpec.Evaluate.Analyse.Data.Files
         EasySpec.Evaluate.Analyse.Data.Raw
         EasySpec.Evaluate.Analyse.Data.Types
+        EasySpec.Evaluate.Analyse.Hackage
         EasySpec.Evaluate.Analyse.Plots
         EasySpec.Evaluate.Analyse.Plots.Files
         EasySpec.Evaluate.Analyse.Plots.RelativeLines

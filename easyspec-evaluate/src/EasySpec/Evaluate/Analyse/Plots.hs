@@ -52,8 +52,7 @@ plotsRulesForExample is = do
         unorderedCombinationsWithoutSelfCombinations evaluators
     pure $ bars ++ boxes ++ points
 
-plotsRulesForExampleAndName :: ES.InputSpec
-                            -> ES.EasyName
-                            -> Rules [Path Abs File]
+plotsRulesForExampleAndName ::
+       ES.InputSpec -> ES.EasyName -> Rules [Path Abs File]
 plotsRulesForExampleAndName is name =
     forM evaluators $ perExampleNameAndEvaluatorBarPlotFor is name

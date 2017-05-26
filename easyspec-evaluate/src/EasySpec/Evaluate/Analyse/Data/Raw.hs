@@ -28,9 +28,8 @@ import EasySpec.Evaluate.Analyse.Data.Files
 rawDataRule :: String
 rawDataRule = "raw-data"
 
-rawDataRules :: Rules ()
-rawDataRules = do
-    ghciResource <- newResource "ghci" 1
+rawDataRules :: Resource -> Rules ()
+rawDataRules ghciResource = do
     es <- examples
     csvFs <- mapM (dataRulesForExample ghciResource) es
     combF <- allDataFile
@@ -55,10 +54,8 @@ dataRulesForExample ghciResource is = do
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
-rulesForFileAndName :: Resource
-                    -> ES.InputSpec
-                    -> ES.EasyName
-                    -> Rules (Path Abs File)
+rulesForFileAndName ::
+       Resource -> ES.InputSpec -> ES.EasyName -> Rules (Path Abs File)
 rulesForFileAndName ghciResource is name = do
     csvFs <-
         forM signatureInferenceStrategies $
@@ -67,8 +64,8 @@ rulesForFileAndName ghciResource is name = do
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
-rulesForFileNameAndStrat
-    :: Resource
+rulesForFileNameAndStrat ::
+       Resource
     -> ES.InputSpec
     -> ES.EasyName
     -> ES.SignatureInferenceStrategy

@@ -20,10 +20,8 @@ import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.R
 
-plotsRulesForPointsPlotWithEvaluatorsPerExample :: ES.InputSpec
-                                                -> Evaluator
-                                                -> Evaluator
-                                                -> Rules (Path Abs File)
+plotsRulesForPointsPlotWithEvaluatorsPerExample ::
+       ES.InputSpec -> Evaluator -> Evaluator -> Rules (Path Abs File)
 plotsRulesForPointsPlotWithEvaluatorsPerExample is e1 e2 = do
     plotF <- pointsPlotForEvaluatorsPerExample is e1 e2
     plotF $%> do
@@ -44,9 +42,8 @@ plotsRulesForPointsPlotWithEvaluatorsPerExample is e1 e2 = do
             ]
     pure plotF
 
-plotsRulesForPointsPlotWithEvaluators :: Evaluator
-                                      -> Evaluator
-                                      -> Rules (Path Abs File)
+plotsRulesForPointsPlotWithEvaluators ::
+       Evaluator -> Evaluator -> Rules (Path Abs File)
 plotsRulesForPointsPlotWithEvaluators e1 e2 = do
     plotF <- pointsPlotForEvaluators e1 e2
     plotF $%> do

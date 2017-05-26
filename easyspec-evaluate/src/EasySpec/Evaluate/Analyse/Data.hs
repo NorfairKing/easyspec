@@ -13,8 +13,8 @@ import EasySpec.Evaluate.Analyse.Data.Raw
 dataRule :: String
 dataRule = "data"
 
-dataRules :: Rules ()
-dataRules = do
-    rawDataRules
+dataRules :: Resource -> Rules ()
+dataRules ghciResource = do
+    rawDataRules ghciResource
     averageDataRules
     dataRule ~> need [rawDataRule, averageDataRule]

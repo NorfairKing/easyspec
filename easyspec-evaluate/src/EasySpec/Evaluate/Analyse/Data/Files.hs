@@ -11,6 +11,7 @@ import qualified EasySpec.Discover.Types as ES
 import EasySpec.Evaluate.Evaluate
 
 import EasySpec.Evaluate.Analyse.Common
+import EasySpec.Evaluate.Analyse.Data.Common
 
 getEasyspecSourceDir :: MonadIO m => m (Path Abs Dir)
 getEasyspecSourceDir = liftIO $ resolveDir' "../easyspec"

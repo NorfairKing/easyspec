@@ -39,12 +39,19 @@ tarfileRules package = do
     tarfile <- liftIO $ resolveFile pd $ package ++ ".tar.gz"
     tarfile $%> do
         ensureDir pd
-        cmd
-            (Cwd $ toFilePath $ parent tarfile)
-            "wget"
-            ("http://hackage.haskell.org/package/" ++ package ++ ".tar.gz")
-            "--output-document"
-            (toFilePath tarfile)
+        unit $
+            cmd
+                (Cwd $ toFilePath $ parent tarfile)
+                "wget"
+                ("http://hackage.haskell.org/package/" ++ package ++ ".tar.gz")
+                "--output-document"
+                (toFilePath tarfile)
+        unit $
+            cmd
+                (Cwd $ toFilePath $ parent tarfile)
+                "tar"
+                "xvzf"
+                (toFilePath tarfile)
     pure tarfile
 
 packageExamples ::
@@ -56,7 +63,7 @@ packageExamples (package, sourceDirs, modulePaths) = do
             forM modulePaths $ \modulePath -> do
                 bd <- liftIO $ resolveDir pd sourceDir
                 fp <- liftIO $ parseRelFile $ modulePath ++ ".hs"
-                exists <- liftIO $ Path.IO.doesFileExist fp
+                exists <- liftIO $ Path.IO.doesFileExist $ bd </> fp
                 pure $
                     if exists
                         then Just
@@ -65,7 +72,9 @@ packageExamples (package, sourceDirs, modulePaths) = do
                                  , ES.inputSpecFile = fp
                                  }
                         else Nothing
-    concat <$> forM sourceDirs modulesIn
+    res <- concat <$> forM sourceDirs modulesIn
+    liftIO $ print res
+    pure res
 
 packageExampleRawDataRules :: Resource -> PackageName -> Rules ()
 packageExampleRawDataRules ghciResource package = do

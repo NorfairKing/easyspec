@@ -3,6 +3,8 @@
 tmp/
 out/
 data/
+*.prof
+*.html
 *.trace
 *.css
 *.js

@@ -18,6 +18,7 @@ library
         EasySpec.Evaluate.Analyse.Common
         EasySpec.Evaluate.Analyse.Data
         EasySpec.Evaluate.Analyse.Data.Averages
+        EasySpec.Evaluate.Analyse.Data.Common
         EasySpec.Evaluate.Analyse.Data.Content
         EasySpec.Evaluate.Analyse.Data.Files
         EasySpec.Evaluate.Analyse.Data.Raw

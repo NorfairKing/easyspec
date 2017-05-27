@@ -14,6 +14,7 @@ import Language.Haskell.TH.Syntax as TH
 
 import qualified Distribution.ModuleName as Cabal
 import Distribution.PackageDescription as Cabal
+import Distribution.PackageDescription.Configuration as Cabal
 import Distribution.PackageDescription.Parse as Cabal
 import Distribution.Verbosity as Cabal
 
@@ -60,7 +61,7 @@ makePackageTup package = do
                                 verbose
                                 (toFilePath cabalFile)
                         pure $
-                            case library $ packageDescription gpd of
+                            case library $ flattenPackageDescription gpd of
                                 Nothing -> ([], [])
                                 Just lib ->
                                     ( hsSourceDirs $ libBuildInfo lib

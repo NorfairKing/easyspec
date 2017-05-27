@@ -18,6 +18,7 @@ import qualified EasySpec.Discover.Types as ES
 import EasySpec.Evaluate.Types
 
 import EasySpec.Evaluate.Analyse.Common
+import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Utils
 
 import EasySpec.Evaluate.Analyse.Data.Content

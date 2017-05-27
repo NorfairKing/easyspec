@@ -21,6 +21,7 @@ import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Types
 
 import EasySpec.Evaluate.Analyse.Common
+import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Utils
 
 import EasySpec.Evaluate.Analyse.Data.Files
@@ -49,6 +50,7 @@ dataRulesForStrategy strat = do
 dataRulesForExample :: Resource -> ES.InputSpec -> Rules (Path Abs File)
 dataRulesForExample ghciResource is = do
     names <- liftIO $ namesInSource is
+    liftIO $ mapM_ print names
     csvFs <- forM names $ rulesForFileAndName ghciResource is
     combF <- dataFileForExample is
     combineCSVFiles @EvaluatorCsvLine combF csvFs

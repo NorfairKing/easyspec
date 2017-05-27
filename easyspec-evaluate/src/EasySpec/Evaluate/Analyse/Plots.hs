@@ -29,9 +29,8 @@ plotsRule = "plots"
 
 plotsRules :: Rules ()
 plotsRules = do
-    es <- examples
     allDataPlotsFs <- plotsRulesForAllData
-    plotsFs <- concat <$> mapM plotsRulesForExample es
+    plotsFs <- concat <$> mapM plotsRulesForExample examples
     plotsRule ~> needP (allDataPlotsFs ++ plotsFs)
 
 plotsRulesForAllData :: Rules [Path Abs File]

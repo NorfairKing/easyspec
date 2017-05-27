@@ -29,3 +29,7 @@ fileInDirWithExtensionAndComponents genDir ext f comps = do
     dd <- genDir
     let fileStr = intercalate "-" $ dropExtensions (toFilePath f) : comps
     liftIO $ (dd </>) <$> parseRelFile (concat [fileStr, ".", ext])
+
+signatureInferenceStrategies :: [ES.SignatureInferenceStrategy]
+signatureInferenceStrategies = ES.inferenceStrategies
+

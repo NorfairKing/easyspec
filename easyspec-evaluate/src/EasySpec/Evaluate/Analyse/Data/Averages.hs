@@ -29,9 +29,8 @@ averageDataRule = "average-data"
 
 averageDataRules :: Rules ()
 averageDataRules = do
-    exs <- examples
-    fs <- concat <$> mapM averageOverNamesPerStrategyForExampleRules exs
-    fss <- mapM averageOverNamesAndStrategiesForExampleRules exs
+    fs <- concat <$> mapM averageOverNamesPerStrategyForExampleRules examples
+    fss <- mapM averageOverNamesAndStrategiesForExampleRules examples
     averageDataRule ~> needP (fs ++ fss)
 
 averageOverNamesPerStrategyForExampleRules ::

@@ -31,8 +31,7 @@ rawDataRule = "raw-data"
 
 rawDataRules :: Resource -> Rules ()
 rawDataRules ghciResource = do
-    es <- examples
-    csvFs <- mapM (dataRulesForExample ghciResource) es
+    csvFs <- mapM (dataRulesForExample ghciResource) examples
     combF <- allDataFile
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     perStrats <- mapM dataRulesForStrategy signatureInferenceStrategies

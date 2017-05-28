@@ -25,7 +25,6 @@ import EasySpec.Utils
 buildExamples :: Q Exp
 buildExamples = do
     res <- runIO findAllExamples
-    runIO $ print res
     TH.lift res
 
 findAllExamples :: MonadIO m => m [ES.InputSpec]
@@ -44,7 +43,7 @@ makeExampleCache :: Q Exp
 makeExampleCache = do
     ntups <-
         runIO $ do
-            exs <- findAllExamples
+            exs <- findAllExamples -- TODO put this function somewhere else so that we can use 'buildExamples' here instead of finding examples again.
             forM exs $ \ex -> do
                 ns <- findNamesInSource ex
                 putStrLn $

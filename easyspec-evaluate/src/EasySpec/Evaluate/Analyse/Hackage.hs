@@ -23,7 +23,7 @@ hackageRules ghciResource = do
     hackageRule ~> need packageRules
 
 hackagePackages :: [(PackageName, [String], [String])]
-hackagePackages = [$(makePackageTup "bytestring-0.10.8.1")]
+hackagePackages = [$(makePackageTup "bytestring-0.10.8.1"), $(makePackageTup "pretty-1.1.3.5")]
 
 hackageRulesFor :: Resource -> (PackageName, [String], [String]) -> Rules String
 hackageRulesFor ghciResource (package, sourceDirs, modulePaths) = do

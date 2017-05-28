@@ -32,4 +32,3 @@ fileInDirWithExtensionAndComponents genDir ext f comps = do
 
 signatureInferenceStrategies :: [ES.SignatureInferenceStrategy]
 signatureInferenceStrategies = ES.inferenceStrategies
-

@@ -28,7 +28,6 @@ hackagePackages = [$(makePackageTup "bytestring-0.10.8.1")]
 hackageRulesFor :: Resource -> (PackageName, [String], [String]) -> Rules String
 hackageRulesFor ghciResource (package, sourceDirs, modulePaths) = do
     tarfile <- tarfileRules package
-    packageExampleRawDataRules ghciResource package
     let rule = "hackage-" ++ package
     rule ~> needP [tarfile]
     pure rule
@@ -72,10 +71,4 @@ packageExamples (package, sourceDirs, modulePaths) = do
                                  , ES.inputSpecFile = fp
                                  }
                         else Nothing
-    res <- concat <$> forM sourceDirs modulesIn
-    liftIO $ print res
-    pure res
-
-packageExampleRawDataRules :: Resource -> PackageName -> Rules ()
-packageExampleRawDataRules ghciResource package = do
-    pure ()
+    concat <$> forM sourceDirs modulesIn

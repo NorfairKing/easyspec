@@ -49,7 +49,6 @@ dataRulesForStrategy strat = do
 dataRulesForExample :: Resource -> ES.InputSpec -> Rules (Path Abs File)
 dataRulesForExample ghciResource is = do
     names <- liftIO $ namesInSource is
-    liftIO $ mapM_ print names
     csvFs <- forM names $ rulesForFileAndName ghciResource is
     combF <- dataFileForExample is
     combineCSVFiles @EvaluatorCsvLine combF csvFs

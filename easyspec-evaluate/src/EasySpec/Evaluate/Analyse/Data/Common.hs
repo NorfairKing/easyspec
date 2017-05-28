@@ -17,10 +17,11 @@ import EasySpec.Evaluate.Types ()
 import EasySpec.Utils
 
 examples :: [ES.InputSpec]
-examples =
-    catMaybes $
-    flip map exampleTups $ \(bd, f) ->
-        ES.InputSpec <$> parseAbsDir bd <*> parseRelFile f
+examples = $(buildExamples)
 
-exampleTups :: [(FilePath, FilePath)]
-exampleTups = $(buildExamples)
+namesInSource :: (MonadIO m, MonadMask m) => ES.InputSpec -> m [ES.EasyName]
+namesInSource is = do
+    let cache = $(makeExampleCache)
+    case lookup is cache of
+        Nothing -> findNamesInSource is
+        Just r -> pure r

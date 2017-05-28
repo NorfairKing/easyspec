@@ -17,47 +17,51 @@ source(common)
 
 res = read.csv(inFile, header=TRUE)
 
-res$origin <- paste(res$path, res$focus)
+if (length(res$output) != 0) {
+  res$origin <- paste(res$path, res$focus)
 
-res1 <- res[res$evaluator == e1,]
-res2 <- res[res$evaluator == e2,]
+  res1 <- res[res$evaluator == e1,]
+  res2 <- res[res$evaluator == e2,]
 
 
-dat <- merge(res1, res2, by = "origin")
-dat <- dat[!is.na(dat$output.x),]
-dat <- dat[!is.na(dat$output.y),]
+  dat <- merge(res1, res2, by = "origin")
+  dat <- dat[!is.na(dat$output.x),]
+  dat <- dat[!is.na(dat$output.y),]
 
-png( outPng
-  , height=600
-  , width=1200
-  , bg="white"
-  )
-
-par(xpd=TRUE, mar=c(4,4,4,35))
-
-plot(dat$output.x
-  , dat$output.y
-  , xlab = paste(e1, paste("(", i1, ")", sep=""))
-  , ylab = paste(e2, paste("(", i2, ")", sep=""))
-  , type = "n" # Don't plot yet.
-  , main = paste(name, "Correlation:", format(round(cor(dat$output.x, dat$output.y), 2), nsmall = 2))
-  )
-
-strats = unique(res$strategy)
-for (i in seq_along(strats)) { 
-  strat = strats[i]
-  sdat <- dat[dat$strategy.x == strat,]
-  points(sdat$output.x
-    , sdat$output.y
-    , col = i
+  png( outPng
+    , height=600
+    , width=1200
+    , bg="white"
     )
+
+  par(xpd=TRUE, mar=c(4,4,4,35))
+
+  plot(dat$output.x
+    , dat$output.y
+    , xlab = paste(e1, paste("(", i1, ")", sep=""))
+    , ylab = paste(e2, paste("(", i2, ")", sep=""))
+    , type = "n" # Don't plot yet.
+    , main = paste(name, "Correlation:", format(round(cor(dat$output.x, dat$output.y), 2), nsmall = 2))
+    )
+
+  strats = unique(res$strategy)
+  for (i in seq_along(strats)) { 
+    strat = strats[i]
+    sdat <- dat[dat$strategy.x == strat,]
+    points(sdat$output.x
+      , sdat$output.y
+      , col = i
+      )
+  }
+
+
+  # To draw legend outside of graph
+  legend("right"
+    , inset=c(-0.8, 0)
+    , legend=levels(factor(strats))
+    , col=as.numeric(unique(factor(strats)))
+    , lty = 1
+    )
+} else { 
+  invalidDataPng(outPng)
 }
-
-
-# To draw legend outside of graph
-legend("right"
-  , inset=c(-0.8, 0)
-  , legend=levels(factor(strats))
-  , col=as.numeric(unique(factor(strats)))
-  , lty = 1
-  )

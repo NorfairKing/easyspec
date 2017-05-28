@@ -67,9 +67,9 @@ dataFilesForStrategy ::
        MonadIO m => ES.SignatureInferenceStrategy -> m [Path Abs File]
 dataFilesForStrategy strat =
     fmap concat $
-        forM examples $ \is -> do
-            names <- liftIO $ namesInSource is
-            forM names $ \name -> dataFileFor is name strat
+    forM examples $ \is -> do
+        names <- liftIO $ namesInSource is
+        forM names $ \name -> dataFileFor is name strat
 
 dataFileForStrategy ::
        MonadIO m => ES.SignatureInferenceStrategy -> m (Path Abs File)

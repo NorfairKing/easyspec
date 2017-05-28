@@ -1,21 +1,56 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE DeriveFunctor #-}
 
 module EasySpec.Discover.Types where
 
 import Import
 
+import Path.Internal (Path(Path))
+
 import Data.Tree
+
+import qualified Language.Haskell.TH.Syntax as TH (Lift)
 
 import Language.Haskell.Exts.Pretty as H
 import Language.Haskell.Exts.Syntax as H
 
+-- FIXME
+-- It is really annoying that these aren't in 'path' yet.
+-- Once they are, we can remove this, although the lift instances
+-- will probably not make it in there.
+deriving instance Data Abs
+
+deriving instance Data Rel
+
+deriving instance Data File
+
+deriving instance Data Dir
+
+deriving instance Typeable Abs
+
+deriving instance Typeable Rel
+
+deriving instance Typeable File
+
+deriving instance Typeable Dir
+
+deriving instance (Typeable a, Typeable b) => Typeable (Path a b)
+
+deriving instance (Data a, Data b) => Data (Path a b)
+
+deriving instance TH.Lift (Path a b)
+
+deriving instance TH.Lift l => TH.Lift (Name l)
+
 data InputSpec = InputSpec
     { inputSpecBaseDir :: Path Abs Dir
     , inputSpecFile :: Path Rel File
-    } deriving (Show, Eq)
+    } deriving (Show, Eq, Data, Typeable, TH.Lift)
 
 inputSpecAbsFile :: InputSpec -> Path Abs File
 inputSpecAbsFile InputSpec {..} = inputSpecBaseDir </> inputSpecFile

@@ -16,8 +16,8 @@ import qualified EasySpec.Discover.Types as ES
 import EasySpec.Evaluate.Evaluate
 import EasySpec.Evaluate.Evaluate.Evaluator
 
-import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Common
+import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
 import EasySpec.Evaluate.Analyse.Plots.RelativeLines
 import EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar

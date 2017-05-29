@@ -3,11 +3,9 @@ module TestUtils where
 import TestImport
 
 import Language.Haskell.Exts
-import Text.Show.Pretty
 
 import EasySpec.Discover.SourceGathering
 import EasySpec.Discover.Types
-import EasySpec.OptParse.Types
 import EasySpec.Utils
 
 forSourceFilesInDir ::

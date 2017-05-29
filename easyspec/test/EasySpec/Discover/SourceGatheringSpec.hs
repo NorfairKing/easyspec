@@ -29,7 +29,22 @@ spec = do
                      InputSpec
                      {inputSpecBaseDir = examplesDir, inputSpecFile = f})
                 defaultSettings
-        srcExtsEasyIds <- getHSEEasyIds examplesDir f
+        -- the hse ids
+        pr <- parseFile $ toFilePath $ examplesDir </> f
+        md <-
+            case pr of
+                ParseFailed srcloc err ->
+                    fail $
+                    unwords
+                        [ "haskell-src-exts failed to parse"
+                        , toFilePath f
+                        , "at"
+                        , show srcloc
+                        , "with error"
+                        , err
+                        ]
+                ParseOk m -> pure m
+        let srcExtsEasyIds = getEasyIdsFrom $ () <$ md
         forM_ srcExtsEasyIds $ \seei ->
             case find (\geid -> idName seei == idName seei) ghcEasyIds of
                 Nothing ->
@@ -48,4 +63,10 @@ spec = do
                               , "::"
                               , prettyPrint $ idType seei
                               ]
+                        , "... with (found) implementation:"
+                        , ppShow $ idImpl geid
+                        , "... with name:"
+                        , ppShow $ idName seei
+                        , "in the following module:"
+                        , ppShow $ () <$ md
                         ]

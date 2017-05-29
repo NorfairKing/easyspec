@@ -65,13 +65,13 @@ getImplFrom name mod_ =
             let ds =
                     flip map decls $ \d ->
                         case d of
-                            FunBind _ [] -> Nothing
+                            FunBind _ [] -> trace "emptyFunbind" Nothing
                             FunBind _ mtcs@(Match _ n _ _ _:_) ->
                                 if name == n
                                     then Just mtcs
-                                    else Nothing
-                            _ -> Nothing
+                                    else trace "wrongName" Nothing
+                            _ -> trace "wrongDecl" Nothing
             in case catMaybes ds of
                    (h:_) -> Just $ Impl h
-                   _ -> Nothing
-        _ -> Nothing
+                   _ -> trace "nodecls" Nothing
+        _ -> trace "wrongmod" Nothing

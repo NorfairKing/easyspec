@@ -36,14 +36,10 @@ hackageRulesFor package = do
     rule ~> needP [tarfile]
     pure rule
 
-hackageDir
-    :: MonadIO m
-    => m (Path Abs Dir)
+hackageDir :: MonadIO m => m (Path Abs Dir)
 hackageDir = (</> $(mkRelDir "hackage")) <$> tmpDir
 
-packageTmpDir
-    :: (MonadIO m, MonadThrow m)
-    => String -> m (Path Abs Dir)
+packageTmpDir :: (MonadIO m, MonadThrow m) => String -> m (Path Abs Dir)
 packageTmpDir package = do
     td <- hackageDir
     resolveDir td package

@@ -20,9 +20,8 @@ import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.R
 
-perExampleAndEvaluatorAverageBoxPlotFor :: ES.InputSpec
-                                        -> Evaluator
-                                        -> Rules (Path Abs File)
+perExampleAndEvaluatorAverageBoxPlotFor ::
+       ES.InputSpec -> Evaluator -> Rules (Path Abs File)
 perExampleAndEvaluatorAverageBoxPlotFor is evaluator = do
     plotF <- singleEvaluatorAverageBoxPlotFileForExample is evaluator
     plotF $%> do

@@ -31,9 +31,7 @@ archiveRules = do
             (map toFilePath $ mapMaybe (stripDir pd) fs)
     archiveRule ~> needP [zf]
 
-archiveFile
-    :: MonadIO m
-    => m (Path Abs File)
+archiveFile :: MonadIO m => m (Path Abs File)
 archiveFile = do
     od <- outDir
     liftIO $ resolveFile od "easyspec-data.tar.gz"

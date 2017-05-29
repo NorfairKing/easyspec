@@ -44,7 +44,7 @@ spec =
                         unless (geid == seei) $
                         expectationFailure $
                         unlines
-                            [ "The that ghc and haskell-src-exts found differ for"
+                            [ "The types that ghc and haskell-src-exts found differ for"
                             , prettyPrint $ idName seei
                             , ""
                             , "as a string:"
@@ -64,38 +64,3 @@ spec =
                             , "haskell-src-exts:"
                             , ppShow $ idType seei
                             ]
-
-getHSEEasyIds :: Path Abs Dir -> Path Rel File -> IO [EasyId]
-getHSEEasyIds bd f = do
-    pr <- parseFile $ toFilePath $ bd </> f
-    case pr of
-        ParseFailed srcloc err ->
-            fail $
-            unwords
-                [ "haskell-src-exts failed to parse"
-                , toFilePath f
-                , "at"
-                , show srcloc
-                , "with error"
-                , err
-                ]
-        ParseOk m -> pure $ getEasyIdsFrom $ () <$ m
-
-getEasyIdsFrom :: Module () -> [EasyId]
-getEasyIdsFrom m =
-    case m of
-        Module _ _ _ _ ds ->
-            concat $
-            flip map ds $ \d ->
-                case d of
-                    TypeSig _ ns t ->
-                        map
-                            (\n ->
-                                 Id
-                                 { idName = n
-                                 , idType = t
-                                 , idImpl = getImplFrom n m
-                                 })
-                            ns
-                    _ -> []
-        _ -> []

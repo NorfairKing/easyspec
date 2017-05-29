@@ -55,10 +55,8 @@ dataRulesForExample ghciResource is = do
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
-rulesForFileAndName :: Resource
-                    -> ES.InputSpec
-                    -> ES.EasyName
-                    -> Rules (Path Abs File)
+rulesForFileAndName ::
+       Resource -> ES.InputSpec -> ES.EasyName -> Rules (Path Abs File)
 rulesForFileAndName ghciResource is name = do
     csvFs <-
         forM signatureInferenceStrategies $
@@ -67,8 +65,8 @@ rulesForFileAndName ghciResource is name = do
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
-rulesForFileNameAndStrat
-    :: Resource
+rulesForFileNameAndStrat ::
+       Resource
     -> ES.InputSpec
     -> ES.EasyName
     -> ES.SignatureInferenceStrategy

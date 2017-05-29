@@ -20,9 +20,8 @@ inferTypeReachability i =
 depthNReachableViaComposition :: Int -> [EasyId] -> [EasyId] -> [EasyId]
 depthNReachableViaComposition = depthNReachable reachableViaComposition
 
-depthNReachable
-    :: (Show a, Eq a)
-    => (a -> a -> Bool) -> Int -> [a] -> [a] -> [a]
+depthNReachable ::
+       (Show a, Eq a) => (a -> a -> Bool) -> Int -> [a] -> [a] -> [a]
 depthNReachable _ 0 focus _ = focus
 depthNReachable canReachFrom depth focus scope =
     let reachableSet =

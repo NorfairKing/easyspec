@@ -21,10 +21,8 @@ import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.R
 
-perExampleNameAndEvaluatorBarPlotFor :: ES.InputSpec
-                                     -> ES.EasyName
-                                     -> Evaluator
-                                     -> Rules (Path Abs File)
+perExampleNameAndEvaluatorBarPlotFor ::
+       ES.InputSpec -> ES.EasyName -> Evaluator -> Rules (Path Abs File)
 perExampleNameAndEvaluatorBarPlotFor is name evaluator = do
     plotFile <- singleEvaluatorBarPlotFileForExampleAndName is name evaluator
     plotFile $%> do

@@ -97,8 +97,9 @@ test-suite easyspec-test
     other-modules:
         TestImport
         TestUtils
-        EasySpec.Discover.SignatureInference.TypeReachabilitySpec
         EasySpec.Discover.SignatureInference.MonomorphisationSpec
+        EasySpec.Discover.SignatureInference.TypeReachabilitySpec
+        EasySpec.Discover.SourceGatheringSpec
         EasySpec.GatherSpec
         EasySpecSpec
         Language.Haskell.Exts.Gen

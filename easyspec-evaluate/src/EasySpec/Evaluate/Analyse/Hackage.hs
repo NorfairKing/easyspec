@@ -24,8 +24,8 @@ hackageRules ghciResource = do
 
 hackagePackages :: [(PackageName, [String], [String])]
 hackagePackages =
-    [ $(makePackageTup "bytestring-0.10.8.1")
-    , $(makePackageTup "pretty-1.1.3.5")
+    [ $(makePackageTup "bytestring-0.10.8.1" ["Data.ByteString"])
+    , $(makePackageTup "pretty-1.1.3.5" [])
     ]
 
 hackageRulesFor :: Resource -> (PackageName, [String], [String]) -> Rules String

@@ -25,8 +25,8 @@ import EasySpec.Evaluate.Analyse.Common
 type PackageName = String
 
 -- Will be of type (String, [String], [String]) -- PackageName, [SourceDir], [ModulePath]
-makePackageTup :: PackageName -> Q Exp
-makePackageTup package = do
+makePackageTup :: PackageName -> [String] -> Q Exp
+makePackageTup package chosenModules = do
     res <-
         runIO $ do
             pd <- liftIO $ packageTmpDir package
@@ -65,22 +65,27 @@ makePackageTup package = do
                                 Nothing -> ([], [])
                                 Just lib ->
                                     ( hsSourceDirs $ libBuildInfo lib
-                                    , exposedModules lib)
+                                    , filter ((`elem` chosenModules) . show) $
+                                      exposedModules lib)
             pure
-                ((package, srcDirs, map Cabal.toFilePath moduleNames) :: ( String
-                                                                         , [String]
-                                                                         , [String]))
+                ((package, srcDirs, map Cabal.toFilePath moduleNames) :: (String, [String], [String]))
     TH.lift res
 
-hackageDir :: MonadIO m => m (Path Abs Dir)
+hackageDir
+    :: MonadIO m
+    => m (Path Abs Dir)
 hackageDir = (</> $(mkRelDir "hackage")) <$> tmpDir
 
-packageTmpDir :: MonadIO m => PackageName -> m (Path Abs Dir)
+packageTmpDir
+    :: MonadIO m
+    => PackageName -> m (Path Abs Dir)
 packageTmpDir package = do
     td <- hackageDir
     liftIO $ resolveDir td package
 
-packageDir :: MonadIO m => PackageName -> m (Path Abs Dir)
+packageDir
+    :: MonadIO m
+    => PackageName -> m (Path Abs Dir)
 packageDir package = do
     td <- packageTmpDir package
     liftIO $ resolveDir td package

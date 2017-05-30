@@ -21,7 +21,9 @@ data IdData = IdData
     , idDataRootloc :: Maybe (Path Rel File)
     } deriving (Eq)
 
-getGHCIds :: MonadIO m => InputSpec -> m [IdData]
+getGHCIds
+    :: MonadIO m
+    => InputSpec -> m [IdData]
 getGHCIds is =
     liftIO $
     runGhc (Just libdir) $ do
@@ -43,8 +45,9 @@ getGHCIds is =
         tmod <- typecheckModule parsedModule
         getGHCIdsFromTcModule (inputSpecFile is) tmod
 
-getGHCIdsFromTcModule ::
-       GhcMonad m => Path Rel File -> TypecheckedModule -> m [IdData]
+getGHCIdsFromTcModule
+    :: GhcMonad m
+    => Path Rel File -> TypecheckedModule -> m [IdData]
 getGHCIdsFromTcModule file tmod = do
     let (tcenv, _) = tm_internals_ tmod
         -- Get the global reader elementss out of the global env
@@ -58,6 +61,8 @@ getGHCIdsFromTcModule file tmod = do
                     , idDataExportingMods = []
                     , idDataRootloc = Just file
                     }
+    printO $ modInfoTyThings $ tm_checked_module_info tmod
+    mapM_ (printO . idDataId) locals
     others <-
         fmap concat $
         forM gres $ \gre -> do

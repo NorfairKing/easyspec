@@ -11,6 +11,7 @@ import qualified EasySpec.Discover.Types as ES
 import EasySpec.Evaluate.Evaluate
 
 import EasySpec.Evaluate.Analyse.Common
+import EasySpec.Evaluate.Analyse.Data.Common
 
 getEasyspecSourceDir :: MonadIO m => m (Path Abs Dir)
 getEasyspecSourceDir = liftIO $ resolveDir' "../easyspec"
@@ -64,12 +65,11 @@ dataFileForExample is =
 
 dataFilesForStrategy ::
        MonadIO m => ES.SignatureInferenceStrategy -> m [Path Abs File]
-dataFilesForStrategy strat = do
-    exs <- examples
+dataFilesForStrategy strat =
     fmap concat $
-        forM exs $ \is -> do
-            names <- liftIO $ namesInSource is
-            forM names $ \name -> dataFileFor is name strat
+    forM examples $ \is -> do
+        names <- liftIO $ namesInSource is
+        forM names $ \name -> dataFileFor is name strat
 
 dataFileForStrategy ::
        MonadIO m => ES.SignatureInferenceStrategy -> m (Path Abs File)

@@ -21,6 +21,7 @@ import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Types
 
 import EasySpec.Evaluate.Analyse.Common
+import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Utils
 
 import EasySpec.Evaluate.Analyse.Data.Files
@@ -28,11 +29,9 @@ import EasySpec.Evaluate.Analyse.Data.Files
 rawDataRule :: String
 rawDataRule = "raw-data"
 
-rawDataRules :: Rules ()
-rawDataRules = do
-    ghciResource <- newResource "ghci" 1
-    es <- examples
-    csvFs <- mapM (dataRulesForExample ghciResource) es
+rawDataRules :: Resource -> Rules ()
+rawDataRules ghciResource = do
+    csvFs <- mapM (dataRulesForExample ghciResource) examples
     combF <- allDataFile
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     perStrats <- mapM dataRulesForStrategy signatureInferenceStrategies

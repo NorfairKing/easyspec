@@ -36,7 +36,8 @@ runBuild target = do
                 shakeOptions
                 { shakeVerbosity = Loud
                 , shakeThreads = 0
-                , shakeReport = ["report.trace"]
+                , shakeReport = ["report.trace", "report.html"]
+                , shakeTimings = True
                 }
                 shakeBuild
 

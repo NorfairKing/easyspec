@@ -18,15 +18,18 @@ library
         EasySpec.Evaluate.Analyse.Common
         EasySpec.Evaluate.Analyse.Data
         EasySpec.Evaluate.Analyse.Data.Averages
+        EasySpec.Evaluate.Analyse.Data.Common
+        EasySpec.Evaluate.Analyse.Data.Common.TH
         EasySpec.Evaluate.Analyse.Data.Content
         EasySpec.Evaluate.Analyse.Data.Files
         EasySpec.Evaluate.Analyse.Data.Raw
         EasySpec.Evaluate.Analyse.Data.Types
         EasySpec.Evaluate.Analyse.Hackage
+        EasySpec.Evaluate.Analyse.Hackage.TH
         EasySpec.Evaluate.Analyse.Plots
+        EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
         EasySpec.Evaluate.Analyse.Plots.Files
         EasySpec.Evaluate.Analyse.Plots.RelativeLines
-        EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
         EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar
         EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
         EasySpec.Evaluate.Analyse.R
@@ -53,6 +56,7 @@ library
         aeson-pretty >=0.8 && <0.9,
         bytestring >=0.10 && <0.11,
         cassava >=0.4 && <0.5,
+        Cabal >=1.24 && <1.25,
         exceptions >=0.8 && <0.9,
         filepath >=1.4 && <1.5,
         optparse-applicative >=0.13,
@@ -60,6 +64,7 @@ library
         path-io >=1.2 && <1.3,
         mtl >=2.2 && <2.3,
         text >=1.2 && <1.3,
+        template-haskell >=2.11 && <2.12,
         timeit >=1.0 && <1.1,
         haskell-src-exts >=1.18 && <1.19,
         shake >=0.15 && <0.16,

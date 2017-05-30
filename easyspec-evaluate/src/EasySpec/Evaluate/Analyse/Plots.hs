@@ -17,6 +17,7 @@ import EasySpec.Evaluate.Evaluate
 import EasySpec.Evaluate.Evaluate.Evaluator
 
 import EasySpec.Evaluate.Analyse.Common
+import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
 import EasySpec.Evaluate.Analyse.Plots.RelativeLines
 import EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar
@@ -28,9 +29,8 @@ plotsRule = "plots"
 
 plotsRules :: Rules ()
 plotsRules = do
-    es <- examples
     allDataPlotsFs <- plotsRulesForAllData
-    plotsFs <- concat <$> mapM plotsRulesForExample es
+    plotsFs <- concat <$> mapM plotsRulesForExample examples
     plotsRule ~> needP (allDataPlotsFs ++ plotsFs)
 
 plotsRulesForAllData :: Rules [Path Abs File]
@@ -54,5 +54,5 @@ plotsRulesForExample is = do
 
 plotsRulesForExampleAndName ::
        ES.InputSpec -> ES.EasyName -> Rules [Path Abs File]
-plotsRulesForExampleAndName is name =
-    forM evaluators $ perExampleNameAndEvaluatorBarPlotFor is name
+plotsRulesForExampleAndName is name = pure []
+    -- forM evaluators $ perExampleNameAndEvaluatorBarPlotFor is name

@@ -18,6 +18,7 @@ import qualified EasySpec.Discover.Types as ES
 import EasySpec.Evaluate.Types
 
 import EasySpec.Evaluate.Analyse.Common
+import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Utils
 
 import EasySpec.Evaluate.Analyse.Data.Content
@@ -28,9 +29,8 @@ averageDataRule = "average-data"
 
 averageDataRules :: Rules ()
 averageDataRules = do
-    exs <- examples
-    fs <- concat <$> mapM averageOverNamesPerStrategyForExampleRules exs
-    fss <- mapM averageOverNamesAndStrategiesForExampleRules exs
+    fs <- concat <$> mapM averageOverNamesPerStrategyForExampleRules examples
+    fss <- mapM averageOverNamesAndStrategiesForExampleRules examples
     averageDataRule ~> needP (fs ++ fss)
 
 averageOverNamesPerStrategyForExampleRules ::

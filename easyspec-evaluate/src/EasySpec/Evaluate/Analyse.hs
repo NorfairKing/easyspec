@@ -15,11 +15,12 @@ analyseRule = "analyse"
 
 analyseRules :: Rules ()
 analyseRules = do
+    ghciResource <- newResource "ghci" 1
     rRules
-    dataRules
+    dataRules ghciResource
     plotsRules
     archiveRules
-    hackageRules
+    hackageRules ghciResource
     analyseRule ~> do
         need [dataRule, plotsRule, hackageRule]
         need [archiveRule] -- needs to be seperate

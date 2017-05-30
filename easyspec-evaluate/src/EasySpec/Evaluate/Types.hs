@@ -12,7 +12,6 @@ import qualified Data.Aeson as JSON
 import Data.Aeson (FromJSON(..), ToJSON(..))
 import Data.Csv hiding (Name)
 
-import Language.Haskell.Exts.Syntax
 
 import qualified EasySpec.Discover.Types as ES
 import qualified EasySpec.Evaluate.Evaluate.Evaluator.Types as ES
@@ -42,14 +41,10 @@ instance FromJSON ES.EasyEq where
 instance ToJSON (ES.Impl ()) where
     toJSON i =
         case i of
-            ES.Impl ms -> toJSON $ FunBind () ms
+            ES.Impl ds -> toJSON ds
 
 instance FromJSON (ES.Impl ()) where
-    parseJSON v = do
-        d <- parseJSON v
-        case d of
-            FunBind () ms -> pure $ ES.Impl ms
-            _ -> mempty
+    parseJSON v = ES.Impl <$> parseJSON v
 
 instance ToJSON (ES.Id ()) where
     toJSON ES.Id {..} =

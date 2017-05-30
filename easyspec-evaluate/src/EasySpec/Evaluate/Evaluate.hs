@@ -17,6 +17,7 @@ import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.Types as ES
 import qualified EasySpec.OptParse as ES
 
+import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Types
@@ -30,10 +31,6 @@ runEvaluate iss = do
             , p <- concat epointss
             ]
     LB8.putStrLn $ encodeDefaultOrderedByName csvLines
-
-namesInSource :: (MonadIO m, MonadMask m) => ES.InputSpec -> m [ES.EasyName]
-namesInSource is =
-    map ES.idName <$> runReaderT (ES.getEasyIds is) evaluationSettings
 
 getEvaluationInputPointsFor :: ES.InputSpec -> IO [EvaluationInputPoint]
 getEvaluationInputPointsFor is = do

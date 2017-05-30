@@ -12,7 +12,6 @@ import qualified Data.Aeson as JSON
 import Data.Aeson (FromJSON(..), ToJSON(..))
 import Data.Csv hiding (Name)
 
-
 import qualified EasySpec.Discover.Types as ES
 import qualified EasySpec.Evaluate.Evaluate.Evaluator.Types as ES
 
@@ -52,13 +51,15 @@ instance ToJSON (ES.Id ()) where
             [ "name" JSON..= idName
             , "type" JSON..= idType
             , "implementation" JSON..= idImpl
+            , "rootloc" JSON..= idRootloc
             ]
 
 instance FromJSON (ES.Id ()) where
     parseJSON =
         JSON.withObject "EasyId" $ \o ->
             ES.Id <$> o JSON..: "name" <*> o JSON..: "type" <*>
-            o JSON..: "implementation"
+            o JSON..: "implementation" <*>
+            o JSON..: "rootloc"
 
 data EvaluationInputPoint = EvaluationInputPoint
     { eipInputSpec :: ES.InputSpec

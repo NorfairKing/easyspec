@@ -59,6 +59,9 @@ makeExampleCache = do
                     ] ++
                     map (ES.prettyPrintOneLine) ns
                 pure (ex, ns)
+    runIO $ do
+        td <- tmpDir
+        writeJSON (td </> $(mkRelFile "examples.json")) ntups
     TH.lift ntups
 
 findNamesInSource :: (MonadIO m, MonadMask m) => ES.InputSpec -> m [ES.EasyName]
@@ -67,4 +70,4 @@ findNamesInSource is =
     -- Only take the ones that have an implementation (I.E. are defined in this file.)
     runReaderT (ES.getEasyIds is) ES.Settings {ES.setsDebugLevel = 0}
   where
-    isInSource = isJust . ES.idImpl
+    isInSource = (== Just (ES.inputSpecFile is)) . ES.idRootloc

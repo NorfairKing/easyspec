@@ -79,6 +79,7 @@ data Id m = Id
     { idName :: Name m
     , idType :: Type m
     , idImpl :: Maybe (Impl m)
+    , idRootloc :: Maybe (Path Rel File) -- The module name where it was defined
     } deriving (Show, Eq, Ord, Generic)
 
 type EasyId = Id ()

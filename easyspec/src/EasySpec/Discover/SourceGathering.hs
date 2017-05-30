@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module EasySpec.Discover.SourceGathering where
 
@@ -21,11 +22,11 @@ gatherSourceOf ::
     => InputSpec
     -> IdData
     -> m (Maybe EasyImpl)
-gatherSourceOf is (IdData i ms) = do
+gatherSourceOf is IdData {..} = do
     mimpl <-
-        case ms of
+        case idDataExportingMods of
             (_:_) -> pure Nothing
-        -- It was defined locally, so we can get the implementation out of the current file.
+        -- It was defined locally, so we may be able to get the implementation out of the current file.
             [] -> do
                 let sourceFile = inputSpecAbsFile is
                 mainContents <- liftIO $ readFile $ toFilePath sourceFile
@@ -44,7 +45,7 @@ gatherSourceOf is (IdData i ms) = do
                     ParseOk mod_ ->
                         pure $
                         getImplFrom
-                            (toEasyName $ Var.varName i :: EasyName)
+                            (toEasyName $ Var.varName idDataId :: EasyName)
                             (() <$ mod_)
     case mimpl of
         Nothing -> pure ()
@@ -52,7 +53,8 @@ gatherSourceOf is (IdData i ms) = do
             debug1 $
             unwords
                 [ "Found the following implementation for"
-                , HSE.prettyPrint (toEasyName $ Var.varName i :: EasyName)
+                , HSE.prettyPrint
+                      (toEasyName $ Var.varName idDataId :: EasyName)
                 , ":\n"
                 , prettyEasyImpl impl
                 ]

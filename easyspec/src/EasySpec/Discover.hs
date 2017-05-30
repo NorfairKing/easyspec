@@ -78,10 +78,10 @@ getEasyIds ::
 getEasyIds is = do
     idDatas <- getGHCIds is
     tups <-
-        forM idDatas $ \idData@(IdData i _) -> do
+        forM idDatas $ \idData -> do
             mimpl <- gatherSourceOf is idData
-            pure (i, mimpl)
-    pure $ map (uncurry toEasyId) tups
+            pure (idDataId idData, mimpl, idDataRootloc idData)
+    pure $ flip map tups $ \(i, j, k) -> toEasyId i j k
 
 splitFocus :: DiscoverSettings -> [EasyId] -> ([EasyId], [EasyId])
 splitFocus ds ids =

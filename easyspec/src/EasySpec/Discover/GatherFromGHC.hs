@@ -15,9 +15,11 @@ import TcRnTypes
 import EasySpec.Discover.Types
 import EasySpec.Discover.Utils
 
-data IdData =
-    IdData GHC.Id
-           [GHC.ModuleName]
+data IdData = IdData
+    { idDataId :: GHC.Id
+    , idDataExportingMods :: [GHC.ModuleName]
+    , idDataRootloc :: Maybe (Path Rel File)
+    } deriving (Eq)
 
 getGHCIds :: MonadIO m => InputSpec -> m [IdData]
 getGHCIds is =
@@ -36,27 +38,50 @@ getGHCIds is =
         target <- guessTarget (moduleNameString targetModName) Nothing
         setTargets [target]
         loadSuccessfully LoadAllTargets
-            -- Doesn't work in a project, only in top-level modules
         modSum <- getModSummary targetModName
         parsedModule <- parseModule modSum
         tmod <- typecheckModule parsedModule
-        getGHCIdsFromTcModule tmod
+        getGHCIdsFromTcModule (inputSpecFile is) tmod
 
-getGHCIdsFromTcModule :: GhcMonad m => TypecheckedModule -> m [IdData]
-getGHCIdsFromTcModule tmod = do
+getGHCIdsFromTcModule ::
+       GhcMonad m => Path Rel File -> TypecheckedModule -> m [IdData]
+getGHCIdsFromTcModule file tmod = do
     let (tcenv, _) = tm_internals_ tmod
         -- Get the global reader elementss out of the global env
     let gres = concat $ occEnvElts $ tcg_rdr_env tcenv
-    fmap concat $
+    let locals =
+            concat $
+            flip map (modInfoTyThings $ tm_checked_module_info tmod) $ \tything ->
+                flip map (idsFromThing tything) $ \i ->
+                    IdData
+                    { idDataId = i
+                    , idDataExportingMods = []
+                    , idDataRootloc = Just file
+                    }
+    others <-
+        fmap concat $
         forM gres $ \gre -> do
-            tything <- lookupName $ gre_name gre
-            let modulesThatImportThis = map (is_mod . is_decl) $ gre_imp gre
+            mtything <- lookupName $ gre_name gre
+            let modulesFromWhichWeImportedThis =
+                    map (is_mod . is_decl) $ gre_imp gre
             pure $
-                map (`IdData` modulesThatImportThis) $
-                case tything of
+                case mtything of
                     Nothing -> []
-                        -- If it's a function, return it
-                    Just (AnId i) -> [i]
-                        -- If it's a data declaration, get its constructors as functions
-                    Just (AConLike (RealDataCon dc)) -> [dataConWorkId dc]
-                    Just _ -> []
+                    Just tything ->
+                        flip map (idsFromThing tything) $ \i ->
+                            IdData
+                            { idDataId = i
+                            , idDataExportingMods =
+                                  modulesFromWhichWeImportedThis
+                            , idDataRootloc = Nothing
+                            }
+    pure $ nubBy (\i1 i2 -> idDataId i1 == idDataId i2) $ locals ++ others
+  where
+    idsFromThing :: GHC.TyThing -> [GHC.Id]
+    idsFromThing tything =
+        case tything of
+            AnId i -> [i]
+                   -- If it's a function, return it
+            AConLike (RealDataCon dc) -> [dataConWorkId dc]
+                   -- If it's a data declaration, get its constructors as functions
+            _ -> []

@@ -46,7 +46,7 @@ spec = do
                 ParseOk m -> pure m
         let srcExtsEasyIds = getEasyIdsFrom $ () <$ md
         forM_ srcExtsEasyIds $ \seei ->
-            case find (\geid -> idName seei == idName seei) ghcEasyIds of
+            case find (\geid -> idName seei == idName geid) ghcEasyIds of
                 Nothing ->
                     expectationFailure $
                     unwords

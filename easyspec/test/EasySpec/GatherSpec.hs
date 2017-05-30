@@ -9,7 +9,6 @@ import Language.Haskell.Exts
 import Text.Show.Pretty
 
 import EasySpec.Discover
-import EasySpec.Discover.SourceGathering
 import EasySpec.Discover.Types
 import EasySpec.OptParse.Types
 

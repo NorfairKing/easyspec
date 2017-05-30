@@ -30,7 +30,7 @@ diffImpl ei1 ei2 =
     dictDiff (letterDict $ namesOf ei1) (letterDict $ namesOf ei2)
 
 namesOf :: EasyImpl -> [String]
-namesOf (Impl ms) = map nameStr $ concatMap getMatchSymbols ms
+namesOf (Impl d) = map nameStr $ concatMap getDeclSymbols d
   where
     nameStr :: Name () -> String
     nameStr (Ident _ s) = s

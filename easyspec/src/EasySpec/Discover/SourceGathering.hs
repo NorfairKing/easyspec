@@ -62,16 +62,18 @@ getImplFrom :: (Eq l, Monoid l) => Name l -> Module l -> Maybe (Impl l)
 getImplFrom name mod_ =
     case mod_ of
         (Module _ _ _ _ decls) ->
-            let ds =
+            let mds =
                     flip map decls $ \d ->
-                        case d of
-                            FunBind _ [] -> trace "emptyFunbind" Nothing
-                            FunBind _ mtcs@(Match _ n _ _ _:_) ->
+                        let ifname n =
                                 if name == n
-                                    then Just mtcs
-                                    else trace "wrongName" Nothing
-                            _ -> trace "wrongDecl" Nothing
-            in case catMaybes ds of
-                   (h:_) -> Just $ Impl h
-                   _ -> trace "nodecls" Nothing
-        _ -> trace "wrongmod" Nothing
+                                    then Just d
+                                    else Nothing
+                        in case d of
+                               FunBind _ (Match _ n _ _ _:_) -> ifname n
+                               PatBind _ (PVar _ n) _ _ -> ifname n
+                               PatSyn _ (PVar _ n) _ _ -> ifname n
+                               _ -> Nothing
+            in case catMaybes mds of
+                   [] -> Nothing
+                   ds -> Just $ Impl ds
+        _ -> Nothing

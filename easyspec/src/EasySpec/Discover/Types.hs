@@ -77,10 +77,10 @@ prettyEasyEq :: EasyEq -> String
 prettyEasyEq (EasyEq e1 e2) = unwords [H.prettyPrint e1, "=", H.prettyPrint e2]
 
 newtype Impl l =
-    Impl [H.Match l]
+    Impl [Decl l]
     deriving (Show, Eq, Ord, Functor)
 
 type EasyImpl = Impl ()
 
 prettyEasyImpl :: EasyImpl -> String
-prettyEasyImpl (Impl ms) = H.prettyPrint $ FunBind () ms
+prettyEasyImpl (Impl ds) = unlines $ map H.prettyPrint ds

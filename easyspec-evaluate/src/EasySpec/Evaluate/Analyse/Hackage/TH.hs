@@ -74,7 +74,7 @@ makePackageTup package chosenModules = do
 hackageDir
     :: MonadIO m
     => m (Path Abs Dir)
-hackageDir = (</> $(mkRelDir "hackage")) <$> tmpDir
+hackageDir = (</> $(mkRelDir ".hackage")) <$> tmpDir
 
 packageTmpDir
     :: MonadIO m

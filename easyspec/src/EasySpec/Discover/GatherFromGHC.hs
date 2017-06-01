@@ -8,9 +8,11 @@ import ConLike
 import DataCon
 import GHC
 import GHC.Paths (libdir)
+import Name
 import OccName
 import RdrName
 import TcRnTypes
+import Var
 
 import EasySpec.Discover.Types
 import EasySpec.Discover.Utils
@@ -21,7 +23,9 @@ data IdData = IdData
     , idDataRootloc :: Maybe (Path Rel File)
     } deriving (Eq)
 
-getGHCIds :: MonadIO m => InputSpec -> m [IdData]
+getGHCIds
+    :: MonadIO m
+    => InputSpec -> m [IdData]
 getGHCIds is =
     liftIO $
     runGhc (Just libdir) $ do
@@ -43,13 +47,18 @@ getGHCIds is =
         tmod <- typecheckModule parsedModule
         getGHCIdsFromTcModule (inputSpecFile is) tmod
 
-getGHCIdsFromTcModule ::
-       GhcMonad m => Path Rel File -> TypecheckedModule -> m [IdData]
+getGHCIdsFromTcModule
+    :: GhcMonad m
+    => Path Rel File -> TypecheckedModule -> m [IdData]
 getGHCIdsFromTcModule file tmod = do
     let (tcenv, _) = tm_internals_ tmod
         -- Get the global reader elementss out of the global env
     let gres = concat $ occEnvElts $ tcg_rdr_env tcenv
+    let isInternal =
+            (\n -> "$tr" `isPrefixOf` n || "$tc" `isPrefixOf` n) .
+            Name.getOccString . Var.varName . idDataId
     let locals =
+            filter (not . isInternal) $
             concat $
             flip map (modInfoTyThings $ tm_checked_module_info tmod) $ \tything ->
                 flip map (idsFromThing tything) $ \i ->

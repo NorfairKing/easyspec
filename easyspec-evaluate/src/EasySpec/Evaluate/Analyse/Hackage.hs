@@ -24,8 +24,8 @@ hackageRules ghciResource = do
 
 hackagePackages :: [(PackageName, [String], [String])]
 hackagePackages =
-    [ $(makePackageTup "bytestring-0.10.8.1" ["Data.ByteString"])
-    , $(makePackageTup "pretty-1.1.3.5" [])
+    [ $(makePackageTup "bytestring-0.10.8.1" [["Data", "ByteString"]])
+    , $(makePackageTup "pretty-1.1.3.5" [["Text", "PrettyPrint"]])
     ]
 
 hackageRulesFor :: Resource -> (PackageName, [String], [String]) -> Rules String
@@ -56,11 +56,14 @@ tarfileRules package = do
                 (toFilePath tarfile)
     pure tarfile
 
-hackageDir :: MonadIO m => m (Path Abs Dir)
+hackageDir
+    :: MonadIO m
+    => m (Path Abs Dir)
 hackageDir = (</> $(mkRelDir "hackage")) <$> tmpDir
 
-packageExamples ::
-       MonadIO m => (PackageName, [String], [String]) -> m [ES.InputSpec]
+packageExamples
+    :: MonadIO m
+    => (PackageName, [String], [String]) -> m [ES.InputSpec]
 packageExamples (package, sourceDirs, modulePaths) = do
     pd <- packageDir package
     let modulesIn sourceDir =

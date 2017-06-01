@@ -25,7 +25,7 @@ import EasySpec.Evaluate.Analyse.Common
 type PackageName = String
 
 -- Will be of type (String, [String], [String]) -- PackageName, [SourceDir], [ModulePath]
-makePackageTup :: PackageName -> [String] -> Q Exp
+makePackageTup :: PackageName -> [[String]] -> Q Exp
 makePackageTup package chosenModules = do
     res <-
         runIO $ do
@@ -65,7 +65,13 @@ makePackageTup package chosenModules = do
                                 Nothing -> ([], [])
                                 Just lib ->
                                     ( hsSourceDirs $ libBuildInfo lib
-                                    , filter ((`elem` chosenModules) . show) $
+                                    , filter
+                                          ((`elem` chosenModules) .
+                                           Cabal.components) $
+                                      trace
+                                          (unlines $
+                                           map (show . Cabal.components) $
+                                           exposedModules lib) $
                                       exposedModules lib)
             pure
                 ((package, srcDirs, map Cabal.toFilePath moduleNames) :: (String, [String], [String]))

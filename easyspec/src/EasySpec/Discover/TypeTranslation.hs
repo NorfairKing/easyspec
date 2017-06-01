@@ -6,6 +6,7 @@ import Import hiding (tyConName)
 
 import Class
 import GHC
+import qualified Module
 import qualified Name
 import TyCoRep
 import TyCon
@@ -14,20 +15,31 @@ import Var
 
 import Language.Haskell.Exts.Syntax as H
 
+import EasySpec.Discover.GatherFromGHC as E
 import EasySpec.Discover.Types as E
 
-toEasyId ::
-       Monoid m => GHC.Id -> Maybe (E.Impl m) -> Maybe (Path Rel File) -> E.Id m
-toEasyId i impl mrl =
+toEasyId :: Monoid m => E.IdData -> Maybe (E.Impl m) -> E.Id m
+toEasyId d impl =
     Id
-    { E.idName = toEasyName $ Var.varName i
-    , E.idType = toEasyType $ Var.varType i
+    { E.idName = toEasyQName d
+    , E.idType = toEasyType $ Var.varType $ idDataId d
     , E.idImpl = impl
-    , E.idRootloc = mrl
+    , E.idRootloc = idDataRootloc d
     }
 
 toEasyName :: Monoid a => GHC.Name -> H.Name a
 toEasyName n = Ident mempty $ showName n
+
+toEasyQName :: Monoid a => IdData -> H.QName a
+toEasyQName d =
+    let ident = toEasyName $ Var.varName $ idDataId d
+    in case idDataExportingMods d of
+           [] -> H.UnQual mempty ident -- FIXME this will break things, most likely
+           (mn:_) ->
+               H.Qual
+                   mempty
+                   (ModuleName mempty $ Module.moduleNameString mn)
+                   ident
 
 toEasyType :: Monoid a => GHC.Type -> H.Type a
 toEasyType ty =
@@ -44,7 +56,7 @@ toEasyType ty =
                                  CxSingle mempty $
                                  ClassA
                                      mempty
-                                     (UnQual mempty $ toEasyName $ className c)
+                                     (UnQual mempty $ toEasyName $ className c) -- FIXME use a qualified name
                                      (map toEasyType kots))
                                 (toEasyType tt)
                         Nothing ->
@@ -62,8 +74,7 @@ toEasyType ty =
                         _ ->
                             foldl
                                 (TyApp mempty)
-                                (TyCon mempty $
-                                 UnQual mempty $ toEasyName $ tyConName tc)
+                                (TyCon mempty $ UnQual mempty $ toEasyName $ tyConName tc)
                                 (map toEasyType kots)
                 ForAllTy _ t' -> toEasyType t'
                 _ -> error "Not implemented yet"

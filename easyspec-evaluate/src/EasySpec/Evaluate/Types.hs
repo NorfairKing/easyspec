@@ -64,7 +64,7 @@ instance FromJSON (ES.Id ()) where
 data EvaluationInputPoint = EvaluationInputPoint
     { eipInputSpec :: ES.InputSpec
     , eipStrat :: String
-    , eipFunc :: ES.EasyName
+    , eipFunc :: ES.EasyQName
     , eipScope :: [ES.EasyId]
     , eipDiscoveredEqs :: [ES.EasyEq]
     , eipRuntime :: Double

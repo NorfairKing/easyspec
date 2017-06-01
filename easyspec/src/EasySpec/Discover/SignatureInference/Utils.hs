@@ -107,7 +107,7 @@ convertToUsableNamedExp i = do
 addTypeClassTrickery :: EasyId -> (EasyExp, EasyType)
 addTypeClassTrickery eid = go (expr, idType eid)
   where
-    expr = Paren mempty $ Var mempty (UnQual mempty (idName eid))
+    expr = Paren mempty $ Var mempty (idName eid)
     go (e, t) =
         case t of
             TyForall _ _ (Just (CxSingle _ (ClassA _ cn [ct]))) ft

@@ -32,7 +32,7 @@ newtype Dispatch =
 
 data DiscoverSettings = DiscoverSettings
     { setDiscInputSpec :: InputSpec
-    , setDiscFun :: Maybe EasyName
+    , setDiscFun :: Maybe EasyQName
     , setDiscInfStrat :: SignatureInferenceStrategy
     }
 

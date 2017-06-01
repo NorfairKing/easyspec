@@ -22,7 +22,7 @@ import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.R
 
 perExampleNameAndEvaluatorBarPlotFor ::
-       ES.InputSpec -> ES.EasyName -> Evaluator -> Rules (Path Abs File)
+       ES.InputSpec -> ES.EasyQName -> Evaluator -> Rules (Path Abs File)
 perExampleNameAndEvaluatorBarPlotFor is name evaluator = do
     plotFile <- singleEvaluatorBarPlotFileForExampleAndName is name evaluator
     plotFile $%> do

@@ -13,7 +13,7 @@ import System.Environment (getArgs)
 
 import Options.Applicative
 
-import Language.Haskell.Exts (Name(Ident))
+import Language.Haskell.Exts as H
 
 import EasySpec.Discover.SignatureInference
 import EasySpec.Discover.Types
@@ -51,10 +51,38 @@ combineToInstructions cmd Flags {..} Configuration = (,) <$> disp <*> sets
                                             , n
                                             ]
                                     Just r -> pure r
+                    f <-
+                        case argDiscFun of
+                            Nothing -> pure Nothing
+                            Just funName ->
+                                fmap Just $
+                                case H.parseExp funName of
+                                    ParseFailed loc err ->
+                                        die $
+                                        unwords
+                                            [ "Failed to parse the focus function's name:"
+                                            , show loc
+                                            , err
+                                            ]
+                                    ParseOk (Var _ qn) ->
+                                        case qn of
+                                            UnQual _ _ ->
+                                                die $
+                                                unwords
+                                                    [ "The focus function's name must be qualified."
+                                                    ]
+                                            Qual _ _ _ -> pure $ () <$ qn
+                                    ParseOk e ->
+                                        die $
+                                        unwords
+                                            [ "Failed to parse the focus function as a variable."
+                                            , "It was parsed as the following instead:"
+                                            , show e
+                                            ]
                     pure
                         DiscoverSettings
                         { setDiscInputSpec = InputSpec dir file
-                        , setDiscFun = Ident mempty <$> argDiscFun
+                        , setDiscFun = f
                         , setDiscInfStrat = infStrat
                         }
     sets = pure Settings {setsDebugLevel = fromMaybe 0 flagsDebugLevel}

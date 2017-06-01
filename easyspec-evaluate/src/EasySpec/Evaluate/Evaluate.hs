@@ -38,7 +38,7 @@ getEvaluationInputPointsFor is = do
     fmap concat $ forM names $ getEvaluationInputPointsForName is
 
 getEvaluationInputPointsForName ::
-       ES.InputSpec -> ES.EasyName -> IO [EvaluationInputPoint]
+       ES.InputSpec -> ES.EasyQName -> IO [EvaluationInputPoint]
 getEvaluationInputPointsForName is funcname =
     forM ES.inferenceStrategies $ getEvaluationInputPoint is funcname
 
@@ -47,7 +47,7 @@ evaluationSettings = ES.Settings {ES.setsDebugLevel = 0}
 
 getEvaluationInputPoint ::
        ES.InputSpec
-    -> ES.EasyName
+    -> ES.EasyQName
     -> ES.SignatureInferenceStrategy
     -> IO EvaluationInputPoint
 getEvaluationInputPoint is funcname strat = do

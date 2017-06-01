@@ -55,7 +55,7 @@ discover ids = do
                  putStrLn $ prettyPrint lh ++ " = " ++ prettyPrint rh)
             res
 
-mentionsEq :: EasyName -> EasyEq -> Bool
+mentionsEq :: EasyQName -> EasyEq -> Bool
 mentionsEq n (EasyEq e1 e2) = mentions n e1 || mentions n e2
 
 discoverEquations ::
@@ -77,11 +77,11 @@ getEasyIds ::
     -> m [EasyId]
 getEasyIds is = do
     idDatas <- getGHCIds is
-    tups <-
+    dats <-
         forM idDatas $ \idData -> do
             mimpl <- gatherSourceOf is idData
-            pure (idDataId idData, mimpl, idDataRootloc idData)
-    pure $ flip map tups $ \(i, j, k) -> toEasyId i j k
+            pure (idData, mimpl)
+    pure $ map (uncurry toEasyId) dats
 
 splitFocus :: DiscoverSettings -> [EasyId] -> ([EasyId], [EasyId])
 splitFocus ds ids =

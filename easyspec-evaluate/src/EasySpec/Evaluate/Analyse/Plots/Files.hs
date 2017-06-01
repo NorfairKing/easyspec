@@ -55,7 +55,7 @@ pointsPlotAnalysisScript = scriptFile "points.r"
 singleEvaluatorBarPlotFileForExampleAndName ::
        MonadIO m
     => ES.InputSpec
-    -> ES.EasyName
+    -> ES.EasyQName
     -> Evaluator
     -> m (Path Abs File)
 singleEvaluatorBarPlotFileForExampleAndName is name ev =

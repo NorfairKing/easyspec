@@ -55,7 +55,7 @@ dataRulesForExample ghciResource is = do
     pure combF
 
 rulesForFileAndName ::
-       Resource -> ES.InputSpec -> ES.EasyName -> Rules (Path Abs File)
+       Resource -> ES.InputSpec -> ES.EasyQName -> Rules (Path Abs File)
 rulesForFileAndName ghciResource is name = do
     csvFs <-
         forM signatureInferenceStrategies $
@@ -67,7 +67,7 @@ rulesForFileAndName ghciResource is name = do
 rulesForFileNameAndStrat ::
        Resource
     -> ES.InputSpec
-    -> ES.EasyName
+    -> ES.EasyQName
     -> ES.SignatureInferenceStrategy
     -> Rules (Path Abs File)
 rulesForFileNameAndStrat ghciResource is name infStrat = do

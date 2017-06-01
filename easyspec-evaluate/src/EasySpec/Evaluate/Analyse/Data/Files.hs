@@ -20,7 +20,7 @@ dataDir = (</> $(mkRelDir "data")) <$> tmpDir
 rawDataFileFor ::
        MonadIO m
     => ES.InputSpec
-    -> ES.EasyName
+    -> ES.EasyQName
     -> ES.SignatureInferenceStrategy
     -> m (Path Abs File)
 rawDataFileFor is name strat =
@@ -35,7 +35,7 @@ jsonDataFileWithComponents = dataFileWithComponents "json"
 dataFileFor ::
        MonadIO m
     => ES.InputSpec
-    -> ES.EasyName
+    -> ES.EasyQName
     -> ES.SignatureInferenceStrategy
     -> m (Path Abs File)
 dataFileFor is name strat =
@@ -44,14 +44,14 @@ dataFileFor is name strat =
         [prettyPrint name, ES.sigInfStratName strat]
 
 dataFileForExampleAndName ::
-       MonadIO m => ES.InputSpec -> ES.EasyName -> m (Path Abs File)
+       MonadIO m => ES.InputSpec -> ES.EasyQName -> m (Path Abs File)
 dataFileForExampleAndName is name =
     csvDataFileWithComponents
         ($(mkRelDir "combined-per-example-per-name") </> ES.inputSpecFile is)
         [prettyPrint name]
 
 dataFilesForExampleAndName ::
-       MonadIO m => ES.InputSpec -> ES.EasyName -> m [Path Abs File]
+       MonadIO m => ES.InputSpec -> ES.EasyQName -> m [Path Abs File]
 dataFilesForExampleAndName is name =
     forM signatureInferenceStrategies $ dataFileFor is name
 

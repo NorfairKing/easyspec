@@ -46,7 +46,15 @@ deriving instance (Data a, Data b) => Data (Path a b)
 
 deriving instance TH.Lift (Path a b)
 
+deriving instance TH.Lift Boxed
+
 deriving instance TH.Lift l => TH.Lift (Name l)
+
+deriving instance TH.Lift l => TH.Lift (QName l)
+
+deriving instance TH.Lift l => TH.Lift (ModuleName l)
+
+deriving instance TH.Lift l => TH.Lift (SpecialCon l)
 
 data InputSpec = InputSpec
     { inputSpecBaseDir :: Path Abs Dir
@@ -77,7 +85,7 @@ newtype SignatureExpression =
     deriving (Show, Eq)
 
 data Id m = Id
-    { idName :: Name m
+    { idName :: QName m
     , idType :: Type m
     , idImpl :: Maybe (Impl m)
     , idRootloc :: Maybe (Path Rel File) -- The module name where it was defined
@@ -97,6 +105,8 @@ data NamedExp m = NamedExp
 type EasyNamedExp = NamedExp ()
 
 type EasyName = H.Name ()
+
+type EasyQName = H.QName ()
 
 type EasyType = H.Type ()
 

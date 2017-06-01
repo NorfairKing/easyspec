@@ -51,6 +51,6 @@ plotsRulesForExample is = do
     pure $ bars ++ boxes ++ points
 
 plotsRulesForExampleAndName ::
-       ES.InputSpec -> ES.EasyName -> Rules [Path Abs File]
+       ES.InputSpec -> ES.EasyQName -> Rules [Path Abs File]
 plotsRulesForExampleAndName is name =
     forM evaluators $ perExampleNameAndEvaluatorBarPlotFor is name

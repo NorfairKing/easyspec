@@ -61,7 +61,8 @@ makeExampleCache = do
         writeJSON (td </> $(mkRelFile "examples.json")) ntups
     TH.lift ntups
 
-findNamesInSource :: (MonadIO m, MonadMask m) => ES.InputSpec -> m [ES.EasyName]
+findNamesInSource ::
+       (MonadIO m, MonadMask m) => ES.InputSpec -> m [ES.EasyQName]
 findNamesInSource is =
     (map ES.idName . filter isInSource) <$>
     -- Only take the ones that have an implementation (I.E. are defined in this file.)

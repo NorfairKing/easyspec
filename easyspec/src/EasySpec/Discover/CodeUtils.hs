@@ -285,13 +285,13 @@ foldType ffa ff ft fl fpa fa fv fc fp fi fk fpr fe fspl fbng fwc fqq = go
     go (TyWildCard l mn) = fwc l mn
     go (TyQuasiQuote l s1 s2) = fqq l s1 s2
 
-mentions :: Eq l => Name l -> Exp l -> Bool
+mentions :: Eq l => QName l -> Exp l -> Bool
 mentions n =
     foldExp
-        (\_ qn -> q qn)
+        (\_ qn -> qn == n)
         (\_ _ -> False)
         (\_ _ -> False)
-        (\_ qn -> q qn)
+        (\_ qn -> qn == n)
         (\_ _ -> False)
         (\_ b1 _ b2 -> b1 || b2)
         (\_ b1 b2 -> b1 || b2)
@@ -310,7 +310,7 @@ mentions n =
         (\_ b -> b)
         (\_ b _ -> b)
         (\_ _ b -> b)
-        (\_ qn _ -> q qn)
+        (\_ qn _ -> qn == n)
         (\_ b _ -> b)
         (\_ b -> b)
         (\_ b1 b2 -> b1 || b2)
@@ -322,8 +322,8 @@ mentions n =
         (\_ b _ -> b)
         (\_ b _ -> b)
         (\_ b _ -> b)
-        (\_ qn -> q qn)
-        (\_ qn -> q qn)
+        (\_ qn -> qn == n)
+        (\_ qn -> qn == n)
         (\_ _ -> False)
         (\_ _ -> False)
         (\_ _ _ -> False)
@@ -343,10 +343,6 @@ mentions n =
         (\_ b1 b2 -> b1 || b2)
         (\_ _ -> False)
         (\_ -> False)
-  where
-    q (UnQual _ n') = n == n'
-    q (Qual _ _ n') = n == n'
-    q (Special _ _) = False
 
 foldExp ::
        (l -> QName l -> b)

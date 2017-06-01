@@ -7,7 +7,6 @@ import Import
 import Path.IO
 
 import Development.Shake
-import Development.Shake.Path
 
 import Language.Haskell.TH as TH
 import Language.Haskell.TH.Syntax as TH
@@ -18,27 +17,24 @@ import Distribution.PackageDescription.Configuration as Cabal
 import Distribution.PackageDescription.Parse as Cabal
 import Distribution.Verbosity as Cabal
 
-import qualified EasySpec.Discover.Types as ES
-
 import EasySpec.Evaluate.Analyse.Common
 
 type PackageName = String
 
 -- Will be of type (String, [String], [String]) -- PackageName, [SourceDir], [ModulePath]
 makePackageTup :: PackageName -> [[String]] -> Q Exp
-makePackageTup package chosenModules = do
+makePackageTup pkg chosenModules = do
     res <-
         runIO $ do
-            pd <- liftIO $ packageTmpDir package
-            tarfile <- liftIO $ resolveFile pd $ package ++ ".tar.gz"
+            pd <- liftIO $ packageTmpDir pkg
+            tarfile <- liftIO $ resolveFile pd $ pkg ++ ".tar.gz"
             exists <- Path.IO.doesFileExist tarfile
             unless exists $ do
                 ensureDir pd
                 cmd
                     (Cwd $ toFilePath $ parent tarfile)
                     "wget"
-                    ("http://hackage.haskell.org/package/" ++
-                     package ++ ".tar.gz")
+                    ("http://hackage.haskell.org/package/" ++ pkg ++ ".tar.gz")
                     "--output-document"
                     (toFilePath tarfile) :: IO ()
             cmd
@@ -74,24 +70,20 @@ makePackageTup package chosenModules = do
                                            exposedModules lib) $
                                       exposedModules lib)
             pure
-                ((package, srcDirs, map Cabal.toFilePath moduleNames) :: (String, [String], [String]))
+                ((pkg, srcDirs, map Cabal.toFilePath moduleNames) :: ( String
+                                                                     , [String]
+                                                                     , [String]))
     TH.lift res
 
-hackageDir
-    :: MonadIO m
-    => m (Path Abs Dir)
+hackageDir :: MonadIO m => m (Path Abs Dir)
 hackageDir = (</> $(mkRelDir ".hackage")) <$> tmpDir
 
-packageTmpDir
-    :: MonadIO m
-    => PackageName -> m (Path Abs Dir)
-packageTmpDir package = do
+packageTmpDir :: MonadIO m => PackageName -> m (Path Abs Dir)
+packageTmpDir pkg = do
     td <- hackageDir
-    liftIO $ resolveDir td package
+    liftIO $ resolveDir td pkg
 
-packageDir
-    :: MonadIO m
-    => PackageName -> m (Path Abs Dir)
-packageDir package = do
-    td <- packageTmpDir package
-    liftIO $ resolveDir td package
+packageDir :: MonadIO m => PackageName -> m (Path Abs Dir)
+packageDir pkg = do
+    td <- packageTmpDir pkg
+    liftIO $ resolveDir td pkg

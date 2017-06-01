@@ -17,9 +17,9 @@ import EasySpec.Evaluate.Analyse.Hackage.TH
 hackageRule :: String
 hackageRule = "hackage"
 
-hackageRules :: Resource -> Rules ()
-hackageRules ghciResource = do
-    packageRules <- mapM (hackageRulesFor ghciResource) hackagePackages
+hackageRules :: Rules ()
+hackageRules = do
+    packageRules <- mapM hackageRulesFor hackagePackages
     hackageRule ~> need packageRules
 
 hackagePackages :: [(PackageName, [String], [String])]
@@ -28,8 +28,8 @@ hackagePackages =
     , $(makePackageTup "pretty-1.1.3.5" [["Text", "PrettyPrint"]])
     ]
 
-hackageRulesFor :: Resource -> (PackageName, [String], [String]) -> Rules String
-hackageRulesFor ghciResource (package, sourceDirs, modulePaths) = do
+hackageRulesFor :: (PackageName, [String], [String]) -> Rules String
+hackageRulesFor (package, _, _) = do
     tarfile <- tarfileRules package
     let rule = "hackage-" ++ package
     rule ~> needP [tarfile]
@@ -56,14 +56,11 @@ tarfileRules package = do
                 (toFilePath tarfile)
     pure tarfile
 
-hackageDir
-    :: MonadIO m
-    => m (Path Abs Dir)
+hackageDir :: MonadIO m => m (Path Abs Dir)
 hackageDir = (</> $(mkRelDir "hackage")) <$> tmpDir
 
-packageExamples
-    :: MonadIO m
-    => (PackageName, [String], [String]) -> m [ES.InputSpec]
+packageExamples ::
+       MonadIO m => (PackageName, [String], [String]) -> m [ES.InputSpec]
 packageExamples (package, sourceDirs, modulePaths) = do
     pd <- packageDir package
     let modulesIn sourceDir =

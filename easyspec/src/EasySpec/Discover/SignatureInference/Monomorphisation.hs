@@ -8,17 +8,16 @@ import EasySpec.Discover.CodeUtils
 
 {-# ANN module "HLint: ignore Use const" #-}
 
-monomorphise
-    :: (Show l, Eq l, Monoid l)
+monomorphise ::
+       (Show l, Eq l, Monoid l)
     => [Type l] -- Full types available for monomorphisation
     -> Type l -- Type to monomorphise
     -> [Type l] -- The possible monomorphisations. Currently only completely free variables
 monomorphise ts = fillIn (nub $ concatMap findAllTypesAndSubtypes ts)
 
 -- All types and subtypes
-findAllTypesAndSubtypes
-    :: (Show l, Eq l, Monoid l)
-    => Type l -> [(Type l, Kind l)]
+findAllTypesAndSubtypes ::
+       (Show l, Eq l, Monoid l) => Type l -> [(Type l, Kind l)]
 findAllTypesAndSubtypes = go
   where
     go t =
@@ -28,8 +27,8 @@ findAllTypesAndSubtypes = go
             TyCon l _ -> [(t, KindStar l)]
             _ -> []
 
-fillIn
-    :: (Show l, Eq l, Monoid l)
+fillIn ::
+       (Show l, Eq l, Monoid l)
     => [(Type l, Kind l)] -- Exact types available for monomorphisation
     -> Type l -- Type to monomorphise
     -> [Type l] -- The possible monomorphisations. Currently only completely free variables
@@ -71,8 +70,7 @@ newtype ContextM l = ContextM
     { unContextM :: Context l
     } deriving (Show, Eq, Ord)
 
-instance Monoid l =>
-         Monoid (ContextM l) where
+instance Monoid l => Monoid (ContextM l) where
     mempty = ContextM $ CxEmpty mempty
     mappend (ContextM c1) (ContextM c2) =
         ContextM $
@@ -88,9 +86,7 @@ instance Monoid l =>
             (CxTuple l1 asts1, CxTuple l2 asts2) ->
                 CxTuple (l1 `mappend` l2) (asts1 ++ asts2)
 
-getKindedTyVars
-    :: (Eq l, Monoid l)
-    => Type l -> ([(Name l, Kind l)], Context l)
+getKindedTyVars :: (Eq l, Monoid l) => Type l -> ([(Name l, Kind l)], Context l)
 getKindedTyVars t =
     let (tups, ContextM ctx) =
             runWriter $

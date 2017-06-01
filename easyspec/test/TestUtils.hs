@@ -48,6 +48,7 @@ getEasyIdsFrom m =
                                  { idName = n
                                  , idType = t
                                  , idImpl = getImplFrom n m
+                                 , idRootloc = Nothing
                                  })
                             ns
                     _ -> []

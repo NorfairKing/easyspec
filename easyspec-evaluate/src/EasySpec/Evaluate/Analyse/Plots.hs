@@ -13,10 +13,8 @@ import Development.Shake.Path
 
 import qualified EasySpec.Discover.Types as ES
 
-import EasySpec.Evaluate.Evaluate
 import EasySpec.Evaluate.Evaluate.Evaluator
 
-import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
 import EasySpec.Evaluate.Analyse.Plots.RelativeLines
@@ -54,5 +52,5 @@ plotsRulesForExample is = do
 
 plotsRulesForExampleAndName ::
        ES.InputSpec -> ES.EasyName -> Rules [Path Abs File]
-plotsRulesForExampleAndName is name = pure []
-    -- forM evaluators $ perExampleNameAndEvaluatorBarPlotFor is name
+plotsRulesForExampleAndName is name =
+    forM evaluators $ perExampleNameAndEvaluatorBarPlotFor is name

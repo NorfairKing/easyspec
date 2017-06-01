@@ -40,7 +40,7 @@ spec =
                             , prettyPrint $ idName seei
                             ]
                     Just geid ->
-                        unless (geid == seei) $
+                        unless (idType geid == idType seei) $
                         expectationFailure $
                         unlines
                             [ "The types that ghc and haskell-src-exts found differ for"

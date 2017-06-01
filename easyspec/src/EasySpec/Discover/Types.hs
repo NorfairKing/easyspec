@@ -5,6 +5,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module EasySpec.Discover.Types where
 

@@ -9,7 +9,6 @@ import DataCon
 import GHC
 import GHC.Paths (libdir)
 import Name
-import OccName
 import RdrName
 import TcRnTypes
 import Var
@@ -23,9 +22,7 @@ data IdData = IdData
     , idDataRootloc :: Maybe (Path Rel File)
     } deriving (Eq)
 
-getGHCIds
-    :: MonadIO m
-    => InputSpec -> m [IdData]
+getGHCIds :: MonadIO m => InputSpec -> m [IdData]
 getGHCIds is =
     liftIO $
     runGhc (Just libdir) $ do
@@ -47,9 +44,8 @@ getGHCIds is =
         tmod <- typecheckModule parsedModule
         getGHCIdsFromTcModule (inputSpecFile is) tmod
 
-getGHCIdsFromTcModule
-    :: GhcMonad m
-    => Path Rel File -> TypecheckedModule -> m [IdData]
+getGHCIdsFromTcModule ::
+       GhcMonad m => Path Rel File -> TypecheckedModule -> m [IdData]
 getGHCIdsFromTcModule file tmod = do
     let (tcenv, _) = tm_internals_ tmod
         -- Get the global reader elementss out of the global env

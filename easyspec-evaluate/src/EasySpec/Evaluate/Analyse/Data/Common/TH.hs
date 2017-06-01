@@ -4,9 +4,6 @@ module EasySpec.Evaluate.Analyse.Data.Common.TH where
 
 import Import
 
-import Path.Internal (Path(Path))
-import System.FilePath (dropExtensions)
-
 import Language.Haskell.TH as TH
 import Language.Haskell.TH.Syntax as TH
 
@@ -57,7 +54,7 @@ makeExampleCache = do
                           , "functions defined in that file."
                           ]
                     ] ++
-                    map (ES.prettyPrintOneLine) ns
+                    map ES.prettyPrintOneLine ns
                 pure (ex, ns)
     runIO $ do
         td <- tmpDir

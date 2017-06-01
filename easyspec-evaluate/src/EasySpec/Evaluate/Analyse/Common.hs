@@ -7,8 +7,6 @@ import System.FilePath (dropExtensions)
 import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.Types as ES
 
-import EasySpec.Utils
-
 examplesDir :: MonadIO m => m (Path Abs Dir)
 examplesDir = liftIO $ resolveDir' "../examples"
 

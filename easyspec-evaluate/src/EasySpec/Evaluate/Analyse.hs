@@ -20,7 +20,7 @@ analyseRules = do
     dataRules ghciResource
     plotsRules
     archiveRules
-    hackageRules ghciResource
+    hackageRules
     analyseRule ~> do
         need [dataRule, plotsRule, hackageRule]
         need [archiveRule] -- needs to be seperate

@@ -24,8 +24,8 @@ hackageRules = do
 
 hackagePackages :: [(PackageName, [String], [String])]
 hackagePackages =
-    [ $(makePackageTup "bytestring-0.10.8.1" [["Data", "ByteString"]])
-    , $(makePackageTup "pretty-1.1.3.5" [["Text", "PrettyPrint"]])
+    -- [ $(makePackageTup "bytestring-0.10.8.1" [["Data", "ByteString"]])
+    [ $(makePackageTup "pretty-1.1.3.5" [["Text", "PrettyPrint", "HughesPJClass"]])
     ]
 
 hackageRulesFor :: (PackageName, [String], [String]) -> Rules String

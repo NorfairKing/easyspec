@@ -74,7 +74,8 @@ toEasyType ty =
                         _ ->
                             foldl
                                 (TyApp mempty)
-                                (TyCon mempty $ UnQual mempty $ toEasyName $ tyConName tc)
+                                (TyCon mempty $
+                                 UnQual mempty $ toEasyName $ tyConName tc)
                                 (map toEasyType kots)
                 ForAllTy _ t' -> toEasyType t'
                 _ -> error "Not implemented yet"

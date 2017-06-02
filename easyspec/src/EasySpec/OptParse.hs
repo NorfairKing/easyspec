@@ -71,7 +71,7 @@ combineToInstructions cmd Flags {..} Configuration = (,) <$> disp <*> sets
                                                 unwords
                                                     [ "The focus function's name must be qualified."
                                                     ]
-                                            Qual _ _ _ -> pure $ () <$ qn
+                                            _ -> pure $ () <$ qn
                                     ParseOk e ->
                                         die $
                                         unwords

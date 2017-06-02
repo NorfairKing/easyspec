@@ -45,9 +45,9 @@ getEasyIdsFrom m =
                         map
                             (\n ->
                                  Id
-                                 { idName = n
+                                 { idName = UnQual mempty n
                                  , idType = t
-                                 , idImpl = getImplFrom n m
+                                 , idImpl = getImplFrom (UnQual mempty n) m
                                  , idRootloc = Nothing
                                  })
                             ns

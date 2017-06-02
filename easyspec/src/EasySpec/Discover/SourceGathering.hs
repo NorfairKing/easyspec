@@ -22,7 +22,7 @@ gatherSourceOf ::
     => InputSpec
     -> IdData
     -> m (Maybe EasyImpl)
-gatherSourceOf is IdData {..} = do
+gatherSourceOf is d@IdData {..} = do
     mimpl <-
         case idDataExportingMods of
             (_:_) -> pure Nothing
@@ -43,10 +43,7 @@ gatherSourceOf is IdData {..} = do
                                 ]
                         pure Nothing
                     ParseOk mod_ ->
-                        pure $
-                        getImplFrom
-                            (toEasyName $ Var.varName idDataId :: EasyName)
-                            (() <$ mod_)
+                        pure $ getImplFrom (toEasyQName d) (() <$ mod_)
     case mimpl of
         Nothing -> pure ()
         Just impl ->
@@ -60,16 +57,22 @@ gatherSourceOf is IdData {..} = do
                 ]
     pure mimpl
 
-getImplFrom :: (Eq l, Monoid l) => Name l -> Module l -> Maybe (Impl l)
+getImplFrom :: (Eq l, Monoid l) => QName l -> Module l -> Maybe (Impl l)
 getImplFrom name mod_ =
     case mod_ of
         (Module _ _ _ _ decls) ->
             let mds =
                     flip map decls $ \d ->
                         let ifname n =
-                                if name == n
-                                    then Just d
-                                    else Nothing
+                                case name of
+                                    UnQual _ un ->
+                                        if un == n
+                                            then Just d
+                                            else Nothing
+                                    Qual _ _ un ->
+                                        if un == n
+                                            then Just d
+                                            else Nothing
                         in case d of
                                FunBind _ (Match _ n _ _ _:_) -> ifname n
                                PatBind _ (PVar _ n) _ _ -> ifname n

@@ -43,7 +43,8 @@ gatherSourceOf is d@IdData {..} = do
                                 ]
                         pure Nothing
                     ParseOk mod_ ->
-                        pure $ getImplFrom (toEasyQName d) (() <$ mod_)
+                        pure $
+                        getImplFrom (toEasyQNameFromSources d) (() <$ mod_)
     case mimpl of
         Nothing -> pure ()
         Just impl ->
@@ -73,6 +74,7 @@ getImplFrom name mod_ =
                                         if un == n
                                             then Just d
                                             else Nothing
+                                    _ -> Nothing
                         in case d of
                                FunBind _ (Match _ n _ _ _:_) -> ifname n
                                PatBind _ (PVar _ n) _ _ -> ifname n

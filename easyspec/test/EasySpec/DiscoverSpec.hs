@@ -35,4 +35,4 @@ spec =
                               (Ident mempty "g")
                     , setDiscInfStrat = inferFullBackground
                     }
-            rels `shouldSatisfy` ((> 0) . length)
+            rels `shouldSatisfy` (not . null)

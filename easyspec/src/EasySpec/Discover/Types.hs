@@ -83,7 +83,7 @@ newtype InferredSignature =
 
 prettyInferredSignature :: InferredSignature -> String
 prettyInferredSignature (InferredSignature f) =
-    unlines $ map drawTree $ map (fmap $ ppShow . map prettyEasyNameExp) f
+    unlines $ map (drawTree . fmap (ppShow . map prettyEasyNameExp)) f
 
 newtype SignatureExpression =
     SignatureExpression EasyExp

@@ -4,6 +4,8 @@ module EasySpec.Discover.TypeTranslation where
 
 import Import hiding (tyConName)
 
+import System.FilePath as FP
+
 import Class
 import GHC
 import qualified Module
@@ -21,7 +23,7 @@ import EasySpec.Discover.Types as E
 toEasyId :: Monoid m => E.IdData -> Maybe (E.Impl m) -> E.Id m
 toEasyId d impl =
     Id
-    { E.idName = toEasyQName d
+    { E.idName = toEasyQNameFromSources d
     , E.idType = toEasyType $ Var.varType $ idDataId d
     , E.idImpl = impl
     , E.idRootloc = idDataRootloc d
@@ -30,16 +32,27 @@ toEasyId d impl =
 toEasyName :: Monoid a => GHC.Name -> H.Name a
 toEasyName n = Ident mempty $ showName n
 
-toEasyQName :: Monoid a => IdData -> H.QName a
-toEasyQName d =
-    let ident = toEasyName $ Var.varName $ idDataId d
-    in case idDataExportingMods d of
-           [] -> H.UnQual mempty ident -- FIXME this will break things, most likely
-           (mn:_) ->
-               H.Qual
-                   mempty
-                   (ModuleName mempty $ Module.moduleNameString mn)
-                   ident
+toEasyQName :: Monoid a => GHC.Name -> String -> H.QName a
+toEasyQName name modname =
+    H.Qual mempty (ModuleName mempty modname) (toEasyName name)
+
+toEasyQNameFromSources :: Monoid a => IdData -> H.QName a
+toEasyQNameFromSources d =
+    case idDataExportingMods d of
+        [] ->
+            case idDataRootloc d of
+                Nothing ->
+                    UnQual mempty (toEasyName $ Var.varName $ idDataId d) -- This should not occur, but it's not enforced by the type system.
+                Just fp ->
+                    toEasyQName (Var.varName $ idDataId d) $
+                    map
+                        (\c ->
+                             case c of
+                                 '/' -> '.'
+                                 _ -> c) $
+                    FP.dropExtensions $ toFilePath fp
+        (mn:_) ->
+            toEasyQName (Var.varName $ idDataId d) (Module.moduleNameString mn)
 
 toEasyType :: Monoid a => GHC.Type -> H.Type a
 toEasyType ty =

@@ -14,6 +14,7 @@ import Import
 import Path.Internal (Path(Path))
 
 import Data.Tree
+import Text.Show.Pretty (ppShow)
 
 import qualified Language.Haskell.TH.Syntax as TH (Lift)
 
@@ -82,7 +83,7 @@ newtype InferredSignature =
 
 prettyInferredSignature :: InferredSignature -> String
 prettyInferredSignature (InferredSignature f) =
-    drawForest $ map (fmap $ show . map prettyEasyNameExp) f
+    unlines $ map drawTree $ map (fmap $ ppShow . map prettyEasyNameExp) f
 
 newtype SignatureExpression =
     SignatureExpression EasyExp

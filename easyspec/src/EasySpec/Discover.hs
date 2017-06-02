@@ -62,7 +62,7 @@ discoverEquations
     => DiscoverSettings -> m [EasyEq]
 discoverEquations ds = do
     ids <- getEasyIds $ setDiscInputSpec ds
-    debug1 "Gathered signature:"
+    debug1 "Gathered scope:"
     debug1 $ unlines $ map prettyEasyId ids
     let (focusIds, bgIds) = splitFocus ds ids
     let iSig = inferSignature (setDiscInfStrat ds) focusIds bgIds

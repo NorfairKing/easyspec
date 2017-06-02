@@ -13,6 +13,7 @@ Property discovery happens in multiple steps:
 -}
 module EasySpec.Discover
     ( discover
+    , discoverRelevantEquations
     , discoverEquations
     , getEasyIds
     , inferenceStrategies
@@ -34,32 +35,40 @@ import EasySpec.Discover.TypeTranslation
 import EasySpec.Discover.Types
 import EasySpec.Utils
 
-discover
-    :: (MonadIO m, MonadMask m, MonadReader Settings m)
-    => DiscoverSettings -> m ()
+discover ::
+       (MonadIO m, MonadMask m, MonadReader Settings m)
+    => DiscoverSettings
+    -> m ()
 discover ids = do
     let ds =
             case setDiscFun ids of
                 Nothing -> ids {setDiscInfStrat = inferFullBackground}
                 _ -> ids
-    -- withCurrentDir (inputSpecBaseDir $ setDiscInputSpec ds) $ do
-    allEqs <- discoverEquations ds
-    let res =
-            case setDiscFun ds of
-                Nothing -> allEqs
-                Just focus -> filter (mentionsEq focus) allEqs
+    res <- discoverRelevantEquations ds
     liftIO $
         mapM_
             (\(EasyEq lh rh) ->
                  putStrLn $ prettyPrint lh ++ " = " ++ prettyPrint rh)
             res
 
+discoverRelevantEquations ::
+       (MonadIO m, MonadMask m, MonadReader Settings m)
+    => DiscoverSettings
+    -> m [EasyEq]
+discoverRelevantEquations ds = do
+    allEqs <- discoverEquations ds
+    pure $
+        case setDiscFun ds of
+            Nothing -> allEqs
+            Just focus -> filter (mentionsEq focus) allEqs
+
 mentionsEq :: EasyQName -> EasyEq -> Bool
 mentionsEq n (EasyEq e1 e2) = mentions n e1 || mentions n e2
 
-discoverEquations
-    :: (MonadIO m, MonadMask m, MonadReader Settings m)
-    => DiscoverSettings -> m [EasyEq]
+discoverEquations ::
+       (MonadIO m, MonadMask m, MonadReader Settings m)
+    => DiscoverSettings
+    -> m [EasyEq]
 discoverEquations ds = do
     ids <- getEasyIds $ setDiscInputSpec ds
     debug1 "Gathered scope:"
@@ -72,9 +81,10 @@ discoverEquations ds = do
     allEqs <- runEasySpec ds iSig
     pure $ nub allEqs
 
-getEasyIds
-    :: (MonadIO m, MonadMask m, MonadReader Settings m)
-    => InputSpec -> m [EasyId]
+getEasyIds ::
+       (MonadIO m, MonadMask m, MonadReader Settings m)
+    => InputSpec
+    -> m [EasyId]
 getEasyIds is = do
     idDatas <- getGHCIds is
     dats <-

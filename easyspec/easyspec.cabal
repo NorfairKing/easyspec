@@ -101,6 +101,7 @@ test-suite easyspec-test
         EasySpec.Discover.SignatureInference.MonomorphisationSpec
         EasySpec.Discover.SignatureInference.TypeReachabilitySpec
         EasySpec.Discover.SourceGatheringSpec
+        EasySpec.DiscoverSpec
         EasySpec.GatherSpec
         EasySpecSpec
         Language.Haskell.Exts.Gen

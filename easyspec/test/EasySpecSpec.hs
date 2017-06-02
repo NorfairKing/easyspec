@@ -15,7 +15,9 @@ spec =
         exampleDir <- runIO $ resolveDir' "../examples"
         forSourceFilesInDir
             exampleDir
-            (\f -> unwords ["works on", toFilePath f])
+            (\f ->
+                 unwords
+                     ["works on", toFilePath f, "without any focus functions."])
             (\f ->
                  withArgs
                      [ "discover"

@@ -80,6 +80,10 @@ newtype InferredSignature =
     InferredSignature (Forest [EasyNamedExp])
     deriving (Show, Eq)
 
+prettyInferredSignature :: InferredSignature -> String
+prettyInferredSignature (InferredSignature f) =
+    drawForest $ map (fmap $ show . map prettyEasyNameExp) f
+
 newtype SignatureExpression =
     SignatureExpression EasyExp
     deriving (Show, Eq)
@@ -103,6 +107,9 @@ data NamedExp m = NamedExp
     } deriving (Show, Eq, Ord)
 
 type EasyNamedExp = NamedExp ()
+
+prettyEasyNameExp :: EasyNamedExp -> String
+prettyEasyNameExp NamedExp {..} = unwords [neName, "=", prettyPrint neExp]
 
 type EasyName = H.Name ()
 

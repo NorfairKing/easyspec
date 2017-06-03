@@ -12,6 +12,7 @@ import Control.Monad as X
 import Control.Monad.Catch as X
 import Control.Monad.IO.Class as X
 
+import Data.Bool as X
 import Data.Data as X
 import Data.Either as X
 import Data.List as X

@@ -34,5 +34,6 @@ spec =
                               (ModuleName mempty "Reachability")
                               (Ident mempty "g")
                     , setDiscInfStrat = inferFullBackground
+                    , setDiscQualified = False
                     }
             rels `shouldSatisfy` (not . null)

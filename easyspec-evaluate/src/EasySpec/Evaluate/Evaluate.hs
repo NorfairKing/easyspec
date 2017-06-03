@@ -56,6 +56,7 @@ getEvaluationInputPoint is funcname strat = do
             { ES.setDiscInputSpec = is
             , ES.setDiscFun = Just funcname
             , ES.setDiscInfStrat = strat
+            , ES.setDiscQualified = True
             }
     ids <- runReaderT (ES.getEasyIds is) evaluationSettings
     (runtime, eqs) <-

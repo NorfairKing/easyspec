@@ -23,6 +23,7 @@ module EasySpec.Discover
 import Import
 
 import Language.Haskell.Exts.Pretty (prettyPrint)
+import Language.Haskell.Exts.Syntax
 
 import EasySpec.OptParse.Types
 
@@ -46,10 +47,78 @@ discover ids = do
                 _ -> ids
     res <- discoverRelevantEquations ds
     liftIO $
-        mapM_
-            (\(EasyEq lh rh) ->
-                 putStrLn $ prettyPrint lh ++ " = " ++ prettyPrint rh)
-            res
+        putStr $
+        presentEquations $ bool id (map unqualify) (setDiscQualified ds) res
+
+unqualify :: EasyEq -> EasyEq
+unqualify (EasyEq e1 e2) = EasyEq (unqualifyExp e1) (unqualifyExp e2)
+  where
+    unqualifyExp :: EasyExp -> EasyExp
+    unqualifyExp =
+        foldExp
+            (\l qn -> Var l $ q qn)
+            OverloadedLabel
+            IPVar
+            (\l qn -> Con l $ q qn)
+            Lit
+            InfixApp
+            App
+            NegApp
+            Lambda
+            Let
+            If
+            MultiIf
+            Case
+            Do
+            MDo
+            Tuple
+            TupleSection
+            List
+            ParArray
+            Paren
+            LeftSection
+            RightSection
+            RecConstr
+            RecUpdate
+            EnumFrom
+            EnumFromTo
+            EnumFromThen
+            EnumFromThenTo
+            ParArrayFromTo
+            ParArrayFromThenTo
+            ListComp
+            ParComp
+            ParArrayComp
+            ExpTypeSig
+            VarQuote
+            TypQuote
+            BracketExp
+            SpliceExp
+            QuasiQuote
+            TypeApp
+            XTag
+            XETag
+            XPcdata
+            XExpTag
+            XChildTag
+            CorePragma
+            SCCPragma
+            GenPragma
+            Proc
+            LeftArrApp
+            RightArrApp
+            LeftArrHighApp
+            RightArrHighApp
+            LCase
+            ExprHole
+      where
+        q :: QName l -> QName l
+        q (Qual l _ n) = UnQual l n
+        q c = c
+
+presentEquations :: [EasyEq] -> String
+presentEquations =
+    unlines . map (\(EasyEq lh rh) -> prettyPrint lh ++ " = " ++ prettyPrint rh)
 
 discoverRelevantEquations ::
        (MonadIO m, MonadMask m, MonadReader Settings m)

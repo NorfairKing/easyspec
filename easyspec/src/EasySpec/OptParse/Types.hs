@@ -17,6 +17,7 @@ data DiscoverArgs = DiscoverArgs
     , argDiscFun :: Maybe String
     , argDiscBaseDir :: Maybe FilePath
     , argDiscInfStratName :: Maybe String
+    , argDiscQualified :: Bool
     } deriving (Show, Eq)
 
 newtype Flags = Flags
@@ -34,6 +35,7 @@ data DiscoverSettings = DiscoverSettings
     { setDiscInputSpec :: InputSpec
     , setDiscFun :: Maybe EasyQName
     , setDiscInfStrat :: SignatureInferenceStrategy
+    , setDiscQualified :: Bool
     }
 
 newtype Settings = Settings

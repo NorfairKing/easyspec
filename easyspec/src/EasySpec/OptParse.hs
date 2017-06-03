@@ -84,6 +84,7 @@ combineToInstructions cmd Flags {..} Configuration = (,) <$> disp <*> sets
                         { setDiscInputSpec = InputSpec dir file
                         , setDiscFun = f
                         , setDiscInfStrat = infStrat
+                        , setDiscQualified = argDiscQualified
                         }
     sets = pure Settings {setsDebugLevel = fromMaybe 0 flagsDebugLevel}
 
@@ -158,7 +159,9 @@ parseCommandDiscover = info parser modifier
                               , show $ map sigInfStratName inferenceStrategies
                               ]
                         ]
-                  ]))
+                  ]) <*>
+         (flag' True (long "qualified") <|> flag' False (long "unqualified") <|>
+          pure True))
     modifier = fullDesc <> progDesc "Command example."
 
 parseFlags :: Parser Flags

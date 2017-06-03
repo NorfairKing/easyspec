@@ -37,7 +37,7 @@ getHSEEasyIds bd f = do
 getEasyIdsFrom :: Module () -> [EasyId]
 getEasyIdsFrom m =
     case m of
-        Module _ _ _ _ ds ->
+        Module _ mmh _ _ ds ->
             concat $
             flip map ds $ \d ->
                 case d of
@@ -45,7 +45,11 @@ getEasyIdsFrom m =
                         map
                             (\n ->
                                  Id
-                                 { idName = UnQual mempty n
+                                 { idName =
+                                       case mmh of
+                                           Nothing -> UnQual mempty n
+                                           Just (ModuleHead _ mn _ _) ->
+                                               Qual mempty mn n
                                  , idType = t
                                  , idImpl = getImplFrom (UnQual mempty n) m
                                  , idRootloc = Nothing

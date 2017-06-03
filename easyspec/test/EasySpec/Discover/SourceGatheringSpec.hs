@@ -48,9 +48,13 @@ spec = do
             case find (\geid -> idName seei == idName geid) ghcEasyIds of
                 Nothing ->
                     expectationFailure $
-                    unwords
+                    unlines
                         [ "haskell-src-exts found an id that GHC did not find:"
                         , prettyPrint $ idName seei
+                        , "haskell-src-exts found these ids:"
+                        , unlines $ map prettyEasyId srcExtsEasyIds
+                        , "ghc found these ids:"
+                        , unlines $ map prettyEasyId ghcEasyIds
                         ]
                 Just geid ->
                     unless (isJust $ idImpl geid) $

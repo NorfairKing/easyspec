@@ -50,9 +50,7 @@ getGHCIdsFromTcModule file tmod = do
     let (tcenv, _) = tm_internals_ tmod
         -- Get the global reader elementss out of the global env
     let gres = concat $ occEnvElts $ tcg_rdr_env tcenv
-    let isInternal =
-            (\n -> "$tr" `isPrefixOf` n || "$tc" `isPrefixOf` n) .
-            Name.getOccString . Var.varName . idDataId
+    let isInternal = isPrefixOf "$" . Name.getOccString . Var.varName . idDataId
     let locals =
             filter (not . isInternal) $
             concat $

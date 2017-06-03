@@ -25,7 +25,7 @@ buildExamples = do
     TH.lift res
 
 findAllExamples :: MonadIO m => m [ES.InputSpec]
-findAllExamples = hackageExamples -- liftM2 (++) hackageExamples contrivedExamples
+findAllExamples = liftM2 (++) hackageExamples contrivedExamples
 
 hackageExamples :: MonadIO m => m [ES.InputSpec]
 hackageExamples = concat <$> mapM packageExamples hackagePackages

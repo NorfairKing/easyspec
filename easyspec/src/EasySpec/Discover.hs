@@ -148,8 +148,12 @@ discoverEquations ds = do
     debug1 "Inferred signature:"
     debug1 $ prettyInferredSignature iSig
     debug1 "Starting to run easyspec now."
-    allEqs <- runEasySpec ds iSig
-    pure $ ordNub allEqs
+    allEqs <- ordNub <$> runEasySpec ds iSig
+    debug1 "Found all these equations:"
+    debug1 "==[Start of Equations]=="
+    debug1 $ unlines $ map prettyEasyEq allEqs
+    debug1 "==[End of Equations]=="
+    pure allEqs
 
 getEasyIds ::
        (MonadIO m, MonadMask m, MonadReader Settings m)

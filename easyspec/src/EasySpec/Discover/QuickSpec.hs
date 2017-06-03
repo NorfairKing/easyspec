@@ -119,7 +119,7 @@ runQuickspecOn iSig = do
         let stmt = bindTo resName quickSpecExp
         exec $ prettyPrintOneLine stmt
         let resExp = Var mempty (UnQual mempty resName)
-        eqs <- getEqs resExp
+        eqs <- ordNub <$> getEqs resExp
         tell eqs
         debug1 "Found these equations:"
         debug1 "==[Start of Equations]=="

@@ -5,19 +5,20 @@ import Import
 import Language.Haskell.Exts.Syntax
 
 import EasySpec.Discover.CodeUtils
+import EasySpec.Discover.Utils
 
 {-# ANN module "HLint: ignore Use const" #-}
 
 monomorphise ::
-       (Show l, Eq l, Monoid l)
+       (Show l, Ord l, Monoid l)
     => [Type l] -- Full types available for monomorphisation
     -> Type l -- Type to monomorphise
     -> [Type l] -- The possible monomorphisations. Currently only completely free variables
-monomorphise ts = fillIn (nub $ concatMap findAllTypesAndSubtypes ts)
+monomorphise ts = fillIn (ordNub $ concatMap findAllTypesAndSubtypes ts)
 
 -- All types and subtypes
 findAllTypesAndSubtypes ::
-       (Show l, Eq l, Monoid l) => Type l -> [(Type l, Kind l)]
+       (Show l, Ord l, Monoid l) => Type l -> [(Type l, Kind l)]
 findAllTypesAndSubtypes = go
   where
     go t =
@@ -28,7 +29,7 @@ findAllTypesAndSubtypes = go
             _ -> []
 
 fillIn ::
-       (Show l, Eq l, Monoid l)
+       (Show l, Ord l, Monoid l)
     => [(Type l, Kind l)] -- Exact types available for monomorphisation
     -> Type l -- Type to monomorphise
     -> [Type l] -- The possible monomorphisations. Currently only completely free variables
@@ -86,7 +87,8 @@ instance Monoid l => Monoid (ContextM l) where
             (CxTuple l1 asts1, CxTuple l2 asts2) ->
                 CxTuple (l1 `mappend` l2) (asts1 ++ asts2)
 
-getKindedTyVars :: (Eq l, Monoid l) => Type l -> ([(Name l, Kind l)], Context l)
+getKindedTyVars ::
+       (Ord l, Monoid l) => Type l -> ([(Name l, Kind l)], Context l)
 getKindedTyVars t =
     let (tups, ContextM ctx) =
             runWriter $
@@ -121,4 +123,4 @@ getKindedTyVars t =
                      (\_ _ _ -> pure [])
                      t)
                 (KindStar mempty)
-    in (nub tups, ctx)
+    in (ordNub tups, ctx)

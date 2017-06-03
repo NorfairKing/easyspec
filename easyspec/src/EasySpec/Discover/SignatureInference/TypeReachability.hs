@@ -9,6 +9,7 @@ import Language.Haskell.Exts.Syntax
 
 import EasySpec.Discover.SignatureInference.Utils
 import EasySpec.Discover.Types
+import EasySpec.Discover.Utils
 
 {-# ANN module "HLint: ignore Use ||" #-}
 
@@ -21,11 +22,11 @@ depthNReachableViaComposition :: Int -> [EasyId] -> [EasyId] -> [EasyId]
 depthNReachableViaComposition = depthNReachable reachableViaComposition
 
 depthNReachable ::
-       (Show a, Eq a) => (a -> a -> Bool) -> Int -> [a] -> [a] -> [a]
+       (Show a, Ord a) => (a -> a -> Bool) -> Int -> [a] -> [a] -> [a]
 depthNReachable _ 0 focus _ = focus
 depthNReachable canReachFrom depth focus scope =
     let reachableSet =
-            nub $
+            ordNub $
             concatMap
                     -- TODO use a better nub if needed
                 (\ff -> filter (canReachFrom ff) (nub $ scope ++ focus))

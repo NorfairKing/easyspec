@@ -87,7 +87,7 @@ prettyInferredSignature (InferredSignature f) =
 
 newtype SignatureExpression =
     SignatureExpression EasyExp
-    deriving (Show, Eq)
+    deriving (Show, Eq, Ord)
 
 data Id m = Id
     { idName :: QName m
@@ -127,7 +127,7 @@ type EasyPat = H.Pat ()
 data EasyEq =
     EasyEq EasyExp
            EasyExp
-    deriving (Show, Eq, Generic)
+    deriving (Show, Eq, Ord, Generic)
 
 prettyEasyEq :: EasyEq -> String
 prettyEasyEq (EasyEq e1 e2) = unwords [H.prettyPrint e1, "=", H.prettyPrint e2]

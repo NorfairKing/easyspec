@@ -6,6 +6,7 @@ import Import
 
 import System.FilePath
 
+import qualified Data.Set as Set
 import DynFlags hiding (Settings)
 import GHC
        (GhcMonad, SuccessFlag(..), LoadHowMuch, ModuleName,
@@ -42,3 +43,6 @@ showGHC a = do
 
 printO :: (GhcMonad m, Outputable a) => a -> m ()
 printO a = showGHC a >>= (liftIO . putStrLn)
+
+ordNub :: Ord a => [a] -> [a]
+ordNub = Set.toList . Set.fromList

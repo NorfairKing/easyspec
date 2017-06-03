@@ -14,6 +14,7 @@ import Development.Shake
 import Development.Shake.Path
 
 import qualified EasySpec.Discover.Types as ES
+import qualified EasySpec.Discover.Utils as ES
 
 import EasySpec.Evaluate.Types
 
@@ -154,16 +155,16 @@ averageOverNamesAndStrategiesForExampleRules is = do
     pure avgF
 
 averagePer ::
-       Eq a
+       Ord a
     => (EvaluatorCsvLine -> a)
     -> [EvaluatorCsvLine]
     -> [(a, AverageOutput)]
 averagePer func ls =
     map (second averageEvaluatorCsvLines) $ groupUnorderedBy func ls
 
-groupUnorderedBy :: Eq b => (a -> b) -> [a] -> [(b, [a])]
+groupUnorderedBy :: Ord b => (a -> b) -> [a] -> [(b, [a])]
 groupUnorderedBy func ls =
-    let oups = nub $ map func ls
+    let oups = ES.ordNub $ map func ls
     in flip map oups $ \oup -> (oup, filter ((== oup) . func) ls)
 
 averageOverNamesAndStrategiesForExampleFile ::

@@ -34,6 +34,7 @@ import EasySpec.Discover.SignatureInference
 import EasySpec.Discover.SourceGathering
 import EasySpec.Discover.TypeTranslation
 import EasySpec.Discover.Types
+import EasySpec.Discover.Utils
 import EasySpec.Utils
 
 discover ::
@@ -148,7 +149,7 @@ discoverEquations ds = do
     debug1 $ prettyInferredSignature iSig
     debug1 "Starting to run easyspec now."
     allEqs <- runEasySpec ds iSig
-    pure $ nub allEqs
+    pure $ ordNub allEqs
 
 getEasyIds ::
        (MonadIO m, MonadMask m, MonadReader Settings m)

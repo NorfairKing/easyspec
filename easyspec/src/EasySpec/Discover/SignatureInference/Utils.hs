@@ -11,6 +11,7 @@ import Language.Haskell.Exts.Syntax
 
 import EasySpec.Discover.CodeUtils
 import EasySpec.Discover.Types
+import EasySpec.Discover.Utils
 
 {-# ANN module "HLint: ignore Avoid lambda" #-}
 
@@ -89,10 +90,10 @@ breakThroughSplitInferAlg name fs func maxDistinctOtherFuncs =
         pure $ ff : grp
 
 -- groupsOf 1 ls == map (:[]) ls
-groupsOf :: (Eq a, Ord a) => Int -> [a] -> [[a]]
+groupsOf :: (Ord a, Ord a) => Int -> [a] -> [[a]]
 groupsOf 0 _ = [[]]
 groupsOf n fs = do
-    rest <- nub $ sort <$> groupsOf (n - 1) fs
+    rest <- ordNub $ sort <$> groupsOf (n - 1) fs
     new <- [f | f <- fs, f `notElem` rest]
     pure $ new : rest
 

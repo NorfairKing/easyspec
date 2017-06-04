@@ -39,7 +39,7 @@ combineToInstructions cmd Flags {..} Configuration = (,) <$> disp <*> sets
                             Just bd -> resolveDir' bd
                     infStrat <-
                         case argDiscInfStratName of
-                            Nothing -> pure inferFullBackground
+                            Nothing -> pure defaultInferenceStrategy
                             Just n ->
                                 case find
                                          ((== n) . sigInfStratName)

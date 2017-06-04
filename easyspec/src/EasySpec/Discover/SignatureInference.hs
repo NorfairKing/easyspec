@@ -1,5 +1,6 @@
 module EasySpec.Discover.SignatureInference
-    ( inferenceStrategies
+    ( defaultInferenceStrategy
+    , inferenceStrategies
     , evenMoreInferenceStrategies
     , inferFullBackground
     ) where
@@ -16,6 +17,9 @@ import EasySpec.Discover.SignatureInference.SyntacticSimilarityType
 import EasySpec.Discover.SignatureInference.TypeReachability
 import EasySpec.Discover.SignatureInference.Utils
 import EasySpec.Discover.Types
+
+defaultInferenceStrategy :: SignatureInferenceStrategy
+defaultInferenceStrategy = inferFullBackground
 
 inferenceStrategies :: [SignatureInferenceStrategy]
 inferenceStrategies =

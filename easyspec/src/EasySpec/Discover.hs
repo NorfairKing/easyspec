@@ -44,7 +44,7 @@ discover ::
 discover ids = do
     let ds =
             case setDiscFun ids of
-                Nothing -> ids {setDiscInfStrat = inferFullBackground}
+                Nothing -> ids {setDiscInfStrat = defaultInferenceStrategy}
                 _ -> ids
     res <- discoverRelevantEquations ds
     liftIO $

@@ -16,8 +16,8 @@ import EasySpec.OptParse.Types
 spec :: Spec
 spec =
     describe "discover" $ do
-        exampleDir <- runIO $ resolveDir' "../examples"
-        it "works on 'Reachability.hs' with focus 'g' and finds 4 functions." $ do
+        exampleDir <- runIO $ resolveDir' "../examples/toy"
+        it "works on 'Reachability.hs' with focus 'g' and finds some equations" $ do
             rels <-
                 flip runReaderT defaultSettings $
                 discoverRelevantEquations

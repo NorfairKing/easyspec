@@ -4,6 +4,8 @@ module TestImport
 
 import Prelude as X hiding (return)
 
+import Safe as X
+
 import Control.Monad as X
 import Control.Monad.IO.Class as X
 

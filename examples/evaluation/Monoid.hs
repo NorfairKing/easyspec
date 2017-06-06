@@ -3,7 +3,9 @@
 module Monoid where
 
 import Data.List (sort, nub)
-import Prelude (Int, Num((+), (*), (-)), mod, head, Eq((==)))
+import Prelude
+       (Int, Num((+), (*), (-)), Ord((<=), (<), (>), (>=)), div, mod, odd,
+        even, Bool(..), succ, pred, head, Eq((==), (/=)))
 
 zero :: Int
 zero = 0

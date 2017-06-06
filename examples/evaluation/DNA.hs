@@ -6,7 +6,7 @@ import Data.Foldable (foldl')
 import Data.List (sort, lookup, elem, splitAt, reverse)
 import Prelude
        (Int, Char, (/), (+), Maybe(..), fst, filter, (==), (/=), map,
-        Double, Bool(..), zip, fromIntegral, length)
+        take, drop, Double, Bool(..), zip, fromIntegral, length)
 
 {-# ANN module "HLint: ignore Use String" #-}
 

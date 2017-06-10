@@ -8,15 +8,15 @@ import Data.List
         intercalate, transpose, stripPrefix, group, inits, tails,
         isPrefixOf, isSuffixOf, isInfixOf, partition, nub, delete, (\\),
         union, intersect, sortOn, insert, isSubsequenceOf)
-import Data.Maybe (isJust, isNothing)
+import Data.Maybe (isJust, isNothing, maybe, Maybe(..), fromMaybe, listToMaybe, maybeToList, mapMaybe)
 import Prelude
-       (Int, Num(..), Ord((<), (<=), (>), (>=), max, min), div, mod, odd, even, Bool(..), Integer,
-        Float, Double, Rational, Word, Monoid(..), id, const, flip, ($),
-        take, drop, splitAt, takeWhile, dropWhile, span, break, lookup,
-        zip, zip3, zipWith, zipWith3, unzip, unzip3, scanl, scanl1, scanr,
-        scanr1, map, (++), filter, Bounded(..), Enum(..), words, lines,
-        unlines, unwords, Either(..), either, Ordering(..), Char, fst, snd,
-        curry, uncurry, Maybe(..), maybe, (&&), (||), not, head, Eq(..))
+       (Int, Num(..), Ord((<), (<=), (>), (>=), max, min), div, mod, odd,
+        even, Bool(..), Integer, Float, Double, Rational, Word, Monoid(..),
+        id, const, flip, ($), take, drop, splitAt, takeWhile, dropWhile,
+        span, break, lookup, zip, zip3, zipWith, zipWith3, unzip, unzip3,
+        scanl, scanl1, scanr, scanr1, map, (++), filter, words, lines,
+        unlines, unwords, Either(..), either, Char, fst, snd, curry,
+        uncurry, (&&), (||), not, head, Eq(..))
 
 zero :: Int
 zero = 0

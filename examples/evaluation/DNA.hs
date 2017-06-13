@@ -5,7 +5,7 @@ module DNA where
 import Data.Foldable (foldl')
 import Data.List
        (sort, lookup, elem, splitAt, reverse, uncons, intersperse, length,
-        intercalate, transpose, stripPrefix, group, inits, tails,
+        intercalate, stripPrefix, group, inits, tails,
         isPrefixOf, isSuffixOf, isInfixOf, partition, nub, delete, (\\),
         union, intersect, sortOn, insert, isSubsequenceOf)
 import Data.Maybe

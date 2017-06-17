@@ -82,7 +82,7 @@ rulesForFileNameAndStrat ghciResource is name infStrat = do
             withResource ghciResource 1 $ do
                 putLoud $
                     unwords
-                        [ "Building data file"
+                        [ "Building raw data file"
                         , toFilePath jsonF
                         , "by running 'easyspec-evaluate' on"
                         , toFilePath absFile
@@ -99,7 +99,7 @@ rulesForFileNameAndStrat ghciResource is name infStrat = do
         needP [jsonF]
         putLoud $
             unwords
-                [ "Building data file"
+                [ "Building evaluated data file"
                 , toFilePath csvF
                 , "by evaluating the results in"
                 , toFilePath jsonF

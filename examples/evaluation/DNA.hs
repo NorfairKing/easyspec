@@ -2,22 +2,11 @@
 
 module DNA where
 
-import Data.Foldable (foldl')
-import Data.List
-       ((\\), delete, elem, group, insert, intersperse, isInfixOf,
-        isPrefixOf, isSubsequenceOf, isSuffixOf, length, lookup, nub,
-        partition, reverse, sort, sortOn, splitAt, stripPrefix, uncons,
-        union)
-import Data.Maybe
-       (Maybe(..), fromMaybe, isJust, isNothing, listToMaybe, mapMaybe,
-        maybe, maybeToList)
+import Data.Foldable(foldl')
+import Data.List (sort)
 import Prelude
-       (Bool(..), Char, Double, Either(..), Eq(..), Float, Int, Integer,
-        Monoid(..), Num(..), Ord((<), (<=), (>), (>=), max, min), Rational,
-        Word, (&&), (++), (||), break, const, curry, div, drop, dropWhile,
-        either, even, filter, flip, fst, id, lines, lookup, map, mod, not,
-        odd, scanl, scanr, snd, span, splitAt, take, takeWhile, uncurry,
-        unlines, unwords, unzip, words, zip, zipWith)
+       (Bool, Char, Int, Maybe(..), (+), (/=), (==), elem, filter,
+        length, lookup, map, reverse, zip)
 
 {-# ANN module "HLint: ignore Use String" #-}
 

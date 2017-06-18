@@ -4,9 +4,9 @@
 module Tree where
 
 import GHC.Generics (Generic)
-import Prelude ((++), Eq, Show, (<$>), (<*>), pure, Bool(..))
+import Prelude (Bool(..), Eq, Show, (++), (<$>), (<*>), pure)
 
-import Test.QuickCheck (Arbitrary(arbitrary), oneof, Gen)
+import Test.QuickCheck (Arbitrary(arbitrary), Gen, oneof)
 
 data Tree
     = Leaf

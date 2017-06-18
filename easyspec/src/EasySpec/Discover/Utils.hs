@@ -9,8 +9,8 @@ import System.FilePath
 import qualified Data.Set as Set
 import DynFlags hiding (Settings)
 import GHC
-       (GhcMonad, SuccessFlag(..), LoadHowMuch, ModuleName,
-        getProgramDynFlags, setSessionDynFlags, load, mkModuleName)
+       (GhcMonad, LoadHowMuch, ModuleName, SuccessFlag(..),
+        getProgramDynFlags, load, mkModuleName, setSessionDynFlags)
 import GHC.LanguageExtensions
 import Outputable (Outputable(..), showPpr)
 

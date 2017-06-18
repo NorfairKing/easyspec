@@ -14,8 +14,7 @@ import Data.Aeson.TH
 
 -- JSON instances for all of the syntax
 $(concat <$>
-  mapM
-      (deriveJSON defaultOptions)
+  mapM (deriveJSON defaultOptions)
       [ ''Activation
       , ''Alt
       , ''Annotation

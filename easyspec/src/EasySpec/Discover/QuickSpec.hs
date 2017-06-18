@@ -10,7 +10,7 @@ import Data.List.Split
 import Data.Tree
 
 import DynFlags hiding (Settings)
-import GHC hiding (Qual, Name)
+import GHC hiding (Name, Qual)
 import GHC.LanguageExtensions
 import GHC.Paths (libdir)
 import Name

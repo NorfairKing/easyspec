@@ -2,7 +2,7 @@
 
 module MySort where
 
-import Prelude (Bool(True), otherwise, (&&), Ord((<=)))
+import Prelude (Bool(True), Ord((<=)), (&&), otherwise)
 
 mySort :: Ord a => [a] -> [a]
 mySort [] = []

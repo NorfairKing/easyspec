@@ -25,14 +25,14 @@ buildExamples = do
     TH.lift res
 
 findAllExamples :: MonadIO m => m [ES.InputSpec]
-findAllExamples = liftM2 (++) hackageExamples contrivedExamples
+findAllExamples = liftM2 (++) hackageExamples evaluationExamples
 
 hackageExamples :: MonadIO m => m [ES.InputSpec]
 hackageExamples = concat <$> mapM packageExamples hackagePackages
 
-contrivedExamples :: MonadIO m => m [ES.InputSpec]
-contrivedExamples = do
-    edir <- examplesDir
+evaluationExamples :: MonadIO m => m [ES.InputSpec]
+evaluationExamples = do
+    edir <- (</> $(mkRelDir "evaluation")) <$> examplesDir
     ss <- sourcesIn edir
     pure $ map (ES.InputSpec edir) ss
 

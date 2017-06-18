@@ -2,11 +2,22 @@ module TestUtils where
 
 import TestImport
 
+import Data.Char (isUpper)
+
 import Language.Haskell.Exts
 
 import EasySpec.Discover.SourceGathering
 import EasySpec.Discover.Types
 import EasySpec.Utils
+
+forExamples ::
+       Example a
+    => (InputSpec -> String)
+    -> (InputSpec -> a)
+    -> SpecWith (Arg a)
+forExamples f1 f2 = do
+    exs <- runIO allExamples
+    forM_ exs $ \ex -> it (f1 ex) (f2 ex)
 
 forSourceFilesInDir ::
        Example a
@@ -18,15 +29,48 @@ forSourceFilesInDir dir itfunc func = do
     fs <- runIO $ sourcesIn dir
     forM_ fs $ \f -> it (itfunc f) (func f)
 
-getHSEEasyIds :: Path Abs Dir -> Path Rel File -> IO [EasyId]
-getHSEEasyIds bd f = do
-    pr <- parseFile $ toFilePath $ bd </> f
+allExamples :: MonadIO m => m [InputSpec]
+allExamples =
+    liftIO $ do
+        edir <- resolveDir' "../examples"
+        walkDirAccum (Just descent) writer edir
+  where
+    descent ::
+           MonadIO m
+        => Path Abs Dir
+        -> [Path Abs Dir]
+        -> [Path Abs File]
+        -> m WalkAction
+    descent _ ds _ = do
+        let startsWithUpper =
+                (== Just True) . fmap isUpper . headMay . toFilePath . dirname
+        pure $
+            if all startsWithUpper ds
+                then WalkFinish
+                else WalkExclude $ filter startsWithUpper ds
+    writer ::
+           MonadIO m
+        => Path Abs Dir
+        -> [Path Abs Dir]
+        -> [Path Abs File]
+        -> m [InputSpec]
+    writer bd _ fs =
+        pure $
+        mapMaybe
+            (\f -> do
+                 rf <- stripDir bd f
+                 pure InputSpec {inputSpecFile = rf, inputSpecBaseDir = bd}) $
+        filter isSourceFile fs
+
+getHSEEasyIds :: InputSpec -> IO [EasyId]
+getHSEEasyIds is = do
+    pr <- parseFile $ toFilePath $ inputSpecAbsFile is
     case pr of
         ParseFailed srcloc err ->
             fail $
             unwords
                 [ "haskell-src-exts failed to parse"
-                , toFilePath f
+                , toFilePath $ inputSpecFile is
                 , "at"
                 , show srcloc
                 , "with error"

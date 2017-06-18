@@ -13,30 +13,23 @@ import EasySpec.Discover.Types
 import EasySpec.OptParse.Types
 
 spec :: Spec
-spec = do
-    examplesDir <- runIO $ resolveDir' "../examples"
-    forSourceFilesInDir
-        examplesDir
-        (\f ->
+spec =
+    forExamples
+        (\ex ->
              unwords
                  [ "Easyspec found all the implementations of the functions defined in"
-                 , toFilePath $ examplesDir </> f
-                 ]) $ \f -> do
-        ghcEasyIds <-
-            runReaderT
-                (getEasyIds
-                     InputSpec
-                     {inputSpecBaseDir = examplesDir, inputSpecFile = f})
-                defaultSettings
+                 , toFilePath $ inputSpecFile ex
+                 ]) $ \ex -> do
+        ghcEasyIds <- runReaderT (getEasyIds ex) defaultSettings
         -- the hse ids
-        pr <- parseFile $ toFilePath $ examplesDir </> f
+        pr <- parseFile $ toFilePath $ inputSpecAbsFile ex
         md <-
             case pr of
                 ParseFailed srcloc err ->
                     fail $
                     unwords
                         [ "haskell-src-exts failed to parse"
-                        , toFilePath f
+                        , toFilePath $ inputSpecFile ex
                         , "at"
                         , show srcloc
                         , "with error"

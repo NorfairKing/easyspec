@@ -8,7 +8,7 @@ module EasySpec.Evaluate.Analyse.Data.Averages where
 import Import
 
 import Data.Aeson as JSON
-import Data.Csv as CSV hiding ((.=), (.:))
+import Data.Csv as CSV hiding ((.:), (.=))
 
 import Development.Shake
 import Development.Shake.Path
@@ -241,8 +241,7 @@ makeAverageCsvLinesFromAverageOverNamesForExampleAndStrategy AverageOverNamesFor
 makeAverageCsvLinesFromAverageEvaluatorPerStrategyOutput ::
        ES.InputSpec -> AverageEvaluatorPerStrategyOutput -> [AverageCsvLine]
 makeAverageCsvLinesFromAverageEvaluatorPerStrategyOutput is AverageEvaluatorPerStrategyOutput {..} =
-    map
-        (makeAverageCsvLinesFromAverageEvaluatorOutput
+    map (makeAverageCsvLinesFromAverageEvaluatorOutput
              is
              averageEvaluatorPerStrategyStrategy)
         averageEvaluatorPerStrategyAverageEvaluatorOutput
@@ -250,8 +249,7 @@ makeAverageCsvLinesFromAverageEvaluatorPerStrategyOutput is AverageEvaluatorPerS
 makeAverageCsvLinesFromAverageOverNamesAndStrategiesForExample ::
        String -> AverageOverNamesAndStrategiesForExample -> [AverageCsvLine]
 makeAverageCsvLinesFromAverageOverNamesAndStrategiesForExample stratName AverageOverNamesAndStrategiesForExample {..} =
-    map
-        (makeAverageCsvLinesFromAverageEvaluatorOutput
+    map (makeAverageCsvLinesFromAverageEvaluatorOutput
              averageOverNamesAndStrategiesForExampleExample
              stratName)
         averageOverNamesAndStrategiesForExampleAverage

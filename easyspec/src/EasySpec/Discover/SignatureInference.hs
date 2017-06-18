@@ -36,7 +36,6 @@ basicInferenceStrategies =
     [ inferEmptyBackground
     , inferFullBackground
     , inferFullBreakthrough 1
-    , inferFullBreakthrough 2
     , inferSyntacticSimilarityName
     , inferSyntacticSimilarityEditDistanceName
     , inferSyntacticSimilaritySymbols

@@ -3,26 +3,28 @@ module EasySpecSpec
     ) where
 
 import TestImport
+import TestUtils
 
 import System.Environment (withArgs)
 
 import EasySpec
-import TestUtils
+import EasySpec.Discover.Types
 
 spec :: Spec
 spec =
-    describe "examples" $ do
-        exampleDir <- runIO $ resolveDir' "../examples"
-        forSourceFilesInDir
-            exampleDir
-            (\f ->
-                 unwords
-                     ["works on", toFilePath f, "without any focus functions."])
-            (\f ->
-                 withArgs
-                     [ "discover"
-                     , toFilePath f
-                     , "--base-dir"
-                     , toFilePath exampleDir
-                     ]
-                     easyspec)
+    describe "examples" $
+    forExamples
+        (\ex ->
+             unwords
+                 [ "works on"
+                 , toFilePath $ inputSpecFile ex
+                 , "without any focus functions, with the default signature inference strategy."
+                 ])
+        (\ex ->
+             withArgs
+                 [ "discover"
+                 , toFilePath $ inputSpecFile ex
+                 , "--base-dir"
+                 , toFilePath $ inputSpecBaseDir ex
+                 ]
+                 easyspec)

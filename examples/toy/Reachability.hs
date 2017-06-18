@@ -4,7 +4,7 @@ module Reachability where
 
 import Data.Char (chr)
 import Prelude
-       (length, Int, String, id, (+), Bool(True), Ordering())
+       (Bool(True), Int, Ordering(), String, (+), id, length)
 
 f :: Ordering -> ()
 f _ = ()

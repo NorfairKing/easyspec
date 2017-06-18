@@ -20,8 +20,7 @@ runQuickspecExp = App () $(easyExp "QuickSpec.Eval.quickSpec")
 
 showPrettyBackgroundExp :: EasyExp -> EasyExp
 showPrettyBackgroundExp =
-    App
-        mempty
+    App mempty
         $(easyExp $
           unwords
               [ "\\sig ->"
@@ -37,12 +36,9 @@ showPrettyBackgroundExp =
 
 runQuickspecWithBackgroundExp :: Monoid m => Exp m -> Exp m -> Exp m
 runQuickspecWithBackgroundExp bgsig =
-    App
-        mempty
-        (App
-             mempty
-             (Var
-                  mempty
+    App mempty
+        (App mempty
+             (Var mempty
                   (Qual
                        mempty
                        (ModuleName mempty "QuickSpec.Eval")
@@ -51,12 +47,9 @@ runQuickspecWithBackgroundExp bgsig =
 
 mappendSigsExp :: EasyExp -> EasyExp -> EasyExp
 mappendSigsExp a =
-    App
-        mempty
-        (App
-             mempty
-             (Var
-                  mempty
+    App mempty
+        (App mempty
+             (Var mempty
                   (Qual
                        mempty
                        (ModuleName mempty "Data.Monoid")
@@ -66,10 +59,8 @@ mappendSigsExp a =
 mconcatSigsExp :: [EasyExp] -> EasyExp
 mconcatSigsExp [e] = e
 mconcatSigsExp es =
-    App
-        mempty
-        (Var
-             mempty
+    App mempty
+        (Var mempty
              (Qual
                   mempty
                   (ModuleName mempty "Data.Monoid")
@@ -97,10 +88,8 @@ createQuickspecSig nexps =
                    mempty
                    (ModuleName mempty "QuickSpec.Signature")
                    (Ident mempty "maxTests"))
-              (App
-                   mempty
-                   (Con
-                        mempty
+              (App mempty
+                   (Con mempty
                         (Qual
                              mempty
                              (ModuleName mempty "Data.Maybe")
@@ -112,8 +101,7 @@ createQuickspecSig nexps =
                    mempty
                    (ModuleName mempty "QuickSpec.Signature")
                    (Ident mempty "silent"))
-              (Con
-                   mempty
+              (Con mempty
                    (Qual
                         mempty
                         (ModuleName mempty "Prelude")
@@ -122,12 +110,9 @@ createQuickspecSig nexps =
 
 signatureComponent :: (Eq m, Monoid m) => NamedExp m -> Exp m
 signatureComponent (NamedExp funNameStr funExp) =
-    App
-        mempty
-        (App
-             mempty
-             (Var
-                  mempty
+    App mempty
+        (App mempty
+             (Var mempty
                   (Qual
                        mempty
                        (ModuleName mempty "QuickSpec.Term")

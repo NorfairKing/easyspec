@@ -21,8 +21,7 @@ rscript scriptF args = do
     needP [commonR, rBin, scriptF]
     needRLibs ["ggplot2"]
     libDir <- rlibdir
-    cmd
-        (toFilePath rBin)
+    cmd (toFilePath rBin)
         (AddEnv "R_LIBS" $ toFilePath libDir)
         (toFilePath scriptF)
         (toFilePath commonR)

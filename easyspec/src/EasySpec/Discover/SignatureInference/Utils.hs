@@ -115,8 +115,7 @@ addTypeClassTrickery eid = go (expr, idType eid)
             -- TODO support the other cases as wel
              ->
                 let (e', t') = go (e, ft)
-                in ( App
-                         mempty
+                in ( App mempty
                          (Var mempty (UnQual mempty (Ident mempty "typeclass")))
                          e'
                    , TyFun

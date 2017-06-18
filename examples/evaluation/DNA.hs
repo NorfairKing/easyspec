@@ -2,11 +2,11 @@
 
 module DNA where
 
-import Data.Foldable(foldl')
+import Data.Foldable (foldl')
 import Data.List (sort)
 import Prelude
-       (Bool, Char, Int, Maybe(..), (+), (/=), (==), elem, filter,
-        length, lookup, map, reverse, zip)
+       (Bool, Char, Int, Maybe(..), (+), (/=), (==), elem, filter, length,
+        lookup, map, reverse, zip)
 
 {-# ANN module "HLint: ignore Use String" #-}
 

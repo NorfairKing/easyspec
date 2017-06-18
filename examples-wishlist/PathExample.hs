@@ -2,11 +2,11 @@
 
 module PathExample where
 
-import Prelude (Maybe, FilePath, Bool(..))
+import Prelude (Bool(..), FilePath, Maybe)
 
 import Data.Maybe (fromMaybe)
 
-import Path (parseRelFile, Path, Rel, File, fromRelFile)
+import Path (File, Path, Rel, fromRelFile, parseRelFile)
 
 parseRel :: FilePath -> Maybe (Path Rel File)
 parseRel = parseRelFile

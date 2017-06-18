@@ -84,6 +84,8 @@ toEasyType ty =
                         ("[]", [lt]) -> TyList mempty $ toEasyType lt
                         ("()", []) ->
                             TyCon mempty $ Special mempty $ UnitCon mempty
+                        ("(,)", [t1, t2]) ->
+                            TyTuple mempty Boxed [toEasyType t1, toEasyType t2]
                         _ ->
                             foldl
                                 (TyApp mempty)

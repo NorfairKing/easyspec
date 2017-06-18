@@ -2,7 +2,7 @@
 
 module Numerical.Triple where
 
-import Prelude ((+), Num)
+import Prelude (Num, (+))
 
 zero :: Num a => a
 zero = 0

@@ -25,4 +25,4 @@ import Path.IO as X
 import Control.Monad.Reader as X
 import Control.Monad.Writer as X
 
-import GHC.Generics as X hiding (Fixity, Prefix, Infix)
+import GHC.Generics as X hiding (Fixity, Infix, Prefix)

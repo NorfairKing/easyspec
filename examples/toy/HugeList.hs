@@ -2,10 +2,10 @@
 
 module HugeList where
 
-import Data.List (sort, partition)
+import Data.List (partition, sort)
 import Prelude
-       (length, scanr, succ, snd, reverse, id, break, filter, scanl,
-        zipWith, concat, zip, sum, (++), map, foldl, takeWhile, foldr,
-        drop, dropWhile, span, unzip, (+), fst, take)
+       ((+), (++), break, concat, drop, dropWhile, filter, foldl, foldr,
+        fst, id, length, map, reverse, scanl, scanr, snd, span, succ, sum,
+        take, takeWhile, unzip, zip, zipWith)
 
-import Control.Monad ((>>=), (>=>))
+import Control.Monad ((>=>), (>>=))

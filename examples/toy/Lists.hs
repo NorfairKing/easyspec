@@ -2,7 +2,7 @@
 
 module Lists where
 
-import Prelude (reverse, (++), map, head, last, tail, init)
+import Prelude ((++), head, init, last, map, reverse, tail)
 
 cons :: a -> [a] -> [a]
 cons a as = a : as

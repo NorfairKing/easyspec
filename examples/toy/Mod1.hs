@@ -2,7 +2,7 @@
 
 module Mod1 where
 
-import Prelude (Bool(..), not, Int)
+import Prelude (Bool(..), Int, not)
 
 import Mod1.Mod2
 

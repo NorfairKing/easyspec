@@ -77,6 +77,7 @@ breakThroughSplitInferAlg name fs func maxDistinctOtherFuncs =
           \focus scope ->
               let scope' = scope \\ focus :: [EasyId]
               in InferredSignature $
+                 ((makeNamedExps focus, 0, []) :) $
                  flip map (zip [1 ..] $ func' focus scope') $ \(ix, funcs) ->
                      (funcs, ix, [])
     }

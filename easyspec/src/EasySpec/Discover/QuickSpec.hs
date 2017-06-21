@@ -130,8 +130,10 @@ runQuickspecOn (InferredSignature iSig) = do
                 debug1 "Broke:"
                 debug1 $ show $ map Name.getOccString ns
     -- => (key -> [r] -> i -> m r)
-    go _ bgExps funcss = do
-        let curSigExp = createQuickspecSig funcss
+    go _ tups funcssFunc = do
+        let bgEqs = map snd tups
+        let curSigExp = createQuickspecSig $ funcssFunc $ concat bgEqs
+        let bgExps = map fst tups
         let sigExp = mconcatSigsExp $ curSigExp : bgExps
         debug1 "Running quickspec with signature:"
         debug1 "==[Start of Signature Expression]=="
@@ -148,7 +150,7 @@ runQuickspecOn (InferredSignature iSig) = do
         debug1 "==[Start of Equations]=="
         debug1 $ unlines $ map prettyEasyEq eqs
         debug1 "==[End of Equations]=="
-        pure resExp
+        pure (resExp, eqs)
     getEqs resExp = do
         let showBackgroundExp = showPrettyBackgroundExp resExp
         let expStr = prettyPrintOneLine showBackgroundExp

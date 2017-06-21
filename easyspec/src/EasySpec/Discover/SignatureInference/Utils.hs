@@ -60,7 +60,8 @@ splitInferAlg name fs func =
                       rights $ map convertToUsableNamedExp funcs
                   fgNExps = makeNamedExps focus
                   bgNExps = makeNamedExps bgSigFuncs \\ fgNExps
-              in InferredSignature [(fgNExps, 1, [0]), (bgNExps, 0, [])]
+              in InferredSignature
+                     [(const fgNExps, 1, [0]), (const bgNExps, 0, [])]
     }
 
 breakThroughSplitInferAlg ::
@@ -77,9 +78,9 @@ breakThroughSplitInferAlg name fs func maxDistinctOtherFuncs =
           \focus scope ->
               let scope' = scope \\ focus :: [EasyId]
               in InferredSignature $
-                 ((makeNamedExps focus, 0, []) :) $
+                 ((const $ makeNamedExps focus, 0, []) :) $
                  flip map (zip [1 ..] $ func' focus scope') $ \(ix, funcs) ->
-                     (funcs, ix, [])
+                     (const funcs, ix, [])
     }
   where
     makeNamedExps funcs = rights $ map convertToUsableNamedExp funcs

@@ -13,8 +13,6 @@ import Import
 
 import Path.Internal (Path(Path))
 
-import Text.Show.Pretty (ppShow)
-
 import qualified Language.Haskell.TH.Syntax as TH (Lift)
 
 import Language.Haskell.Exts.Pretty as H
@@ -77,11 +75,7 @@ instance Eq SignatureInferenceStrategy where
     s1 == s2 = sigInfStratName s1 == sigInfStratName s2
 
 newtype InferredSignature =
-    InferredSignature [([EasyNamedExp], Int, [Int])]
-    deriving (Show, Eq)
-
-prettyInferredSignature :: InferredSignature -> String
-prettyInferredSignature (InferredSignature f) = ppShow f
+    InferredSignature [([EasyEq] -> [EasyNamedExp], Int, [Int])]
 
 newtype SignatureExpression =
     SignatureExpression EasyExp

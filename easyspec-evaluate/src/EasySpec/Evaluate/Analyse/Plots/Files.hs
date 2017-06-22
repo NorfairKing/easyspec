@@ -12,7 +12,7 @@ import Language.Haskell.Exts.Pretty (prettyPrint)
 import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Analyse.Common
-
+import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
 commonRFile :: MonadIO m => m (Path Abs File)
@@ -87,3 +87,19 @@ singleEvaluatorAverageGlobalBoxPlotFileForExample ev =
 singleEvaluatorAverageBoxGlobalAnalysisScript :: MonadIO m => m (Path Abs File)
 singleEvaluatorAverageBoxGlobalAnalysisScript =
     scriptFile "single_evaluator_boxplot_average_global.r"
+
+plotFileForDistributionNrDifferentFunctions :: MonadIO m => m (Path Abs File)
+plotFileForDistributionNrDifferentFunctions =
+    pngPlotFileWithComponents
+        $(mkRelFile "distribution-nr-different-functions-per-equation")
+        []
+
+csvFileForDistributionNrDifferentFunctions :: MonadIO m => m (Path Abs File)
+csvFileForDistributionNrDifferentFunctions =
+    csvDataFileWithComponents
+        $(mkRelFile "distribution-nr-different-functions-per-equation")
+        []
+
+distributionNrDifferentFunctionsAnalysisScript :: MonadIO m => m (Path Abs File)
+distributionNrDifferentFunctionsAnalysisScript =
+    scriptFile "distribution-nr-different-functions-per-equation.r"

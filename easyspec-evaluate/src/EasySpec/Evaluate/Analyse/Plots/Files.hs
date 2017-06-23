@@ -12,7 +12,6 @@ import Language.Haskell.Exts.Pretty (prettyPrint)
 import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Analyse.Common
-import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
 commonRFile :: MonadIO m => m (Path Abs File)

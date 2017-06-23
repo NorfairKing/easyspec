@@ -12,19 +12,13 @@ import Language.Haskell.Exts.Pretty (prettyPrint)
 import Data.Csv
 
 import Development.Shake
-import Development.Shake.Path
 
 import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.Types as ES
 import qualified EasySpec.Discover.Utils as ES
 
-import EasySpec.Evaluate.Analyse.Common
-import EasySpec.Evaluate.Analyse.Data.Common
-import EasySpec.Evaluate.Analyse.Data.Content
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.Plots.ResultsPlots
-import EasySpec.Evaluate.Analyse.R
-import EasySpec.Evaluate.Analyse.Utils
 import EasySpec.Evaluate.Types
 
 plotsRulesDistributionNrDifferentFunctions :: Rules [Path Abs File]
@@ -65,12 +59,12 @@ nrsDifferentFunctionsFromData dats =
 
 nrsDifferentFunctionsFrom :: EvaluationInputPoint -> [Int]
 nrsDifferentFunctionsFrom ei =
-    map (nrDifferentFunctionsFrom (eipFunc ei : map ES.idName (eipScope ei)))
+    map (nrDifferentFunctionsFrom
+             (ES.ordNub $ eipFunc ei : map ES.idName (eipScope ei)))
         (eipDiscoveredEqs ei)
 
 nrDifferentFunctionsFrom :: [ES.EasyQName] -> ES.EasyEq -> Int
-nrDifferentFunctionsFrom ns eq =
-    length $ filter (`ES.mentionsEq` eq) (ES.ordNub ns)
+nrDifferentFunctionsFrom ns eq = length $ filter (`ES.mentionsEq` eq) ns
 
 newtype NrDifferentFunctions =
     NrDifferentFunctions Int

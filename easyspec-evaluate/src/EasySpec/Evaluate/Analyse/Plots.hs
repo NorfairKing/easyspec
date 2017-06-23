@@ -18,6 +18,7 @@ import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
 import EasySpec.Evaluate.Analyse.Plots.DistributionNrDifferentFunctions
+import EasySpec.Evaluate.Analyse.Plots.DistributionOccurrencesInSameEquation
 import EasySpec.Evaluate.Analyse.Plots.RelativeLines
 import EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar
 import EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
@@ -40,7 +41,8 @@ plotsRulesForAllData = do
         unorderedCombinationsWithoutSelfCombinations evaluators
     bfs <- mapM perEvaluatorGlobalAverageBoxPlotFor evaluators
     dnrdfs <- plotsRulesDistributionNrDifferentFunctions
-    pure $ lfs ++ pfs ++ bfs ++ dnrdfs
+    oosfies <- plotsRulesDistributionDistributionOccurrencesInSameEquation
+    pure $ lfs ++ pfs ++ bfs ++ dnrdfs ++ oosfies
 
 plotsRulesForExample :: ES.InputSpec -> Rules [Path Abs File]
 plotsRulesForExample is = do

@@ -40,10 +40,10 @@ rawDataFromExample e =
 rawDataFromStrategy ::
        ES.SignatureInferenceStrategy -> Action [EvaluationInputPoint]
 rawDataFromStrategy s =
-    rawDataFromWith $ do
-        fmap concat <$> forM examples $ \example -> do
-            names <- liftIO $ namesInSource example
-            mapM (\n -> rawDataFileFor example n s) names
+    rawDataFromWith $
+    fmap concat <$> forM examples $ \example -> do
+        names <- liftIO $ namesInSource example
+        mapM (\n -> rawDataFileFor example n s) names
 
 rawDataFromWith :: Action [Path Abs File] -> Action [EvaluationInputPoint]
 rawDataFromWith getFilePaths = do

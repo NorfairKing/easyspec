@@ -21,13 +21,15 @@ namesInSource is = do
         Just r -> pure r
 
 examplesAndNames :: MonadIO m => m [(ES.InputSpec, ES.EasyQName)]
-examplesAndNames = fmap concat $
-        forM examples $ \example -> do
-            names <- liftIO $ namesInSource example
-            pure $ (,) example <$> names
+examplesAndNames =
+    fmap concat $
+    forM examples $ \example -> do
+        names <- liftIO $ namesInSource example
+        pure $ (,) example <$> names
+
 examplesNamesAndStrategies ::
        MonadIO m
     => m [(ES.InputSpec, ES.EasyQName, ES.SignatureInferenceStrategy)]
 examplesNamesAndStrategies = do
     exns <- examplesAndNames
-    pure [(e,n,s) | (e,n) <- exns, s <- signatureInferenceStrategies]
+    pure [(e, n, s) | (e, n) <- exns, s <- signatureInferenceStrategies]

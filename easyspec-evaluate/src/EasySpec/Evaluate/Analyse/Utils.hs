@@ -95,5 +95,5 @@ unorderedCombinationsWithoutSelfCombinations ls =
                  (l1:l2s) -> map ((,) l1) l2s)
         (tails ls)
 
-uncurry3 :: (a -> b -> c -> d) -> (a,b,c) -> d
-uncurry3 func = \(a,b,c) -> func a b c
+uncurry3 :: (a -> b -> c -> d) -> (a, b, c) -> d
+uncurry3 func (a, b, c) = func a b c

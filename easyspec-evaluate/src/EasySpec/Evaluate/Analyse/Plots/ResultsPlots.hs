@@ -16,7 +16,6 @@ import Data.Csv
 import Development.Shake
 import Development.Shake.Path
 
-import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Analyse.Common

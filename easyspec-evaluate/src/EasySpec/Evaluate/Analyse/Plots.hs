@@ -40,7 +40,7 @@ plotsRulesForAllData = do
         unorderedCombinationsWithoutSelfCombinations evaluators
     bfs <- mapM perEvaluatorGlobalAverageBoxPlotFor evaluators
     dnrdfs <- plotsRulesDistributionNrDifferentFunctions
-    pure $ lfs ++ pfs ++ bfs ++ [dnrdfs]
+    pure $ lfs ++ pfs ++ bfs ++ dnrdfs
 
 plotsRulesForExample :: ES.InputSpec -> Rules [Path Abs File]
 plotsRulesForExample is = do

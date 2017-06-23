@@ -20,6 +20,7 @@ import EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
 import EasySpec.Evaluate.Analyse.Plots.DistributionNrDifferentFunctions
 import EasySpec.Evaluate.Analyse.Plots.DistributionOccurrencesInSameEquation
 import EasySpec.Evaluate.Analyse.Plots.RelativeLines
+import EasySpec.Evaluate.Analyse.Plots.DistributionSizeOfProperty
 import EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar
 import EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
 import EasySpec.Evaluate.Analyse.Utils

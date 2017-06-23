@@ -34,6 +34,7 @@ library
         EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar
         EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
         EasySpec.Evaluate.Analyse.Plots.DistributionNrDifferentFunctions
+        EasySpec.Evaluate.Analyse.Plots.DistributionSizeOfProperty
         EasySpec.Evaluate.Analyse.Plots.DistributionOccurrencesInSameEquation
         EasySpec.Evaluate.Analyse.R
         EasySpec.Evaluate.Analyse.Utils

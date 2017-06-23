@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -8,7 +9,6 @@ import Import
 
 import Language.Haskell.Exts.Pretty (prettyPrint)
 
-
 import Data.Csv
 
 import Development.Shake
@@ -16,74 +16,47 @@ import Development.Shake.Path
 
 import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.Types as ES
+import qualified EasySpec.Discover.Utils as ES
 
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Data.Content
 import EasySpec.Evaluate.Analyse.Plots.Files
+import EasySpec.Evaluate.Analyse.Plots.ResultsPlots
 import EasySpec.Evaluate.Analyse.R
 import EasySpec.Evaluate.Analyse.Utils
 import EasySpec.Evaluate.Types
 
 plotsRulesDistributionNrDifferentFunctions :: Rules [Path Abs File]
 plotsRulesDistributionNrDifferentFunctions = do
-    plotFile <- nrDifferentFunctionsCsvFileRulesForAllRules
-    enss <- examplesNamesAndStrategies
-    csvFs <- mapM (uncurry3 nrDifferentFunctionsCsvFileRulesFor) enss
-    csvFs' <-
-        mapM
-            nrDifferentFunctionsCsvFileRulesForStrategyRules
-            signatureInferenceStrategies
-    pure $ plotFile : csvFs ++ csvFs'
-
-nrDifferentFunctionsCsvFileRulesForAllRules :: Rules (Path Abs File)
-nrDifferentFunctionsCsvFileRulesForAllRules = do
-    csvFs <-
-        mapM
-            csvFileForDistributionNrDifferentFunctionsForStrategy
-            signatureInferenceStrategies
-    resF <- csvFileForDistributionNrDifferentFunctions
-    combineCSVFiles @NrDifferentFunctions resF csvFs
-    plotFile <- plotFileForDistributionNrDifferentFunctions
-    plotFile $%> do
-        needP [resF]
-        scriptF <- distributionNrDifferentFunctionsAnalysisScript
-        rscript scriptF [toFilePath resF, toFilePath plotFile]
-    pure plotFile
-
-nrDifferentFunctionsCsvFileRulesForStrategyRules ::
-       ES.SignatureInferenceStrategy -> Rules (Path Abs File)
-nrDifferentFunctionsCsvFileRulesForStrategyRules s = do
-    exns <- examplesAndNames
-    fs <-
-        forM exns $ \(example, name) ->
-            csvFileForDistributionNrDifferentFunctionsFor example name s
-    resF <- csvFileForDistributionNrDifferentFunctionsForStrategy s
-    combineCSVFiles @NrDifferentFunctions resF fs
-    pure resF
-
-nrDifferentFunctionsCsvFileRulesFor ::
-       ES.InputSpec
-    -> ES.EasyQName
-    -> ES.SignatureInferenceStrategy
-    -> Rules (Path Abs File)
-nrDifferentFunctionsCsvFileRulesFor e n s = do
-    csvF <- csvFileForDistributionNrDifferentFunctionsFor e n s
-    csvF $%> do
-        dat <- rawDataFrom e n s
-        putLoud $
-            unwords
-                [ "Calculating the number of different functions per equation in the results of running easyspec on"
-                , toFilePath $ ES.inputSpecAbsFile e
-                , "with focus"
-                , show $ prettyPrint n
-                , "with signature inference strategy"
-                , show $ ES.sigInfStratName s
-                , "and writing the results to"
-                , toFilePath csvF
-                ]
-        writeCSV csvF $ nrsDifferentFunctionsFromData [dat]
-    pure csvF
+    plotF <- scriptFile "distribution-nr-different-functions-per-equation.r"
+    resultsPlotsFor
+        EvaluationFunc
+        { evaluationFuncDir =
+              $(mkRelDir "distribution-nr-different-functions-per-equation")
+        , evaluationFuncEval = nrsDifferentFunctionsFromData
+        , evaluationFuncIndividualMessage =
+              \e n s csvF ->
+                  unwords
+                      [ "Calculating the number of different functions per equation in the results of running easyspec on"
+                      , toFilePath $ ES.inputSpecAbsFile e
+                      , "with focus"
+                      , show $ prettyPrint n
+                      , "with signature inference strategy"
+                      , show $ ES.sigInfStratName s
+                      , "and writing the results to"
+                      , toFilePath csvF
+                      ]
+        , evaluationFuncPerStrategyMessage =
+              \s csvF ->
+                  unwords
+                      [ "Calculating the number of different functions per equation in the results of running easyspec on all examples and names, but with signature inference strategy"
+                      , show $ ES.sigInfStratName s
+                      , "and writing the results to"
+                      , toFilePath csvF
+                      ]
+        , evaluationFuncPlotScript = plotF
+        }
 
 nrsDifferentFunctionsFromData ::
        [EvaluationInputPoint] -> [NrDifferentFunctions]
@@ -96,7 +69,8 @@ nrsDifferentFunctionsFrom ei =
         (eipDiscoveredEqs ei)
 
 nrDifferentFunctionsFrom :: [ES.EasyQName] -> ES.EasyEq -> Int
-nrDifferentFunctionsFrom ns eq = length $ filter (`ES.mentionsEq` eq) ns
+nrDifferentFunctionsFrom ns eq =
+    length $ filter (`ES.mentionsEq` eq) (ES.ordNub ns)
 
 newtype NrDifferentFunctions =
     NrDifferentFunctions Int

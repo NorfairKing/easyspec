@@ -26,7 +26,7 @@ res$output <- suppressWarnings(as.numeric(as.character(res$output)))
 res$output <- replace(res$output, is.na(res$output), 0)
 
 
-if(length(res$output != 0)) {
+if(length(res$output) != 0) {
   png(outPng, height=900, width=1200, bg="white")
   par(mar=c(35,4.1,4.1,2.1))
 

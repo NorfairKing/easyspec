@@ -87,38 +87,3 @@ singleEvaluatorAverageGlobalBoxPlotFileForExample ev =
 singleEvaluatorAverageBoxGlobalAnalysisScript :: MonadIO m => m (Path Abs File)
 singleEvaluatorAverageBoxGlobalAnalysisScript =
     scriptFile "single_evaluator_boxplot_average_global.r"
-
-plotFileForDistributionNrDifferentFunctions :: MonadIO m => m (Path Abs File)
-plotFileForDistributionNrDifferentFunctions =
-    pngPlotFileWithComponents
-        $(mkRelFile "distribution-nr-different-functions-per-equation")
-        []
-
-csvFileForDistributionNrDifferentFunctionsFor ::
-       MonadIO m
-    => ES.InputSpec
-    -> ES.EasyQName
-    -> ES.SignatureInferenceStrategy
-    -> m (Path Abs File)
-csvFileForDistributionNrDifferentFunctionsFor e n s = do
-    csvDataFileWithComponents
-        ($(mkRelDir "distribution-nr-different-functions-per-equation") </>
-         ES.inputSpecFile e)
-        [prettyPrint n, ES.sigInfStratName s]
-
-csvFileForDistributionNrDifferentFunctionsForStrategy :: MonadIO m =>
-       ES.SignatureInferenceStrategy -> m (Path Abs File)
-csvFileForDistributionNrDifferentFunctionsForStrategy s =
-    csvDataFileWithComponents
-        $(mkRelFile "distribution-nr-different-functions-per-equation/strategy")
-        [ES.sigInfStratName s]
-
-csvFileForDistributionNrDifferentFunctions :: MonadIO m => m (Path Abs File)
-csvFileForDistributionNrDifferentFunctions =
-    csvDataFileWithComponents
-        $(mkRelFile "distribution-nr-different-functions-per-equation")
-        []
-
-distributionNrDifferentFunctionsAnalysisScript :: MonadIO m => m (Path Abs File)
-distributionNrDifferentFunctionsAnalysisScript =
-    scriptFile "distribution-nr-different-functions-per-equation.r"

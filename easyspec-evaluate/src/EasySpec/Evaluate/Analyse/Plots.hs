@@ -19,8 +19,8 @@ import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
 import EasySpec.Evaluate.Analyse.Plots.DistributionNrDifferentFunctions
 import EasySpec.Evaluate.Analyse.Plots.DistributionOccurrencesInSameEquation
-import EasySpec.Evaluate.Analyse.Plots.RelativeLines
 import EasySpec.Evaluate.Analyse.Plots.DistributionSizeOfProperty
+import EasySpec.Evaluate.Analyse.Plots.RelativeLines
 import EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar
 import EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
 import EasySpec.Evaluate.Analyse.Utils
@@ -43,7 +43,8 @@ plotsRulesForAllData = do
     bfs <- mapM perEvaluatorGlobalAverageBoxPlotFor evaluators
     dnrdfs <- plotsRulesDistributionNrDifferentFunctions
     oosfies <- plotsRulesDistributionDistributionOccurrencesInSameEquation
-    pure $ lfs ++ pfs ++ bfs ++ dnrdfs ++ oosfies
+    dsofs <- plotsRulesDistributionDistributionSizeOfProperty
+    pure $ lfs ++ pfs ++ bfs ++ dnrdfs ++ oosfies ++ dsofs
 
 plotsRulesForExample :: ES.InputSpec -> Rules [Path Abs File]
 plotsRulesForExample is = do

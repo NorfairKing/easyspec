@@ -16,10 +16,8 @@ import Data.Csv
 
 import Development.Shake
 
-import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.CodeUtils as ES
 import qualified EasySpec.Discover.Types as ES
-import qualified EasySpec.Discover.Utils as ES
 
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.Plots.ResultsPlots

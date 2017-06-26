@@ -25,19 +25,25 @@ buildExamples = do
     TH.lift res
 
 findAllExamples :: MonadIO m => m [(String, [ES.InputSpec])]
-findAllExamples = do
-    hes <- hackageExamples
-    ees <- evaluationExamples
-    pure [("hackage", hes), ("evaluation", ees)]
+findAllExamples =
+    sequence [hackageExamples, evaluationExamples, runtimeExamples]
 
-hackageExamples :: MonadIO m => m [ES.InputSpec]
-hackageExamples = concat <$> mapM packageExamples hackagePackages
+hackageExamples :: MonadIO m => m (String, [ES.InputSpec])
+hackageExamples =
+    (,) "hackage" <$> (concat <$> mapM packageExamples hackagePackages)
 
-evaluationExamples :: MonadIO m => m [ES.InputSpec]
-evaluationExamples = do
-    edir <- (</> $(mkRelDir "evaluation")) <$> examplesDir
+evaluationExamples :: MonadIO m => m (String, [ES.InputSpec])
+evaluationExamples = subdirExamples "evaluation"
+
+runtimeExamples :: MonadIO m => m (String, [ES.InputSpec])
+runtimeExamples = subdirExamples "runtime"
+
+subdirExamples :: MonadIO m => String -> m (String, [ES.InputSpec])
+subdirExamples dirStr = do
+    dir <- liftIO $ parseRelDir dirStr
+    edir <- (</> dir) <$> examplesDir
     ss <- sourcesIn edir
-    pure $ map (ES.InputSpec edir) ss
+    pure (dirStr, map (ES.InputSpec edir) ss)
 
 makeExampleCache :: Q Exp
 makeExampleCache = do

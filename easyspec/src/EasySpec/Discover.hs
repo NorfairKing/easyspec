@@ -149,8 +149,7 @@ discoverEquations ds = do
     debug1 $ unlines $ map prettyEasyId ids
     let (focusIds, bgIds) = splitFocus ds ids
     let iSig = inferSignature (setDiscInfStrat ds) focusIds bgIds
-    debug1 "Inferred signature:"
-    debug1 $ prettyInferredSignature iSig
+    debug1 "Inferred signature."
     debug1 "Starting to run easyspec now."
     allEqs <- ordNub <$> runEasySpec ds iSig
     debug1 "Found all these equations:"

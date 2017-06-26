@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module EasySpec.Discover.QuickSpec where
 
@@ -6,8 +7,8 @@ import Import
 
 import Control.Monad.State
 import Data.Dynamic
+import Data.Graph
 import Data.List.Split
-import Data.Tree
 
 import DynFlags hiding (Settings)
 import GHC hiding (Name, Qual)
@@ -82,19 +83,40 @@ runEasySpec ds iSig = do
             void $ execStmt declaretc execOptions
             runReaderT (runQuickspecOn iSig) sets
 
+-- Do work in a dependency DAG.
+dagWork ::
+       forall m key r i. (Eq key, Monad m)
+    => (key -> [r] -> i -> m r)
+    -> [(key, [key])]
+    -> [(key, i)]
+    -> m [(key, r)]
+dagWork worker deps ins = execStateT (mapM_ go ins) []
+  where
+    go :: (key, i) -> StateT [(key, r)] m ()
+    go (k, i) = do
+        let ds = fromMaybe [] $ lookup k deps
+        prevRes <- catMaybes <$> mapM (gets . lookup) ds
+        r <- lift $ worker k prevRes i
+        modify (\s -> (k, r) : s)
+
 runQuickspecOn :: GhcMonad m => InferredSignature -> ReaderT Settings m [EasyEq]
-runQuickspecOn iSig = do
-    let expForest = makeSignatureExpressions iSig
-    fmap concat $
-        forM expForest $ \expTree ->
-            execWriterT $ evalStateT (go expTree) (0 :: Int)
+runQuickspecOn (InferredSignature iSig) = do
+    let (graph, vertexMapping) = graphFromEdges' iSig
+    let rtops = reverse $ topSort graph
+    let ins =
+            map
+                (\n ->
+                     let (funcss, _, _) = vertexMapping n
+                     in (n, funcss))
+                rtops
+    let deps = map (\(_, n, ds) -> (n, ds)) iSig
+    execWriterT $ flip evalStateT (0 :: Int) $ dagWork go deps ins
   where
     liftGHC = lift . lift . lift
     nextSigExpName = do
         num <- get
         modify (+ 1)
         pure $ Ident mempty $ "s" ++ show num
-    -- go :: GhcMonad m => Tree EasyExp -> StateT Int (WriterT [EasyEq] (ReaderT Settings m) EasyExp
     exec s = do
         debug1 s
         res <- liftGHC $ execStmt s execOptions
@@ -107,8 +129,11 @@ runQuickspecOn iSig = do
             ExecBreak ns _ -> do
                 debug1 "Broke:"
                 debug1 $ show $ map Name.getOccString ns
-    go (Node curSigExp others) = do
-        bgExps <- mapM go others
+    -- => (key -> [r] -> i -> m r)
+    go _ tups funcssFunc = do
+        let bgEqs = map snd tups
+        let curSigExp = createQuickspecSig $ funcssFunc $ concat bgEqs
+        let bgExps = map fst tups
         let sigExp = mconcatSigsExp $ curSigExp : bgExps
         debug1 "Running quickspec with signature:"
         debug1 "==[Start of Signature Expression]=="
@@ -125,7 +150,7 @@ runQuickspecOn iSig = do
         debug1 "==[Start of Equations]=="
         debug1 $ unlines $ map prettyEasyEq eqs
         debug1 "==[End of Equations]=="
-        pure resExp
+        pure (resExp, eqs)
     getEqs resExp = do
         let showBackgroundExp = showPrettyBackgroundExp resExp
         let expStr = prettyPrintOneLine showBackgroundExp
@@ -172,9 +197,6 @@ runQuickspecOn iSig = do
 
 bindTo :: EasyName -> EasyExp -> EasyStmt
 bindTo n = Generator mempty (PVar mempty n)
-
-makeSignatureExpressions :: InferredSignature -> Forest EasyExp
-makeSignatureExpressions (InferredSignature t) = mapF createQuickspecSig t
 
 mapF :: (a -> b) -> Forest a -> Forest b
 mapF func = map (fmap func)

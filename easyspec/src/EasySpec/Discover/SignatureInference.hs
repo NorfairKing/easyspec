@@ -19,7 +19,7 @@ import EasySpec.Discover.SignatureInference.Utils
 import EasySpec.Discover.Types
 
 defaultInferenceStrategy :: SignatureInferenceStrategy
-defaultInferenceStrategy = inferFullBackground
+defaultInferenceStrategy = inferFullBreakthrough 1
 
 inferenceStrategies :: [SignatureInferenceStrategy]
 inferenceStrategies =
@@ -33,10 +33,12 @@ inferenceStrategies =
 
 basicInferenceStrategies :: [SignatureInferenceStrategy]
 basicInferenceStrategies =
+    nubBy ((==) `on` sigInfStratName) $
+    defaultInferenceStrategy :
     [ inferEmptyBackground
     , inferFullBackground
-    , inferFullBreakthrough 1
     , inferSyntacticSimilarityName
+    , inferFullBreakthrough 1
     , inferSyntacticSimilarityEditDistanceName
     , inferSyntacticSimilaritySymbols
     , inferSyntacticSimilarityType

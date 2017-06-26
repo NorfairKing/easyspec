@@ -5,8 +5,6 @@ module EasySpec.Discover.SignatureInference.Utils where
 
 import Import
 
-import Data.Tree
-
 import Language.Haskell.Exts.Syntax
 
 import EasySpec.Discover.CodeUtils
@@ -62,7 +60,8 @@ splitInferAlg name fs func =
                       rights $ map convertToUsableNamedExp funcs
                   fgNExps = makeNamedExps focus
                   bgNExps = makeNamedExps bgSigFuncs \\ fgNExps
-              in InferredSignature [Node fgNExps [Node bgNExps []]]
+              in InferredSignature
+                     [(const fgNExps, 1, [0]), (const bgNExps, 0, [])]
     }
 
 breakThroughSplitInferAlg ::
@@ -79,7 +78,9 @@ breakThroughSplitInferAlg name fs func maxDistinctOtherFuncs =
           \focus scope ->
               let scope' = scope \\ focus :: [EasyId]
               in InferredSignature $
-                 flip map (func' focus scope') $ \funcs -> Node funcs []
+                 ((const $ makeNamedExps focus, 0, []) :) $
+                 flip map (zip [1 ..] $ func' focus scope') $ \(ix, funcs) ->
+                     (const funcs, ix, [])
     }
   where
     makeNamedExps funcs = rights $ map convertToUsableNamedExp funcs

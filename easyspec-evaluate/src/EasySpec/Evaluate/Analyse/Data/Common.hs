@@ -10,8 +10,11 @@ import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Common.TH
 import EasySpec.Evaluate.Types ()
 
+exampleGroups :: [(String, [ES.InputSpec])]
+exampleGroups = $(buildExamples)
+
 examples :: [ES.InputSpec]
-examples = $(buildExamples)
+examples = concatMap snd exampleGroups
 
 namesInSource :: (MonadIO m, MonadMask m) => ES.InputSpec -> m [ES.EasyQName]
 namesInSource is = do

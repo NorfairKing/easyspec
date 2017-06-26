@@ -18,14 +18,17 @@ import EasySpec.Evaluate.Analyse.Utils
 import EasySpec.Evaluate.Types ()
 import EasySpec.Utils
 
--- [(FilePath, FilePath)]
+-- [(String, [InputSpec])]
 buildExamples :: Q Exp
 buildExamples = do
     res <- runIO findAllExamples
     TH.lift res
 
-findAllExamples :: MonadIO m => m [ES.InputSpec]
-findAllExamples = liftM2 (++) hackageExamples evaluationExamples
+findAllExamples :: MonadIO m => m [(String, [ES.InputSpec])]
+findAllExamples = do
+    hes <- hackageExamples
+    ees <- evaluationExamples
+    pure [("hackage", hes), ("evaluation", ees)]
 
 hackageExamples :: MonadIO m => m [ES.InputSpec]
 hackageExamples = concat <$> mapM packageExamples hackagePackages
@@ -41,7 +44,7 @@ makeExampleCache = do
     ntups <-
         runIO $ do
             exs <- findAllExamples -- TODO put this function somewhere else so that we can use 'buildExamples' here instead of finding examples again.
-            forM exs $ \ex -> do
+            forM (concatMap snd exs) $ \ex -> do
                 ns <- findNamesInSource ex
                 putStrLn $
                     unlines $

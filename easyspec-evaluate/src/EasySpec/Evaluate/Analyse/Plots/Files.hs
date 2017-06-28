@@ -55,6 +55,18 @@ pointsPlotForEvaluatorsPerExampleGroup groupName e1 e2 =
         $(mkRelFile "points/per-group/group")
         [groupName, evaluatorName e1, evaluatorName e2]
 
+pointsPlotForEvaluatorsPerExampleGroupPerStrategy ::
+       MonadIO m
+    => String
+    -> ES.SignatureInferenceStrategy
+    -> Evaluator
+    -> Evaluator
+    -> m (Path Abs File)
+pointsPlotForEvaluatorsPerExampleGroupPerStrategy groupName s e1 e2 =
+    pngPlotFileWithComponents
+        $(mkRelFile "points/per-group-per-strategy/points")
+        [groupName, ES.sigInfStratName s, evaluatorName e1, evaluatorName e2]
+
 pointsPlotAnalysisScript :: MonadIO m => m (Path Abs File)
 pointsPlotAnalysisScript = scriptFile "points.r"
 

@@ -84,6 +84,19 @@ dataFilesForExample is = do
     names <- liftIO $ namesInSource is
     fmap concat $ forM names $ dataFilesForExampleAndName is
 
+dataFilesForExampleGroupAndStrategy ::
+       MonadIO m => String -> ES.SignatureInferenceStrategy -> m [Path Abs File]
+dataFilesForExampleGroupAndStrategy groupName s = do
+    tups <- groupExamplesAndNames groupName
+    mapM (\(is, n) -> dataFileFor is n s) tups
+
+dataFileForExampleGroupAndStrategy ::
+       MonadIO m => String -> ES.SignatureInferenceStrategy -> m (Path Abs File)
+dataFileForExampleGroupAndStrategy groupName s =
+    csvDataFileWithComponents
+        $(mkRelFile "combined-per-group-per-stragety/data")
+        [groupName, ES.sigInfStratName s]
+
 dataFilesForExampleGroup :: MonadIO m => String -> m [Path Abs File]
 dataFilesForExampleGroup groupName = do
     tups <- groupExamplesAndNames groupName

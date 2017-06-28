@@ -69,6 +69,34 @@ plotsRulesForPointsPlotsWithGroupsOfExamples groupName _ e1 e2 = do
             ]
     pure plotF
 
+plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy ::
+       String
+    -> [ES.InputSpec]
+    -> ES.SignatureInferenceStrategy
+    -> Evaluator
+    -> Evaluator
+    -> Rules (Path Abs File)
+plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy groupName _ s e1 e2 = do
+    plotF <- pointsPlotForEvaluatorsPerExampleGroupPerStrategy groupName s e1 e2
+    plotF $%> do
+        dependOnEvaluator e1
+        dependOnEvaluator e2
+        dataF <- dataFileForExampleGroupAndStrategy groupName s
+        needP [dataF]
+        scriptF <- pointsPlotAnalysisScript
+        rscript
+            scriptF
+            [ toFilePath dataF
+            , toFilePath plotF
+            , evaluatorName e1
+            , evaluatorName e2
+            , "Per Group: " <> groupName <> " with strategy: " <>
+              ES.sigInfStratName s
+            , prettyIndication $ evaluatorIndication e1
+            , prettyIndication $ evaluatorIndication e2
+            ]
+    pure plotF
+
 plotsRulesForPointsPlotWithEvaluators ::
        Evaluator -> Evaluator -> Rules (Path Abs File)
 plotsRulesForPointsPlotWithEvaluators e1 e2 = do

@@ -2,7 +2,7 @@
 
 module Six where
 
-import Prelude ((++), (-), (<), id, map, Int)
+import Prelude (Int, (++), (-), (<), id, map)
 
 myDrop :: Int -> [a] -> [a]
 myDrop x as =

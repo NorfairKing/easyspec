@@ -53,8 +53,28 @@ dataRulesForExampleGroup ghciResource groupName exs = do
     csvFs <- mapM (dataRulesForExample ghciResource) exs
     combF <- dataFileForExampleGroup groupName
     combineCSVFiles @EvaluatorCsvLine combF csvFs
+    combFs <-
+        mapM
+            (dataRulesForExampleGroupAndStrategy ghciResource groupName exs)
+            signatureInferenceStrategies
     let rule = groupName
-    rule ~> needP [combF]
+    rule ~> needP (combF : combFs)
+    pure combF
+
+dataRulesForExampleGroupAndStrategy ::
+       Resource
+    -> String
+    -> [ES.InputSpec]
+    -> ES.SignatureInferenceStrategy
+    -> Rules (Path Abs File)
+dataRulesForExampleGroupAndStrategy _ groupName exs strat = do
+    csvFs <-
+        fmap concat $
+        forM exs $ \example -> do
+            names <- namesInSource example
+            mapM (\n -> dataFileFor example n strat) names
+    combF <- dataFileForExampleGroupAndStrategy groupName strat
+    combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
 dataRulesForExample :: Resource -> ES.InputSpec -> Rules (Path Abs File)

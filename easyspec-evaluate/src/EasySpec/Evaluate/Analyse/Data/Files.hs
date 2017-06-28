@@ -90,7 +90,7 @@ dataFilesForExampleGroup groupName = do
     concat <$> mapM (uncurry dataFilesForExampleAndName) tups
 
 dataFileForExampleGroup :: MonadIO m => String -> m (Path Abs File)
-dataFileForExampleGroup groupName = do
+dataFileForExampleGroup groupName =
     csvDataFileWithComponents
         $(mkRelFile "combined-per-group/group")
         [groupName]

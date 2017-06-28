@@ -31,7 +31,8 @@ plotsRule = "plots"
 plotsRules :: Rules ()
 plotsRules = do
     allDataPlotsFs <- plotsRulesForAllData
-    groupPlotsFs <- concat <$> mapM (uncurry plotsRulesForExampleGroup) exampleGroups
+    groupPlotsFs <-
+        concat <$> mapM (uncurry plotsRulesForExampleGroup) exampleGroups
     plotsFs <- concat <$> mapM plotsRulesForExample examples
     plotsRule ~> needP (allDataPlotsFs ++ groupPlotsFs ++ plotsFs)
 
@@ -48,7 +49,7 @@ plotsRulesForAllData = do
     pure $ lfs ++ pfs ++ bfs ++ dnrdfs ++ oosfies ++ dsofs
 
 plotsRulesForExampleGroup :: String -> [ES.InputSpec] -> Rules [Path Abs File]
-plotsRulesForExampleGroup groupName exs = do
+plotsRulesForExampleGroup groupName exs =
     mapM
         (uncurry $ plotsRulesForPointsPlotsWithGroupsOfExamples groupName exs)
         (unorderedCombinationsWithoutSelfCombinations evaluators)

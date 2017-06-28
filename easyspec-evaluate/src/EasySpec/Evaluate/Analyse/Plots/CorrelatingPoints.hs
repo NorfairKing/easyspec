@@ -3,6 +3,7 @@
 
 module EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
     ( plotsRulesForPointsPlotWithEvaluatorsPerExample
+    , plotsRulesForPointsPlotsWithGroupsOfExamples
     , plotsRulesForPointsPlotWithEvaluators
     ) where
 
@@ -37,6 +38,32 @@ plotsRulesForPointsPlotWithEvaluatorsPerExample is e1 e2 = do
             , evaluatorName e1
             , evaluatorName e2
             , toFilePath $ ES.inputSpecFile is
+            , prettyIndication $ evaluatorIndication e1
+            , prettyIndication $ evaluatorIndication e2
+            ]
+    pure plotF
+
+plotsRulesForPointsPlotsWithGroupsOfExamples ::
+       String
+    -> [ES.InputSpec]
+    -> Evaluator
+    -> Evaluator
+    -> Rules (Path Abs File)
+plotsRulesForPointsPlotsWithGroupsOfExamples groupName _ e1 e2 = do
+    plotF <- pointsPlotForEvaluatorsPerExampleGroup groupName e1 e2
+    plotF $%> do
+        dependOnEvaluator e1
+        dependOnEvaluator e2
+        dataF <- dataFileForExampleGroup groupName
+        needP [dataF]
+        scriptF <- pointsPlotAnalysisScript
+        rscript
+            scriptF
+            [ toFilePath dataF
+            , toFilePath plotF
+            , evaluatorName e1
+            , evaluatorName e2
+            , "Per Group: " <> groupName
             , prettyIndication $ evaluatorIndication e1
             , prettyIndication $ evaluatorIndication e2
             ]

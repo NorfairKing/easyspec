@@ -26,7 +26,7 @@ buildExamples = do
 
 findAllExamples :: MonadIO m => m [(String, [ES.InputSpec])]
 findAllExamples =
-    sequence [hackageExamples, evaluationExamples, runtimeExamples]
+    sequence [evaluationExamples, runtimeExamples] -- No hackage for now
 
 hackageExamples :: MonadIO m => m (String, [ES.InputSpec])
 hackageExamples =

@@ -26,8 +26,10 @@ data EvaluationInput = EvaluationInput
 data Indication
     = GreaterIsBetter
     | SmallerIsBetter
+    | Input
     deriving (Show, Eq)
 
 prettyIndication :: Indication -> String
 prettyIndication GreaterIsBetter = "Greater is better."
 prettyIndication SmallerIsBetter = "Smaller is better."
+prettyIndication Input = "This is a part of the input."

@@ -14,13 +14,13 @@ import qualified EasySpec.Discover.Types as ES
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Hackage.TH
 
-hackageRule :: String
-hackageRule = "hackage"
+hackageDownloadRule :: String
+hackageDownloadRule = "hackage-download"
 
 hackageRules :: Rules ()
 hackageRules = do
     packageRules <- mapM hackageRulesFor hackagePackages
-    hackageRule ~> need packageRules
+    hackageDownloadRule ~> need packageRules
 
 hackagePackages :: [(PackageName, [String], [String])]
 hackagePackages = [$(makePackageTup "pretty-1.1.3.5" [["Text", "PrettyPrint"]])] -- , "HugesPJ"]]

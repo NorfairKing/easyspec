@@ -79,11 +79,21 @@ csvDataFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
 csvDataFileWithComponents = dataFileWithComponents "csv"
 
-dataFilesForExample ::
-       (MonadIO m, MonadMask m) => ES.InputSpec -> m [Path Abs File]
+dataFilesForExample :: MonadIO m => ES.InputSpec -> m [Path Abs File]
 dataFilesForExample is = do
-    names <- namesInSource is
+    names <- liftIO $ namesInSource is
     fmap concat $ forM names $ dataFilesForExampleAndName is
+
+dataFilesForExampleGroup :: MonadIO m => String -> m [Path Abs File]
+dataFilesForExampleGroup groupName = do
+    tups <- groupExamplesAndNames groupName
+    concat <$> mapM (uncurry dataFilesForExampleAndName) tups
+
+dataFileForExampleGroup :: MonadIO m => String -> m (Path Abs File)
+dataFileForExampleGroup groupName = do
+    csvDataFileWithComponents
+        $(mkRelFile "combined-per-group/group")
+        [groupName]
 
 allDataFile :: MonadIO m => m (Path Abs File)
 allDataFile = (</> $(mkRelFile "evaluated/all.csv")) <$> dataDir

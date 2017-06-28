@@ -13,14 +13,24 @@ import EasySpec.Evaluate.Types ()
 exampleGroups :: [(String, [ES.InputSpec])]
 exampleGroups = $(buildExamples)
 
+groupExamples :: String -> [ES.InputSpec]
+groupExamples name = fromMaybe [] $ lookup name exampleGroups
+
+groupExamplesAndNames :: MonadIO m => String -> m [(ES.InputSpec, ES.EasyQName)]
+groupExamplesAndNames name =
+    fmap concat $
+    forM (groupExamples name) $ \example -> do
+        names <- liftIO $ namesInSource example
+        pure $ (,) example <$> names
+
 examples :: [ES.InputSpec]
 examples = concatMap snd exampleGroups
 
-namesInSource :: (MonadIO m, MonadMask m) => ES.InputSpec -> m [ES.EasyQName]
+namesInSource :: MonadIO m => ES.InputSpec -> m [ES.EasyQName]
 namesInSource is = do
     let cache = $(makeExampleCache)
     case lookup is cache of
-        Nothing -> findNamesInSource is
+        Nothing -> liftIO $ findNamesInSource is
         Just r -> pure r
 
 examplesAndNames :: MonadIO m => m [(ES.InputSpec, ES.EasyQName)]

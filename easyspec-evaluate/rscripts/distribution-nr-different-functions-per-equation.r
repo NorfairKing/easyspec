@@ -24,7 +24,7 @@ if (length(dat) != 0) {
        main=title,
        xlab="Different functions",
        ylab="# of cases",
-       breaks=c(0.5,1.5,2.5,3.5,4.5,5.5,6.5))
+       breaks=seq(min(dat)-0.5, max(dat)+0.5, by=1))
 
   h$density = h$counts/sum(h$counts)
   plot(h,

@@ -48,6 +48,7 @@ library
         EasySpec.Evaluate.Evaluate.Evaluator.RelevantEquations
         EasySpec.Evaluate.Evaluate.Evaluator.RelevantFunctions
         EasySpec.Evaluate.Evaluate.Evaluator.Runtime
+        EasySpec.Evaluate.Evaluate.Evaluator.ScopeSize
         EasySpec.Evaluate.Evaluate.Evaluator.Types
         EasySpec.Evaluate.Evaluate.Evaluator.Utils
         EasySpec.Evaluate.HaskellJSON

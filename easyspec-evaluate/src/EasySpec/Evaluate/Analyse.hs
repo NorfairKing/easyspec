@@ -22,5 +22,5 @@ analyseRules = do
     archiveRules
     hackageRules
     analyseRule ~> do
-        need [dataRule, plotsRule, hackageRule]
+        need [dataRule, plotsRule, hackageDownloadRule]
         need [archiveRule] -- needs to be seperate

@@ -154,3 +154,9 @@ instance DefaultOrdered EvaluatorCsvLine where
             , "quantity"
             , "pretty output"
             ]
+
+type GroupName = String
+
+type Example =  ES.InputSpec
+
+type ExampleFunction = ES.EasyQName

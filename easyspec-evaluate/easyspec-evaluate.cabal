@@ -27,6 +27,7 @@ library
         EasySpec.Evaluate.Analyse.Hackage
         EasySpec.Evaluate.Analyse.Hackage.TH
         EasySpec.Evaluate.Analyse.Plots
+        EasySpec.Evaluate.Analyse.Plots.Plotter
         EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
         EasySpec.Evaluate.Analyse.Plots.Files
         EasySpec.Evaluate.Analyse.Plots.RelativeLines

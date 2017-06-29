@@ -2,7 +2,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
-    ( plotsRulesForPointsPlotWithEvaluatorsPerExample
+    ( correlatingPointsPlotter
+    , plotsRulesForPointsPlotWithEvaluatorsPerExample
     , plotsRulesForPointsPlotsWithGroupsOfExamples
     , plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy
     , plotsRulesForPointsPlotWithEvaluators
@@ -20,7 +21,11 @@ import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
 import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
+import EasySpec.Evaluate.Analyse.Plots.Plotter
 import EasySpec.Evaluate.Analyse.R
+
+correlatingPointsPlotter :: Plotter
+correlatingPointsPlotter = plotter "correlating-points"
 
 plotsRulesForPointsPlotWithEvaluatorsPerExample ::
        ES.InputSpec -> Evaluator -> Evaluator -> Rules (Path Abs File)

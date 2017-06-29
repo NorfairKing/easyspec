@@ -15,6 +15,7 @@ import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Evaluate.Evaluator
 
+import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
 import EasySpec.Evaluate.Analyse.Plots.DistributionNrDifferentFunctions
@@ -49,9 +50,31 @@ plotsRulesForAllData = do
     pure $ lfs ++ pfs ++ bfs ++ dnrdfs ++ oosfies ++ dsofs
 
 plotsRulesForExampleGroup :: String -> [ES.InputSpec] -> Rules [Path Abs File]
-plotsRulesForExampleGroup groupName exs =
+plotsRulesForExampleGroup groupName exs = do
+    glob <-
+        mapM
+            (uncurry $
+             plotsRulesForPointsPlotsWithGroupsOfExamples groupName exs)
+            (unorderedCombinationsWithoutSelfCombinations evaluators)
+    locs <-
+        concat <$>
+        mapM
+            (plotsRulesForExampleGroupAndStrategy groupName exs)
+            signatureInferenceStrategies
+    pure $ glob ++ locs
+
+plotsRulesForExampleGroupAndStrategy ::
+       String
+    -> [ES.InputSpec]
+    -> ES.SignatureInferenceStrategy
+    -> Rules [Path Abs File]
+plotsRulesForExampleGroupAndStrategy groupName exs strat =
     mapM
-        (uncurry $ plotsRulesForPointsPlotsWithGroupsOfExamples groupName exs)
+        (uncurry $
+         plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy
+             groupName
+             exs
+             strat)
         (unorderedCombinationsWithoutSelfCombinations evaluators)
 
 plotsRulesForExample :: ES.InputSpec -> Rules [Path Abs File]

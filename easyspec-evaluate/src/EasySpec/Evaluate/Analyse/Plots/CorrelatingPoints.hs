@@ -4,6 +4,7 @@
 module EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
     ( plotsRulesForPointsPlotWithEvaluatorsPerExample
     , plotsRulesForPointsPlotsWithGroupsOfExamples
+    , plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy
     , plotsRulesForPointsPlotWithEvaluators
     ) where
 

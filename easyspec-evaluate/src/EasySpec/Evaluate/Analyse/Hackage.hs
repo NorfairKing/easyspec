@@ -23,7 +23,7 @@ hackageRules = do
     hackageDownloadRule ~> need packageRules
 
 hackagePackages :: [(PackageName, [String], [String])]
-hackagePackages = [$(makePackageTup "pretty-1.1.3.5" [["Text", "PrettyPrint"]])] -- , "HugesPJ"]]
+hackagePackages = [] -- [$(makePackageTup "pretty-1.1.3.5" [["Text", "PrettyPrint"]])] -- , "HugesPJ"]]
 
 hackageRulesFor :: (PackageName, [String], [String]) -> Rules String
 hackageRulesFor (package, _, _) = do

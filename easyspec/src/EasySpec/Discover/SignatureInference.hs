@@ -1,6 +1,7 @@
 module EasySpec.Discover.SignatureInference
     ( defaultInferenceStrategy
     , inferenceStrategies
+    , inferenceStrategiesToEvaluate
     , evenMoreInferenceStrategies
     , inferFullBackground
     ) where
@@ -29,6 +30,15 @@ inferenceStrategies =
     , inferSyntacticSimilarityName `unionInferAlg` inferSyntacticSimilarityType
     , inferSyntacticSimilaritySymbols `unionInferAlg`
       inferSyntacticSimilarityType
+    ]
+
+inferenceStrategiesToEvaluate :: [SignatureInferenceStrategy]
+inferenceStrategiesToEvaluate =
+    [ inferEmptyBackground
+    , inferFullBackground
+    , inferFullBreakthrough 1
+    , inferSyntacticSimilarityType
+    , inferTypeReachability 7
     ]
 
 basicInferenceStrategies :: [SignatureInferenceStrategy]

@@ -2,8 +2,7 @@
 
 module Four where
 
-import Prelude ((++), id, reverse)
+import Prelude ((++), map, reverse)
 
-myMap :: (a -> b) -> [a] -> [b]
-myMap _ [] = []
-myMap f (a:as) = f a : myMap f as
+myId :: a -> a
+myId a = a

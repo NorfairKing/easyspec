@@ -4,7 +4,7 @@ import Import
 
 import System.FilePath (dropExtensions)
 
-import qualified EasySpec.Discover as ES
+import qualified EasySpec.Discover.SignatureInference as ES
 import qualified EasySpec.Discover.Types as ES
 
 examplesDir :: MonadIO m => m (Path Abs Dir)
@@ -29,4 +29,4 @@ fileInDirWithExtensionAndComponents genDir ext f comps = do
     liftIO $ (dd </>) <$> parseRelFile (concat [fileStr, ".", ext])
 
 signatureInferenceStrategies :: [ES.SignatureInferenceStrategy]
-signatureInferenceStrategies = ES.inferenceStrategies
+signatureInferenceStrategies = ES.inferenceStrategiesToEvaluate

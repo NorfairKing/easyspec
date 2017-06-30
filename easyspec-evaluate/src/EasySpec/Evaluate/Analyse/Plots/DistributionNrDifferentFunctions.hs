@@ -30,7 +30,7 @@ plotsRulesDistributionNrDifferentFunctions = do
               $(mkRelDir "distribution-nr-different-functions-per-equation")
         , evaluationFuncEval = nrsDifferentFunctionsFromData
         , evaluationFuncIndividualMessage =
-              \e n s csvF ->
+              \_ e n s csvF ->
                   unwords
                       [ "Calculating the number of different functions per equation in the results of running easyspec on"
                       , toFilePath $ ES.inputSpecAbsFile e
@@ -42,7 +42,7 @@ plotsRulesDistributionNrDifferentFunctions = do
                       , toFilePath csvF
                       ]
         , evaluationFuncPerStrategyMessage =
-              \s csvF ->
+              \_ s csvF ->
                   unwords
                       [ "Calculating the number of different functions per equation in the results of running easyspec on all examples and names, but with signature inference strategy"
                       , show $ ES.sigInfStratName s

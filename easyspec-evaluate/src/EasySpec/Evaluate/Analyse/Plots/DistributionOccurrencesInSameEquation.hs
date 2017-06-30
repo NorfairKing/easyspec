@@ -30,7 +30,7 @@ plotsRulesDistributionDistributionOccurrencesInSameEquation = do
         { evaluationFuncDir = $(mkRelDir "occurrences-in-same-equation")
         , evaluationFuncEval = occurrencesFromData
         , evaluationFuncIndividualMessage =
-              \e n s csvF ->
+              \_ e n s csvF ->
                   unwords
                       [ "Calculating the number of occurrences of a function in the same equation of the results of running easyspec on"
                       , toFilePath $ ES.inputSpecAbsFile e
@@ -42,7 +42,7 @@ plotsRulesDistributionDistributionOccurrencesInSameEquation = do
                       , toFilePath csvF
                       ]
         , evaluationFuncPerStrategyMessage =
-              \s csvF ->
+              \_ s csvF ->
                   unwords
                       [ "Calculating the number of  occurrences of a function in the same equation of the results of running easyspec on all examples and names, but with signature inference strategy"
                       , show $ ES.sigInfStratName s

@@ -160,3 +160,5 @@ type GroupName = String
 type Example = ES.InputSpec
 
 type ExampleFunction = ES.EasyQName
+
+type SignatureInferenceStrategy = ES.SignatureInferenceStrategy

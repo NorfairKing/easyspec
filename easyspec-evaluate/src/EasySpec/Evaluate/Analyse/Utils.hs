@@ -97,3 +97,6 @@ unorderedCombinationsWithoutSelfCombinations ls =
 
 uncurry3 :: (a -> b -> c -> d) -> (a, b, c) -> d
 uncurry3 func (a, b, c) = func a b c
+
+uncurry4 :: (a -> b -> c -> d -> e) -> (a, b, c, d) -> e
+uncurry4 func (a, b, c, d) = func a b c d

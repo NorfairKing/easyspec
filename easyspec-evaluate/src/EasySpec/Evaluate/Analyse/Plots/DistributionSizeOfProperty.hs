@@ -33,7 +33,7 @@ plotsRulesDistributionDistributionSizeOfProperty = do
         { evaluationFuncDir = $(mkRelDir "size-of-property")
         , evaluationFuncEval = sizesFromData
         , evaluationFuncIndividualMessage =
-              \e n s csvF ->
+              \_ e n s csvF ->
                   unwords
                       [ "Calculating the size of properties in the results of running easyspec on"
                       , toFilePath $ ES.inputSpecAbsFile e
@@ -45,7 +45,7 @@ plotsRulesDistributionDistributionSizeOfProperty = do
                       , toFilePath csvF
                       ]
         , evaluationFuncPerStrategyMessage =
-              \s csvF ->
+              \_ s csvF ->
                   unwords
                       [ "Calculating the size of properties in the results of running easyspec on all examples and names, but with signature inference strategy"
                       , show $ ES.sigInfStratName s

@@ -54,7 +54,7 @@ dataRulesForExampleGroup ::
     -> [ES.InputSpec]
     -> Rules (Path Abs File, [Path Abs File])
 dataRulesForExampleGroup ghciResource groupName exs = do
-    csvFs <- mapM (dataRulesForExample ghciResource) exs
+    csvFs <- mapM (dataRulesForExample ghciResource groupName) exs
     combF <- dataFileForExampleGroup groupName
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     combFs <-
@@ -76,37 +76,38 @@ dataRulesForExampleGroupAndStrategy _ groupName exs strat = do
         fmap concat $
         forM exs $ \example -> do
             names <- namesInSource example
-            mapM (\n -> dataFileFor example n strat) names
+            mapM (\n -> dataFileFor groupName example n strat) names
     combF <- dataFileForExampleGroupAndStrategy groupName strat
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
-dataRulesForExample :: Resource -> ES.InputSpec -> Rules (Path Abs File)
-dataRulesForExample ghciResource is = do
+dataRulesForExample :: Resource -> GroupName-> Example -> Rules (Path Abs File)
+dataRulesForExample ghciResource groupName is = do
     names <- liftIO $ namesInSource is
-    csvFs <- forM names $ rulesForFileAndName ghciResource is
+    csvFs <- forM names $ rulesForFileAndName ghciResource groupName is
     combF <- dataFileForExample is
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
 rulesForFileAndName ::
-       Resource -> ES.InputSpec -> ES.EasyQName -> Rules (Path Abs File)
-rulesForFileAndName ghciResource is name = do
+       Resource -> GroupName -> Example -> ExampleFunction -> Rules (Path Abs File)
+rulesForFileAndName ghciResource groupName is name = do
     csvFs <-
         forM signatureInferenceStrategies $
-        rulesForFileNameAndStrat ghciResource is name
+        rulesForFileNameAndStrat ghciResource groupName is name
     combF <- dataFileForExampleAndName is name
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
 rulesForFileNameAndStrat ::
        Resource
-    -> ES.InputSpec
-    -> ES.EasyQName
-    -> ES.SignatureInferenceStrategy
+    -> GroupName
+    -> Example
+    -> ExampleFunction
+    -> SignatureInferenceStrategy
     -> Rules (Path Abs File)
-rulesForFileNameAndStrat ghciResource is name infStrat = do
-    jsonF <- rawDataFileFor is name infStrat
+rulesForFileNameAndStrat ghciResource groupName is name infStrat = do
+    jsonF <- rawDataFileFor groupName is name infStrat
     jsonF $%> do
         sourceDir <- getEasyspecSourceDir
         let relevantFiles =
@@ -128,7 +129,7 @@ rulesForFileNameAndStrat ghciResource is name infStrat = do
                         ]
                 liftIO $ getEvaluationInputPoint is name infStrat
         writeJSON jsonF ip
-    csvF <- dataFileFor is name infStrat
+    csvF <- dataFileFor groupName is name infStrat
     csvF $%> do
         mapM_ dependOnEvaluator evaluators
         needP [jsonF]

@@ -10,6 +10,7 @@ import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Common
+import EasySpec.Evaluate.Types
 
 getEasyspecSourceDir :: MonadIO m => m (Path Abs Dir)
 getEasyspecSourceDir = liftIO $ resolveDir' "../easyspec"
@@ -19,14 +20,15 @@ dataDir = (</> $(mkRelDir "data")) <$> tmpDir
 
 rawDataFileFor ::
        MonadIO m
-    => ES.InputSpec
-    -> ES.EasyQName
-    -> ES.SignatureInferenceStrategy
+    => GroupName
+    -> Example
+    -> ExampleFunction
+    -> SignatureInferenceStrategy
     -> m (Path Abs File)
-rawDataFileFor is name strat =
+rawDataFileFor groupName is name strat =
     jsonDataFileWithComponents
         ($(mkRelDir "raw") </> ES.inputSpecFile is)
-        [prettyPrint name, ES.sigInfStratName strat]
+        [groupName ++ "/" ++ prettyPrint name, ES.sigInfStratName strat]
 
 jsonDataFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
@@ -34,14 +36,15 @@ jsonDataFileWithComponents = dataFileWithComponents "json"
 
 dataFileFor ::
        MonadIO m
-    => ES.InputSpec
-    -> ES.EasyQName
-    -> ES.SignatureInferenceStrategy
+    => GroupName
+    -> Example
+    -> ExampleFunction
+    -> SignatureInferenceStrategy
     -> m (Path Abs File)
-dataFileFor is name strat =
+dataFileFor groupName is name strat =
     csvDataFileWithComponents
         ($(mkRelDir "evaluated") </> ES.inputSpecFile is)
-        [prettyPrint name, ES.sigInfStratName strat]
+        [groupName ++ "/" ++ prettyPrint name, ES.sigInfStratName strat]
 
 dataFileForExampleAndName ::
        MonadIO m => ES.InputSpec -> ES.EasyQName -> m (Path Abs File)
@@ -50,10 +53,14 @@ dataFileForExampleAndName is name =
         ($(mkRelDir "combined-per-example-per-name") </> ES.inputSpecFile is)
         [prettyPrint name]
 
-dataFilesForExampleAndName ::
-       MonadIO m => ES.InputSpec -> ES.EasyQName -> m [Path Abs File]
-dataFilesForExampleAndName is name =
-    forM signatureInferenceStrategies $ dataFileFor is name
+dataFilesForGroupExampleAndName ::
+       MonadIO m
+    => GroupName
+    -> ES.InputSpec
+    -> ES.EasyQName
+    -> m [Path Abs File]
+dataFilesForGroupExampleAndName groupName is name =
+    forM signatureInferenceStrategies $ dataFileFor groupName is name
 
 dataFileForExample :: MonadIO m => ES.InputSpec -> m (Path Abs File)
 dataFileForExample is =
@@ -65,9 +72,11 @@ dataFilesForStrategy ::
        MonadIO m => ES.SignatureInferenceStrategy -> m [Path Abs File]
 dataFilesForStrategy strat =
     fmap concat $
-    forM examples $ \is -> do
-        names <- liftIO $ namesInSource is
-        forM names $ \name -> dataFileFor is name strat
+    forM exampleGroups $ \(groupName, exs) -> do
+        fmap concat $
+            forM exs $ \ex -> do
+                names <- liftIO $ namesInSource ex
+                forM names $ \name -> dataFileFor groupName ex name strat
 
 dataFileForStrategy ::
        MonadIO m => ES.SignatureInferenceStrategy -> m (Path Abs File)
@@ -79,16 +88,17 @@ csvDataFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
 csvDataFileWithComponents = dataFileWithComponents "csv"
 
-dataFilesForExample :: MonadIO m => ES.InputSpec -> m [Path Abs File]
-dataFilesForExample is = do
+dataFilesForGroupAndExample ::
+       MonadIO m => GroupName -> ES.InputSpec -> m [Path Abs File]
+dataFilesForGroupAndExample groupName is = do
     names <- liftIO $ namesInSource is
-    fmap concat $ forM names $ dataFilesForExampleAndName is
+    fmap concat $ forM names $ dataFilesForGroupExampleAndName groupName is
 
 dataFilesForExampleGroupAndStrategy ::
        MonadIO m => String -> ES.SignatureInferenceStrategy -> m [Path Abs File]
 dataFilesForExampleGroupAndStrategy groupName s = do
     tups <- groupExamplesAndNames groupName
-    mapM (\(is, n) -> dataFileFor is n s) tups
+    mapM (\(is, n) -> dataFileFor groupName is n s) tups
 
 dataFileForExampleGroupAndStrategy ::
        MonadIO m => String -> ES.SignatureInferenceStrategy -> m (Path Abs File)
@@ -100,7 +110,7 @@ dataFileForExampleGroupAndStrategy groupName s =
 dataFilesForExampleGroup :: MonadIO m => String -> m [Path Abs File]
 dataFilesForExampleGroup groupName = do
     tups <- groupExamplesAndNames groupName
-    concat <$> mapM (uncurry dataFilesForExampleAndName) tups
+    concat <$> mapM (uncurry $ dataFilesForGroupExampleAndName groupName) tups
 
 dataFileForExampleGroup :: MonadIO m => String -> m (Path Abs File)
 dataFileForExampleGroup groupName =

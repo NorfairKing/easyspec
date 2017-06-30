@@ -10,7 +10,7 @@ import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Common.TH
 import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
-import EasySpec.Evaluate.Types ()
+import EasySpec.Evaluate.Types
 
 groups :: [String]
 groups = map fst exampleGroups
@@ -63,9 +63,9 @@ examplesAndNames =
         names <- liftIO $ namesInSource example
         pure $ (,) example <$> names
 
-examplesNamesAndStrategies ::
+groupsExamplesNamesAndStrategies ::
        MonadIO m
-    => m [(ES.InputSpec, ES.EasyQName, ES.SignatureInferenceStrategy)]
-examplesNamesAndStrategies = do
-    exns <- examplesAndNames
-    pure [(e, n, s) | (e, n) <- exns, s <- signatureInferenceStrategies]
+    => m [(String, Example, ExampleFunction, SignatureInferenceStrategy)]
+groupsExamplesNamesAndStrategies = do
+    exns <- groupsExamplesAndNames
+    pure [(g, e, n, s) | (g, e, n) <- exns, s <- signatureInferenceStrategies]

@@ -32,71 +32,77 @@ resultsPlotsFor ::
     => EvaluationFunc r
     -> Rules [Path Abs File]
 resultsPlotsFor ef = do
-    enss <- examplesNamesAndStrategies
-    mapM_ (uncurry3 $ individualCsvFilesFor ef) enss
-    individualPlotFs <- mapM (uncurry3 $ individualPlotFor ef) enss
-    mapM_ (perStrategyCsvFilesFor ef) signatureInferenceStrategies
+    enss <- groupsExamplesNamesAndStrategies
+    mapM_ (uncurry4 $ individualCsvFilesFor ef) enss
+    individualPlotFs <- mapM (uncurry4 $ individualPlotFor ef) enss
+    mapM_ (uncurry $ perStrategyCsvFilesFor ef) $
+        (,) <$> groups <*> signatureInferenceStrategies
     perStrategyPlotFs <-
-        mapM (perStrategyPlotFor ef) signatureInferenceStrategies
+        mapM (uncurry $ perStrategyPlotFor ef) $
+        (,) <$> groups <*> signatureInferenceStrategies
     pure $ individualPlotFs ++ perStrategyPlotFs
 
 data EvaluationFunc r = EvaluationFunc
     { evaluationFuncDir :: Path Rel Dir
     , evaluationFuncEval :: [EvaluationInputPoint] -> [r]
-    , evaluationFuncIndividualMessage :: ES.InputSpec -> ES.EasyQName -> ES.SignatureInferenceStrategy -> Path Abs File -> String
-    , evaluationFuncPerStrategyMessage :: ES.SignatureInferenceStrategy -> Path Abs File -> String
+    , evaluationFuncIndividualMessage :: GroupName -> ES.InputSpec -> ES.EasyQName -> ES.SignatureInferenceStrategy -> Path Abs File -> String
+    , evaluationFuncPerStrategyMessage :: GroupName -> ES.SignatureInferenceStrategy -> Path Abs File -> String
     , evaluationFuncPlotScript :: Path Abs File
     } deriving (Generic)
 
 evaluationFuncIndividualCsvDataFileFor ::
        MonadIO m
     => EvaluationFunc r
-    -> ES.InputSpec
-    -> ES.EasyQName
-    -> ES.SignatureInferenceStrategy
+    -> GroupName
+    -> Example
+    -> ExampleFunction
+    -> SignatureInferenceStrategy
     -> m (Path Abs File)
-evaluationFuncIndividualCsvDataFileFor EvaluationFunc {..} e n s =
+evaluationFuncIndividualCsvDataFileFor EvaluationFunc {..} g e n s =
     csvDataFileWithComponents
         (evaluationFuncDir </> ES.inputSpecFile e)
-        [prettyPrint n, ES.sigInfStratName s]
+        [g ++ "/" ++ prettyPrint n, ES.sigInfStratName s]
 
 individualCsvFilesFor ::
        (ToNamedRecord r, DefaultOrdered r)
     => EvaluationFunc r
-    -> ES.InputSpec
-    -> ES.EasyQName
-    -> ES.SignatureInferenceStrategy
+    -> GroupName
+    -> Example
+    -> ExampleFunction
+    -> SignatureInferenceStrategy
     -> Rules (Path Abs File)
-individualCsvFilesFor ef e n s = do
-    csvF <- evaluationFuncIndividualCsvDataFileFor ef e n s
+individualCsvFilesFor ef g e n s = do
+    csvF <- evaluationFuncIndividualCsvDataFileFor ef g e n s
     csvF $%> do
-        dat <- rawDataFrom e n s
-        putLoud $ evaluationFuncIndividualMessage ef e n s csvF
+        dat <- rawDataFrom g e n s
+        putLoud $ evaluationFuncIndividualMessage ef g e n s csvF
         writeCSV csvF $ evaluationFuncEval ef [dat]
     pure csvF
 
 evaluationFuncIndividualPngPlotFileFor ::
        MonadIO m
     => EvaluationFunc r
-    -> ES.InputSpec
-    -> ES.EasyQName
-    -> ES.SignatureInferenceStrategy
+    -> GroupName
+    -> Example
+    -> ExampleFunction
+    -> SignatureInferenceStrategy
     -> m (Path Abs File)
-evaluationFuncIndividualPngPlotFileFor EvaluationFunc {..} e n s =
+evaluationFuncIndividualPngPlotFileFor EvaluationFunc {..} g e n s =
     pngPlotFileWithComponents
         (evaluationFuncDir </> ES.inputSpecFile e)
-        [prettyPrint n, ES.sigInfStratName s]
+        [g ++ "/" ++ prettyPrint n, ES.sigInfStratName s]
 
 individualPlotFor ::
        EvaluationFunc r
-    -> ES.InputSpec
-    -> ES.EasyQName
-    -> ES.SignatureInferenceStrategy
+    -> GroupName
+    -> Example
+    -> ExampleFunction
+    -> SignatureInferenceStrategy
     -> Rules (Path Abs File)
-individualPlotFor ef e n s = do
-    plotF <- evaluationFuncIndividualPngPlotFileFor ef e n s
+individualPlotFor ef g e n s = do
+    plotF <- evaluationFuncIndividualPngPlotFileFor ef g e n s
     plotF $%> do
-        csvF <- evaluationFuncIndividualCsvDataFileFor ef e n s
+        csvF <- evaluationFuncIndividualCsvDataFileFor ef g e n s
         let scriptF = evaluationFuncPlotScript ef
         needP [csvF, scriptF]
         rscript
@@ -113,44 +119,48 @@ individualPlotFor ef e n s = do
 evaluationFuncPerStrategyCsvDataFileFor ::
        MonadIO m
     => EvaluationFunc r
+    -> GroupName
     -> ES.SignatureInferenceStrategy
     -> m (Path Abs File)
-evaluationFuncPerStrategyCsvDataFileFor EvaluationFunc {..} s =
+evaluationFuncPerStrategyCsvDataFileFor EvaluationFunc {..} g s =
     csvDataFileWithComponents
         (evaluationFuncDir </> $(mkRelFile "strategy"))
-        [ES.sigInfStratName s]
+        [g ++ "/" ++ ES.sigInfStratName s]
 
 perStrategyCsvFilesFor ::
        forall r. (ToNamedRecord r, DefaultOrdered r, FromNamedRecord r)
     => EvaluationFunc r
+    -> GroupName
     -> ES.SignatureInferenceStrategy
     -> Rules (Path Abs File)
-perStrategyCsvFilesFor ef s = do
+perStrategyCsvFilesFor ef g s = do
     exns <- examplesAndNames
     csvFs <-
-        mapM (\(e, n) -> evaluationFuncIndividualCsvDataFileFor ef e n s) exns
-    resF <- evaluationFuncPerStrategyCsvDataFileFor ef s
+        mapM (\(e, n) -> evaluationFuncIndividualCsvDataFileFor ef g e n s) exns
+    resF <- evaluationFuncPerStrategyCsvDataFileFor ef g s
     combineCSVFiles @r resF csvFs
     pure resF
 
 evaluationFuncPerStrategyPngPlotFileFor ::
        MonadIO m
     => EvaluationFunc r
+    -> GroupName
     -> ES.SignatureInferenceStrategy
     -> m (Path Abs File)
-evaluationFuncPerStrategyPngPlotFileFor EvaluationFunc {..} s =
+evaluationFuncPerStrategyPngPlotFileFor EvaluationFunc {..} g s =
     pngPlotFileWithComponents
         (evaluationFuncDir </> $(mkRelFile "strategy"))
-        [ES.sigInfStratName s]
+        [g ++ "/" ++ ES.sigInfStratName s]
 
 perStrategyPlotFor ::
        EvaluationFunc r
+    -> GroupName
     -> ES.SignatureInferenceStrategy
     -> Rules (Path Abs File)
-perStrategyPlotFor ef s = do
-    plotF <- evaluationFuncPerStrategyPngPlotFileFor ef s
+perStrategyPlotFor ef g s = do
+    plotF <- evaluationFuncPerStrategyPngPlotFileFor ef g s
     plotF $%> do
-        csvF <- evaluationFuncPerStrategyCsvDataFileFor ef s
+        csvF <- evaluationFuncPerStrategyCsvDataFileFor ef g s
         let scriptF = evaluationFuncPlotScript ef
         needP [csvF, scriptF]
         rscript

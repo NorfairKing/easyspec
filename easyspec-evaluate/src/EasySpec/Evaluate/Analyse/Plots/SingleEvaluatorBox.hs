@@ -13,6 +13,8 @@ import qualified EasySpec.Discover.Types as ES
 import Development.Shake
 import Development.Shake.Path
 
+import EasySpec.Evaluate.Types
+
 import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
@@ -21,12 +23,12 @@ import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.R
 
 perExampleAndEvaluatorAverageBoxPlotFor ::
-       ES.InputSpec -> Evaluator -> Rules (Path Abs File)
-perExampleAndEvaluatorAverageBoxPlotFor is evaluator = do
+       GroupName -> Example -> Evaluator -> Rules (Path Abs File)
+perExampleAndEvaluatorAverageBoxPlotFor groupName is evaluator = do
     plotF <- singleEvaluatorAverageBoxPlotFileForExample is evaluator
     plotF $%> do
         dependOnEvaluator evaluator
-        dataF <- dataFileForExample is
+        dataF <- dataFileForExample groupName is
         needP [dataF]
         scriptF <- singleEvaluatorAverageBoxAnalysisScript
         rscript

@@ -85,7 +85,7 @@ dataRulesForExample :: Resource -> GroupName-> Example -> Rules (Path Abs File)
 dataRulesForExample ghciResource groupName is = do
     names <- liftIO $ namesInSource is
     csvFs <- forM names $ rulesForFileAndName ghciResource groupName is
-    combF <- dataFileForExample is
+    combF <- dataFileForExample groupName is
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 

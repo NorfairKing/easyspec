@@ -69,8 +69,8 @@ dataFromExampleAndName ::
 dataFromExampleAndName is name =
     dataFromWith $ dataFileForExampleAndName is name
 
-dataFromExample :: ES.InputSpec -> Action [EvaluatorCsvLine]
-dataFromExample is = dataFromWith $ dataFileForExample is
+dataFromExample :: GroupName -> Example -> Action [EvaluatorCsvLine]
+dataFromExample groupName is = dataFromWith $ dataFileForExample groupName is
 
 dataFromAll :: Action [EvaluatorCsvLine]
 dataFromAll = dataFromWith allDataFile

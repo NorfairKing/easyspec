@@ -16,6 +16,8 @@ import Development.Shake.Path
 
 import qualified EasySpec.Discover.Types as ES
 
+import EasySpec.Evaluate.Types
+
 import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
@@ -28,13 +30,13 @@ correlatingPointsPlotter :: Plotter
 correlatingPointsPlotter = plotter "correlating-points"
 
 plotsRulesForPointsPlotWithEvaluatorsPerExample ::
-       ES.InputSpec -> Evaluator -> Evaluator -> Rules (Path Abs File)
-plotsRulesForPointsPlotWithEvaluatorsPerExample is e1 e2 = do
+       GroupName -> Example -> Evaluator -> Evaluator -> Rules (Path Abs File)
+plotsRulesForPointsPlotWithEvaluatorsPerExample groupName is e1 e2 = do
     plotF <- pointsPlotForEvaluatorsPerExample is e1 e2
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
-        dataF <- dataFileForExample is
+        dataF <- dataFileForExample groupName is
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
         rscript

@@ -69,11 +69,11 @@ dataFilesForGroupExampleAndName ::
 dataFilesForGroupExampleAndName groupName is name =
     forM signatureInferenceStrategies $ dataFileFor groupName is name
 
-dataFileForExample :: MonadIO m => ES.InputSpec -> m (Path Abs File)
-dataFileForExample is =
+dataFileForExample :: MonadIO m => GroupName -> Example -> m (Path Abs File)
+dataFileForExample groupName is =
     csvDataFileWithComponents
         ($(mkRelDir "combined-per-example") </> ES.inputSpecFile is)
-        []
+        [groupName]
 
 dataFilesForStrategy ::
        MonadIO m => ES.SignatureInferenceStrategy -> m [Path Abs File]

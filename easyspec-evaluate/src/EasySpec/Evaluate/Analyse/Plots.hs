@@ -13,6 +13,8 @@ import Development.Shake.Path
 
 import qualified EasySpec.Discover.Types as ES
 
+import EasySpec.Evaluate.Types
+
 import EasySpec.Evaluate.Evaluate.Evaluator
 
 import EasySpec.Evaluate.Analyse.Common
@@ -35,7 +37,7 @@ plotsRules = do
     allDataPlotsFs <- plotsRulesForAllData
     groupPlotsFs <-
         concat <$> mapM (uncurry plotsRulesForExampleGroup) exampleGroups
-    plotsFs <- concat <$> mapM plotsRulesForExample examples
+    plotsFs <- concat <$> mapM (uncurry plotsRulesForExample ) groupsAndExamples
     correlatingPointsRule <- plotRulesForPlotter correlatingPointsPlotter
     plotsRule ~> do
         need [correlatingPointsRule]
@@ -81,17 +83,20 @@ plotsRulesForExampleGroupAndStrategy groupName exs strat =
              strat)
         (unorderedCombinationsWithoutSelfCombinations evaluators)
 
-plotsRulesForExample :: ES.InputSpec -> Rules [Path Abs File]
-plotsRulesForExample is = do
+plotsRulesForExample :: GroupName -> Example -> Rules [Path Abs File]
+plotsRulesForExample groupName is = do
     names <- liftIO $ namesInSource is
-    bars <- fmap concat $ forM names $ plotsRulesForExampleAndName is
-    boxes <- forM evaluators $ perExampleAndEvaluatorAverageBoxPlotFor is
+    bars <- fmap concat $ forM names $ plotsRulesForExampleAndName groupName is
+    boxes <-
+        forM evaluators $ perExampleAndEvaluatorAverageBoxPlotFor groupName is
     points <-
-        mapM (uncurry (plotsRulesForPointsPlotWithEvaluatorsPerExample is)) $
+        mapM
+            (uncurry
+                 (plotsRulesForPointsPlotWithEvaluatorsPerExample groupName is)) $
         unorderedCombinationsWithoutSelfCombinations evaluators
     pure $ bars ++ boxes ++ points
 
 plotsRulesForExampleAndName ::
-       ES.InputSpec -> ES.EasyQName -> Rules [Path Abs File]
-plotsRulesForExampleAndName is name =
-    forM evaluators $ perExampleNameAndEvaluatorBarPlotFor is name
+       GroupName -> Example -> ExampleFunction -> Rules [Path Abs File]
+plotsRulesForExampleAndName groupName is name =
+    forM evaluators $ perExampleNameAndEvaluatorBarPlotFor groupName is name

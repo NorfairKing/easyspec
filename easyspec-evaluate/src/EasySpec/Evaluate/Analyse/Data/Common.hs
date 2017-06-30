@@ -65,7 +65,7 @@ examplesAndNames =
 
 groupsExamplesNamesAndStrategies ::
        MonadIO m
-    => m [(String, Example, ExampleFunction, SignatureInferenceStrategy)]
+    => m [(GroupName, Example, ExampleFunction, SignatureInferenceStrategy)]
 groupsExamplesNamesAndStrategies = do
     exns <- groupsExamplesAndNames
     pure [(g, e, n, s) | (g, e, n) <- exns, s <- signatureInferenceStrategies]

@@ -100,3 +100,6 @@ uncurry3 func (a, b, c) = func a b c
 
 uncurry4 :: (a -> b -> c -> d -> e) -> (a, b, c, d) -> e
 uncurry4 func (a, b, c, d) = func a b c d
+
+uncurry5 :: (a -> b -> c -> d -> e -> f) -> (a, b, c, d, e) -> f
+uncurry5 func (a, b, c, d, e) = func a b c d e

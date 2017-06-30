@@ -145,6 +145,13 @@ evaluatedFileForGroupEvaluator ::
 evaluatedFileForGroupEvaluator g e =
     evaluatedCSVFileWithComponents ["per-group-evaluator", g] [evaluatorName e]
 
+evaluatedFileForStrategyEvaluator ::
+       MonadIO m => SignatureInferenceStrategy -> Evaluator -> m (Path Abs File)
+evaluatedFileForStrategyEvaluator s e =
+    evaluatedCSVFileWithComponents
+        ["per-strategy-evaluator", strategyName s]
+        [evaluatorName e]
+
 evaluatedFileForGroupStrategyEvaluator ::
        MonadIO m
     => GroupName

@@ -33,7 +33,7 @@ perExampleNameAndEvaluatorBarPlotFor groupName is name evaluator = do
     plotFile <- singleEvaluatorBarPlotFileForExampleAndName is name evaluator
     plotFile $%> do
         dependOnEvaluator evaluator
-        dataFile <- dataFileForExampleAndName is name
+        dataFile <- dataFileForExampleAndName groupName is name
         singleEvaluatorBarScript <- singleEvaluatorBarAnalysisScript
         needP [dataFile]
         rscript

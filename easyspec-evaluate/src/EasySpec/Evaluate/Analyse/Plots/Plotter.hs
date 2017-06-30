@@ -14,8 +14,8 @@ import System.FilePath (dropExtensions)
 import Development.Shake
 import Development.Shake.Path
 
-import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Data.Common
+import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.Utils
 import EasySpec.Evaluate.Evaluate.Evaluator
@@ -40,7 +40,7 @@ plotRulesForPlotter p@Plotter {..} = do
     perGroupExamplePlots <-
         rule plotterRulesEvaluatorGroupExample $ \func ->
             forM groupsAndExamples $ \(group, example) -> do
-                dataF <- undefined
+                dataF <- dataFileForExample group example
                 plotF <- plotterEvaluatorGroupExamplePlot p group example
                 func plotF dataF group example
                 pure plotF
@@ -48,7 +48,7 @@ plotRulesForPlotter p@Plotter {..} = do
         rule plotterRulesEvaluatorGroupExampleName $ \func -> do
             trips <- groupsExamplesAndNames
             forM trips $ \(group, example, name) -> do
-                dataF <- undefined
+                dataF <- dataFileForExampleAndName group example name
                 plotF <-
                     plotterEvaluatorGroupExampleNamePlot p group example name
                 func plotF dataF group example name

@@ -65,9 +65,9 @@ dataFrom groupName is name strat =
     dataFromWith $ dataFileFor groupName is name strat
 
 dataFromExampleAndName ::
-       ES.InputSpec -> ES.EasyQName -> Action [EvaluatorCsvLine]
-dataFromExampleAndName is name =
-    dataFromWith $ dataFileForExampleAndName is name
+       GroupName -> Example ->ExampleFunction  -> Action [EvaluatorCsvLine]
+dataFromExampleAndName groupName is name =
+    dataFromWith $ dataFileForExampleAndName groupName is name
 
 dataFromExample :: GroupName -> Example -> Action [EvaluatorCsvLine]
 dataFromExample groupName is = dataFromWith $ dataFileForExample groupName is

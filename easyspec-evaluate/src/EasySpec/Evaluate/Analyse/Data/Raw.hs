@@ -18,6 +18,7 @@ import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Evaluate
 import EasySpec.Evaluate.Evaluate.Evaluator
+import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Types
 
 import EasySpec.Evaluate.Analyse.Common
@@ -81,7 +82,7 @@ dataRulesForExampleGroupAndStrategy _ groupName exs strat = do
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
-dataRulesForExample :: Resource -> GroupName-> Example -> Rules (Path Abs File)
+dataRulesForExample :: Resource -> GroupName -> Example -> Rules (Path Abs File)
 dataRulesForExample ghciResource groupName is = do
     names <- liftIO $ namesInSource is
     csvFs <- forM names $ rulesForFileAndName ghciResource groupName is
@@ -90,12 +91,16 @@ dataRulesForExample ghciResource groupName is = do
     pure combF
 
 rulesForFileAndName ::
-       Resource -> GroupName -> Example -> ExampleFunction -> Rules (Path Abs File)
+       Resource
+    -> GroupName
+    -> Example
+    -> ExampleFunction
+    -> Rules (Path Abs File)
 rulesForFileAndName ghciResource groupName is name = do
     csvFs <-
         forM signatureInferenceStrategies $
         rulesForFileNameAndStrat ghciResource groupName is name
-    combF <- dataFileForExampleAndName is name
+    combF <- dataFileForExampleAndName groupName is name
     combineCSVFiles @EvaluatorCsvLine combF csvFs
     pure combF
 
@@ -129,18 +134,25 @@ rulesForFileNameAndStrat ghciResource groupName is name infStrat = do
                         ]
                 liftIO $ getEvaluationInputPoint is name infStrat
         writeJSON jsonF ip
-    csvF <- dataFileFor groupName is name infStrat
-    csvF $%> do
-        mapM_ dependOnEvaluator evaluators
+    tups <-
+        forM evaluators $ \ev ->
+            (,) ev <$> dataFileForGranular groupName is name infStrat ev
+    map snd tups $&%> do
         needP [jsonF]
-        putLoud $
-            unwords
-                [ "Building evaluated data file"
-                , toFilePath csvF
-                , "by evaluating the results in"
-                , toFilePath jsonF
-                , "with all evaluators."
-                ]
         ip <- readJSON jsonF
-        writeCSV csvF $ map (evaluationInputPointCsvLine ip) evaluators
-    pure csvF
+        forM_ tups $ \(evaluator, evaluatorCsvFile) -> do
+            dependOnEvaluator evaluator
+            putLoud $
+                unwords
+                    [ "Building evaluated data file"
+                    , toFilePath evaluatorCsvFile
+                    , "by evaluating the results in"
+                    , toFilePath jsonF
+                    , "with evaluator"
+                    , evaluatorName evaluator
+                    ]
+            writeCSV evaluatorCsvFile $
+                [evaluationInputPointCsvLine ip evaluator]
+    combF <- dataFileFor groupName is name infStrat
+    combineCSVFiles @EvaluatorCsvLine combF $ map snd tups
+    pure combF

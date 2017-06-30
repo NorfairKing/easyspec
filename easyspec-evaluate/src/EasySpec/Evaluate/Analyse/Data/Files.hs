@@ -11,6 +11,7 @@ import qualified EasySpec.Discover.Types as ES
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Plots.Files
+import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Types
 
 getEasyspecSourceDir :: MonadIO m => m (Path Abs Dir)
@@ -38,6 +39,23 @@ jsonDataFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
 jsonDataFileWithComponents = dataFileWithComponents "json"
 
+dataFileForGranular ::
+       MonadIO m
+    => GroupName
+    -> Example
+    -> ExampleFunction
+    -> SignatureInferenceStrategy
+    -> Evaluator
+    -> m (Path Abs File)
+dataFileForGranular groupName is name strat ev =
+    csvDataFileWithComponents
+        ($(mkRelDir "evaluated") </> $(mkRelFile "data"))
+        [ groupName ++ "/" ++ exampleModule is
+        , prettyPrint name
+        , ES.sigInfStratName strat
+        , evaluatorName ev
+        ]
+
 dataFileFor ::
        MonadIO m
     => GroupName
@@ -47,18 +65,18 @@ dataFileFor ::
     -> m (Path Abs File)
 dataFileFor groupName is name strat =
     csvDataFileWithComponents
-        ($(mkRelDir "evaluated") </> $(mkRelFile "data"))
+        ($(mkRelDir "combined-per-example-per-name-per-strategy") </> $(mkRelFile "data"))
         [ groupName ++ "/" ++ exampleModule is
         , prettyPrint name
         , ES.sigInfStratName strat
         ]
 
 dataFileForExampleAndName ::
-       MonadIO m => ES.InputSpec -> ES.EasyQName -> m (Path Abs File)
-dataFileForExampleAndName is name =
+       MonadIO m => GroupName -> Example -> ExampleFunction -> m (Path Abs File)
+dataFileForExampleAndName groupName is name =
     csvDataFileWithComponents
         ($(mkRelDir "combined-per-example-per-name") </> ES.inputSpecFile is)
-        [prettyPrint name]
+        [groupName, prettyPrint name]
 
 dataFilesForGroupExampleAndName ::
        MonadIO m

@@ -89,12 +89,7 @@ plotsRulesForExample groupName is = do
     bars <- fmap concat $ forM names $ plotsRulesForExampleAndName groupName is
     boxes <-
         forM evaluators $ perExampleAndEvaluatorAverageBoxPlotFor groupName is
-    points <-
-        mapM
-            (uncurry
-                 (plotsRulesForPointsPlotWithEvaluatorsPerExample groupName is)) $
-        unorderedCombinationsWithoutSelfCombinations evaluators
-    pure $ bars ++ boxes ++ points
+    pure $ bars ++ boxes
 
 plotsRulesForExampleAndName ::
        GroupName -> Example -> ExampleFunction -> Rules [Path Abs File]

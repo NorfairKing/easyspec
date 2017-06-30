@@ -1,5 +1,6 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
     ( correlatingPointsPlotter
@@ -27,16 +28,24 @@ import EasySpec.Evaluate.Analyse.Plots.Plotter
 import EasySpec.Evaluate.Analyse.R
 
 correlatingPointsPlotter :: Plotter
-correlatingPointsPlotter = plotter "correlating-points"
+correlatingPointsPlotter =
+    "correlating-points"
+    { plotterRulesEvaluatorGroupExampleOrderedDistinct2Evaluator =
+          Just plotsRulesForPointsPlotWithEvaluatorsPerExample
+    }
 
 plotsRulesForPointsPlotWithEvaluatorsPerExample ::
-       GroupName -> Example -> Evaluator -> Evaluator -> Rules (Path Abs File)
-plotsRulesForPointsPlotWithEvaluatorsPerExample groupName is e1 e2 = do
-    plotF <- pointsPlotForEvaluatorsPerExample is e1 e2
+       Path Abs File
+    -> Path Abs File
+    -> GroupName
+    -> Example
+    -> Evaluator
+    -> Evaluator
+    -> Rules ()
+plotsRulesForPointsPlotWithEvaluatorsPerExample plotF dataF groupName is e1 e2 =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
-        dataF <- dataFileForExample groupName is
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
         rscript
@@ -49,7 +58,6 @@ plotsRulesForPointsPlotWithEvaluatorsPerExample groupName is e1 e2 = do
             , prettyIndication $ evaluatorIndication e1
             , prettyIndication $ evaluatorIndication e2
             ]
-    pure plotF
 
 plotsRulesForPointsPlotsWithGroupsOfExamples ::
        String

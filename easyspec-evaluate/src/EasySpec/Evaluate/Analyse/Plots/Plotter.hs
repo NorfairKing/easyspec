@@ -8,6 +8,7 @@ module EasySpec.Evaluate.Analyse.Plots.Plotter
 
 import Import hiding (group)
 
+import Data.String
 import Language.Haskell.Exts.Pretty (prettyPrint)
 import System.FilePath (dropExtensions)
 
@@ -148,6 +149,9 @@ data Plotter = Plotter
     , plotterRulesEvaluatorGroupExampleNameEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Rules ())
     , plotterRulesEvaluatorGroupExampleNameOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Evaluator -> Rules ())
     }
+
+instance IsString Plotter where
+    fromString = plotter
 
 plotter :: String -> Plotter
 plotter name =

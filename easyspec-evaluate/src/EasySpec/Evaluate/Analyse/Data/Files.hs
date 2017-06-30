@@ -27,11 +27,12 @@ rawDataFileFor ::
     -> ExampleFunction
     -> SignatureInferenceStrategy
     -> m (Path Abs File)
-rawDataFileFor = evaluatedFileForGroupExampleNameStrategy
-
-jsonDataFileWithComponents ::
-       MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
-jsonDataFileWithComponents = dataFileWithComponents "json"
+rawDataFileFor g e n s =
+        fileWithComponentsAndExtension
+        ((</> $(mkRelDir "raw")) <$> dataDir)
+        [g, exampleModule e, prettyPrint n]
+        [strategyName s]
+        "json"
 
 dataFileForGranular ::
        MonadIO m
@@ -205,7 +206,9 @@ evaluatedFileForGroupExampleStrategyEvaluator g m s e =
 evaluatedFileForGroupExampleName ::
        MonadIO m => GroupName -> Example -> ExampleFunction -> m (Path Abs File)
 evaluatedFileForGroupExampleName g m n =
-    evaluatedCSVFileWithComponents ["per-group-example-name", g, exampleModule m] [prettyPrint n]
+    evaluatedCSVFileWithComponents
+        ["per-group-example-name", g, exampleModule m]
+        [prettyPrint n]
 
 evaluatedFileForGroupExampleNameStrategy ::
        MonadIO m

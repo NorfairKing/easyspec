@@ -8,6 +8,7 @@ import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Common.TH
+import EasySpec.Evaluate.Analyse.Utils
 import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Types
@@ -69,3 +70,6 @@ groupsExamplesNamesAndStrategies ::
 groupsExamplesNamesAndStrategies = do
     exns <- groupsExamplesAndNames
     pure [(g, e, n, s) | (g, e, n) <- exns, s <- signatureInferenceStrategies]
+
+groupExampleEvaluators :: [(GroupName, Example, Evaluator)]
+groupExampleEvaluators = lTuple groupsAndExamples evaluators

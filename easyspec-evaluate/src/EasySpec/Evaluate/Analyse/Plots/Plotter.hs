@@ -53,6 +53,37 @@ plotRulesForPlotter p@Plotter {..} = do
                     plotterEvaluatorGroupExampleNamePlot p group example name
                 func plotF dataF group example name
                 pure plotF
+    perGroupExampleEvaluatorPlots <-
+        rule plotterRulesEvaluatorGroupExampleEvaluator $ \func -> do
+            forM groupExampleEvaluators $ \(group, example, evaluator) -> do
+                dataF <-
+                    evaluatedFileForGroupExampleEvaluator
+                        group
+                        example
+                        evaluator
+                plotF <-
+                    plotterEvaluatorGroupExampleEvaluatorPlot
+                        p
+                        group
+                        example
+                        evaluator
+                func plotF dataF group example evaluator
+                pure plotF
+    perGroupExampleOrderedDistinct2EvaluatorPlots <-
+        rule plotterRulesEvaluatorGroupExampleOrderedDistinct2Evaluator $ \func ->
+            fmap concat $
+            forM groupsAndExamples $ \(group, example) ->
+                forM (orderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
+                    dataF <- evaluatedFileForGroupExample group example
+                    plotF <-
+                        plotterEvaluatorGroupExampleOrderedDistinct2EvaluatorPlot
+                            p
+                            group
+                            example
+                            e1
+                            e2
+                    func plotF dataF group example e1 e2
+                    pure plotF
     perGroupExampleNameEvaluatorPlots <-
         rule plotterRulesEvaluatorGroupExampleNameEvaluator $ \func -> do
             quads <- groupExamplesNamesAndEvaluators
@@ -72,15 +103,16 @@ plotRulesForPlotter p@Plotter {..} = do
                         evaluator
                 func plotF dataF group example name evaluator
                 pure plotF
-    perGroupExampleNameOrderedUnequal2EvaluatorPlots <-
-        rule plotterRulesEvaluatorGroupExampleNameOrderedUnequal2Evaluator $ \func -> do
+    perGroupExampleNameOrderedDistinct2EvaluatorPlots <-
+        rule plotterRulesEvaluatorGroupExampleNameOrderedDistinct2Evaluator $ \func -> do
             trips <- groupsExamplesAndNames
             fmap concat $
                 forM trips $ \(group, example, name) ->
                     forM (orderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
-                        dataF <- evaluatedFileForGroupExampleName group example name
+                        dataF <-
+                            evaluatedFileForGroupExampleName group example name
                         plotF <-
-                            plotterEvaluatorGroupExampleNameOrderedUnequal2EvaluatorPlot
+                            plotterEvaluatorGroupExampleNameOrderedDistinct2EvaluatorPlot
                                 p
                                 group
                                 example
@@ -89,13 +121,17 @@ plotRulesForPlotter p@Plotter {..} = do
                                 e2
                         func plotF dataF group example name e1 e2
                         pure plotF
-    let plots =
-            perGroupPlots ++
-            perGroupExamplePlots ++
-            perGroupExampleNamePlots ++
-            perGroupExampleNameEvaluatorPlots ++
-            perGroupExampleNameOrderedUnequal2EvaluatorPlots
-    plotterRule ~> needP plots
+    plotterRule ~>
+        needP
+            (concat
+                 [ perGroupPlots
+                 , perGroupExamplePlots
+                 , perGroupExampleEvaluatorPlots
+                 , perGroupExampleOrderedDistinct2EvaluatorPlots
+                 , perGroupExampleNamePlots
+                 , perGroupExampleNameEvaluatorPlots
+                 , perGroupExampleNameOrderedDistinct2EvaluatorPlots
+                 ])
     pure plotterRule
   where
     rule :: Applicative f => Maybe a -> (a -> f [b]) -> f [b]
@@ -106,9 +142,11 @@ data Plotter = Plotter
     { plotterRule :: String
     , plotterRulesEvaluatorGroup :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Rules ())
     , plotterRulesEvaluatorGroupExample :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> Rules ())
+    , plotterRulesEvaluatorGroupExampleEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> Evaluator -> Rules ())
+    , plotterRulesEvaluatorGroupExampleOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> Evaluator -> Evaluator -> Rules ())
     , plotterRulesEvaluatorGroupExampleName :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Rules ())
     , plotterRulesEvaluatorGroupExampleNameEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Rules ())
-    , plotterRulesEvaluatorGroupExampleNameOrderedUnequal2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Evaluator -> Rules ())
+    , plotterRulesEvaluatorGroupExampleNameOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Evaluator -> Rules ())
     }
 
 plotter :: String -> Plotter
@@ -117,9 +155,11 @@ plotter name =
     { plotterRule = name
     , plotterRulesEvaluatorGroup = Nothing
     , plotterRulesEvaluatorGroupExample = Nothing
+    , plotterRulesEvaluatorGroupExampleEvaluator = Nothing
+    , plotterRulesEvaluatorGroupExampleOrderedDistinct2Evaluator = Nothing
     , plotterRulesEvaluatorGroupExampleName = Nothing
     , plotterRulesEvaluatorGroupExampleNameEvaluator = Nothing
-    , plotterRulesEvaluatorGroupExampleNameOrderedUnequal2Evaluator = Nothing
+    , plotterRulesEvaluatorGroupExampleNameOrderedDistinct2Evaluator = Nothing
     }
 
 plotterEvaluatorGroupPlot ::
@@ -130,6 +170,33 @@ plotterEvaluatorGroupExamplePlot ::
        MonadIO m => Plotter -> GroupName -> Example -> m (Path Abs File)
 plotterEvaluatorGroupExamplePlot p g e =
     plotterPlotFile p ["per-group-example"] [g, exampleModule e]
+
+plotterEvaluatorGroupExampleEvaluatorPlot ::
+       MonadIO m
+    => Plotter
+    -> GroupName
+    -> Example
+    -> Evaluator
+    -> m (Path Abs File)
+plotterEvaluatorGroupExampleEvaluatorPlot p g e e1 =
+    plotterPlotFile
+        p
+        ["per-group-example-evaluator"]
+        [g, exampleModule e, evaluatorName e1]
+
+plotterEvaluatorGroupExampleOrderedDistinct2EvaluatorPlot ::
+       MonadIO m
+    => Plotter
+    -> GroupName
+    -> Example
+    -> Evaluator
+    -> Evaluator
+    -> m (Path Abs File)
+plotterEvaluatorGroupExampleOrderedDistinct2EvaluatorPlot p g e e1 e2 =
+    plotterPlotFile
+        p
+        ["per-group-example-ordered-distinct-evaluators"]
+        [g, exampleModule e, evaluatorName e1, evaluatorName e2]
 
 plotterEvaluatorGroupExampleNamePlot ::
        MonadIO m
@@ -155,10 +222,10 @@ plotterEvaluatorGroupExampleNameEvaluatorPlot ::
 plotterEvaluatorGroupExampleNameEvaluatorPlot p g e n e1 =
     plotterPlotFile
         p
-        ["per-group-example-name"]
+        ["per-group-example-name-evaluator"]
         [g, exampleModule e, prettyPrint n, evaluatorName e1]
 
-plotterEvaluatorGroupExampleNameOrderedUnequal2EvaluatorPlot ::
+plotterEvaluatorGroupExampleNameOrderedDistinct2EvaluatorPlot ::
        MonadIO m
     => Plotter
     -> GroupName
@@ -167,10 +234,10 @@ plotterEvaluatorGroupExampleNameOrderedUnequal2EvaluatorPlot ::
     -> Evaluator
     -> Evaluator
     -> m (Path Abs File)
-plotterEvaluatorGroupExampleNameOrderedUnequal2EvaluatorPlot p g e n e1 e2 =
+plotterEvaluatorGroupExampleNameOrderedDistinct2EvaluatorPlot p g e n e1 e2 =
     plotterPlotFile
         p
-        ["per-group-example-name-ordered-distict-evaluators"]
+        ["per-group-example-name-ordered-distinct-evaluators"]
         [g, exampleModule e, prettyPrint n, evaluatorName e1, evaluatorName e2]
 
 plotterPlotFile ::

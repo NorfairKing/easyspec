@@ -52,18 +52,6 @@ evaluatedDataRules = do
     mapM_ (uncurry5 evaluatedDataRulesForGroupExampleNameStrategyEvaluator) $
         lTriple2 gens signatureInferenceStrategies evaluators
 
-lTuple :: [(a, b)] -> [c] -> [(a, b, c)]
-lTuple ab cs = [(a, b, c) | (a, b) <- ab, c <- cs]
-
-lTriple :: [(a, b, c)] -> [d] -> [(a, b, c, d)]
-lTriple abcs ds = [(a, b, c, d) | (a, b, c) <- abcs, d <- ds]
-
-lTuple2 :: [(a, b)] -> [c] -> [d] -> [(a, b, c, d)]
-lTuple2 ab cs ds = lTuple ab cs `lTriple` ds
-
-lTriple2 :: [(a, b, c)] -> [d] -> [e] -> [(a, b, c, d, e)]
-lTriple2 abcs ds es = [(a, b, c, d, e) | (a, b, c) <- abcs, d <- ds, e <- es]
-
 evaluatedDataRulesAllData :: Rules ()
 evaluatedDataRulesAllData =
     combine allDataFile $ mapM evaluatedFileForGroup groups

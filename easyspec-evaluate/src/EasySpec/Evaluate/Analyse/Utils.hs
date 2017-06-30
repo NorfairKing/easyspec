@@ -103,3 +103,15 @@ uncurry4 func (a, b, c, d) = func a b c d
 
 uncurry5 :: (a -> b -> c -> d -> e -> f) -> (a, b, c, d, e) -> f
 uncurry5 func (a, b, c, d, e) = func a b c d e
+
+lTuple :: [(a, b)] -> [c] -> [(a, b, c)]
+lTuple ab cs = [(a, b, c) | (a, b) <- ab, c <- cs]
+
+lTriple :: [(a, b, c)] -> [d] -> [(a, b, c, d)]
+lTriple abcs ds = [(a, b, c, d) | (a, b, c) <- abcs, d <- ds]
+
+lTuple2 :: [(a, b)] -> [c] -> [d] -> [(a, b, c, d)]
+lTuple2 ab cs ds = lTuple ab cs `lTriple` ds
+
+lTriple2 :: [(a, b, c)] -> [d] -> [e] -> [(a, b, c, d, e)]
+lTriple2 abcs ds es = [(a, b, c, d, e) | (a, b, c) <- abcs, d <- ds, e <- es]

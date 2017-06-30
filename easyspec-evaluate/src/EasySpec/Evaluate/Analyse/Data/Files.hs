@@ -205,7 +205,7 @@ evaluatedFileForGroupExampleStrategyEvaluator g m s e =
 evaluatedFileForGroupExampleName ::
        MonadIO m => GroupName -> Example -> ExampleFunction -> m (Path Abs File)
 evaluatedFileForGroupExampleName g m n =
-    evaluatedCSVFileWithComponents [g, exampleModule m] [prettyPrint n]
+    evaluatedCSVFileWithComponents ["per-group-example-name", g, exampleModule m] [prettyPrint n]
 
 evaluatedFileForGroupExampleNameStrategy ::
        MonadIO m

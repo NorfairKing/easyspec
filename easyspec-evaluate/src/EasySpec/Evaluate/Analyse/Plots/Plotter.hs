@@ -57,7 +57,12 @@ plotRulesForPlotter p@Plotter {..} = do
         rule plotterRulesEvaluatorGroupExampleNameEvaluator $ \func -> do
             quads <- groupExamplesNamesAndEvaluators
             forM quads $ \(group, example, name, evaluator) -> do
-                dataF <- undefined
+                dataF <-
+                    evaluatedFileForGroupExampleNameEvaluator
+                        group
+                        example
+                        name
+                        evaluator
                 plotF <-
                     plotterEvaluatorGroupExampleNameEvaluatorPlot
                         p
@@ -73,7 +78,7 @@ plotRulesForPlotter p@Plotter {..} = do
             fmap concat $
                 forM trips $ \(group, example, name) ->
                     forM (orderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
-                        dataF <- undefined
+                        dataF <- evaluatedFileForGroupExampleName group example name
                         plotF <-
                             plotterEvaluatorGroupExampleNameOrderedUnequal2EvaluatorPlot
                                 p

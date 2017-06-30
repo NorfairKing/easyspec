@@ -31,16 +31,17 @@ resultsPlotsFor ::
        (ToNamedRecord r, DefaultOrdered r, FromNamedRecord r)
     => EvaluationFunc r
     -> Rules [Path Abs File]
-resultsPlotsFor ef = do
-    enss <- groupsExamplesNamesAndStrategies
-    mapM_ (uncurry4 $ individualCsvFilesFor ef) enss
-    individualPlotFs <- mapM (uncurry4 $ individualPlotFor ef) enss
-    mapM_ (uncurry $ perStrategyCsvFilesFor ef) $
-        (,) <$> groups <*> signatureInferenceStrategies
-    perStrategyPlotFs <-
-        mapM (uncurry $ perStrategyPlotFor ef) $
-        (,) <$> groups <*> signatureInferenceStrategies
-    pure $ individualPlotFs ++ perStrategyPlotFs
+resultsPlotsFor ef = pure []
+    -- enss <- groupsExamplesNamesAndStrategies
+    -- individualPlotFs <-
+    --     forM enss $ \quad -> do
+    --         void $ uncurry4 (individualCsvFilesFor ef) quad
+    --         uncurry4 (individualPlotFor ef) quad
+    -- perStrategyPlotFs <-
+    --     forM ((,) <$> groups <*> signatureInferenceStrategies) $ \(g, strat) -> do
+    --         void $ perStrategyCsvFilesFor ef g strat
+    --         perStrategyPlotFor ef g strat
+    -- pure $ individualPlotFs ++ perStrategyPlotFs
 
 data EvaluationFunc r = EvaluationFunc
     { evaluationFuncDir :: Path Rel Dir
@@ -60,8 +61,8 @@ evaluationFuncIndividualCsvDataFileFor ::
     -> m (Path Abs File)
 evaluationFuncIndividualCsvDataFileFor EvaluationFunc {..} g e n s =
     csvDataFileWithComponents
-        (evaluationFuncDir </> ES.inputSpecFile e)
-        [g ++ "/" ++ prettyPrint n, ES.sigInfStratName s]
+        (evaluationFuncDir </> $(mkRelFile "data"))
+        [g, exampleModule e, prettyPrint n, ES.sigInfStratName s]
 
 individualCsvFilesFor ::
        (ToNamedRecord r, DefaultOrdered r)
@@ -89,8 +90,8 @@ evaluationFuncIndividualPngPlotFileFor ::
     -> m (Path Abs File)
 evaluationFuncIndividualPngPlotFileFor EvaluationFunc {..} g e n s =
     pngPlotFileWithComponents
-        (evaluationFuncDir </> ES.inputSpecFile e)
-        [g ++ "/" ++ prettyPrint n, ES.sigInfStratName s]
+        (evaluationFuncDir </> $(mkRelFile "plot"))
+        [g, exampleModule e, prettyPrint n, ES.sigInfStratName s]
 
 individualPlotFor ::
        EvaluationFunc r
@@ -125,7 +126,7 @@ evaluationFuncPerStrategyCsvDataFileFor ::
 evaluationFuncPerStrategyCsvDataFileFor EvaluationFunc {..} g s =
     csvDataFileWithComponents
         (evaluationFuncDir </> $(mkRelFile "strategy"))
-        [g ++ "/" ++ ES.sigInfStratName s]
+        [g, ES.sigInfStratName s]
 
 perStrategyCsvFilesFor ::
        forall r. (ToNamedRecord r, DefaultOrdered r, FromNamedRecord r)
@@ -150,7 +151,7 @@ evaluationFuncPerStrategyPngPlotFileFor ::
 evaluationFuncPerStrategyPngPlotFileFor EvaluationFunc {..} g s =
     pngPlotFileWithComponents
         (evaluationFuncDir </> $(mkRelFile "strategy"))
-        [g ++ "/" ++ ES.sigInfStratName s]
+        [g, ES.sigInfStratName s]
 
 perStrategyPlotFor ::
        EvaluationFunc r
@@ -162,7 +163,7 @@ perStrategyPlotFor ef g s = do
     plotF $%> do
         csvF <- evaluationFuncPerStrategyCsvDataFileFor ef g s
         let scriptF = evaluationFuncPlotScript ef
-        needP [csvF, scriptF]
+        needP [csvF]
         rscript
             scriptF
             [ toFilePath csvF

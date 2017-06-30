@@ -14,8 +14,6 @@ import System.FilePath (dropExtensions)
 import Development.Shake
 import Development.Shake.Path
 
-import qualified EasySpec.Discover.Types as ES
-
 import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.Utils
@@ -168,13 +166,6 @@ plotterEvaluatorGroupExampleNameOrderedUnequal2EvaluatorPlot p g e n e1 e2 =
         p
         ["per-group-example-name-ordered-distict-evaluators"]
         [g, exampleModule e, prettyPrint n, evaluatorName e1, evaluatorName e2]
-
-exampleModule :: Example -> String
-exampleModule = map go . dropExtensions . toFilePath . ES.inputSpecFile
-  where
-    go :: Char -> Char
-    go '/' = '.'
-    go c = c
 
 plotterPlotFile ::
        MonadIO m => Plotter -> [String] -> [String] -> m (Path Abs File)

@@ -13,7 +13,7 @@ import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Types
 
 groups :: [String]
-groups = map fst exampleGroups
+groups = nub . sort . map fst $ exampleGroups
 
 exampleGroups :: [(String, [ES.InputSpec])]
 exampleGroups = $(buildExamples)

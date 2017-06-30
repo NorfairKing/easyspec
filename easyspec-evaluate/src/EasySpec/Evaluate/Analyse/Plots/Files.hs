@@ -8,11 +8,13 @@ module EasySpec.Evaluate.Analyse.Plots.Files where
 import Import
 
 import Language.Haskell.Exts.Pretty (prettyPrint)
+import System.FilePath (dropExtensions)
 
 import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
+import EasySpec.Evaluate.Types
 
 commonRFile :: MonadIO m => m (Path Abs File)
 commonRFile = scriptFile "common.r"
@@ -49,7 +51,7 @@ pointsPlotForEvaluatorsPerExample is e1 e2 =
         [evaluatorName e1, evaluatorName e2]
 
 pointsPlotForEvaluatorsPerExampleGroup ::
-       MonadIO m => String -> Evaluator -> Evaluator -> m (Path Abs File)
+       MonadIO m => GroupName -> Evaluator -> Evaluator -> m (Path Abs File)
 pointsPlotForEvaluatorsPerExampleGroup groupName e1 e2 =
     pngPlotFileWithComponents
         $(mkRelFile "points/per-group/group")
@@ -105,3 +107,10 @@ singleEvaluatorAverageGlobalBoxPlotFileForExample ev =
 singleEvaluatorAverageBoxGlobalAnalysisScript :: MonadIO m => m (Path Abs File)
 singleEvaluatorAverageBoxGlobalAnalysisScript =
     scriptFile "single_evaluator_boxplot_average_global.r"
+
+exampleModule :: Example -> String
+exampleModule = map go . dropExtensions . toFilePath . ES.inputSpecFile
+  where
+    go :: Char -> Char
+    go '/' = '.'
+    go c = c

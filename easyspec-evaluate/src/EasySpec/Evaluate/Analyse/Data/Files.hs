@@ -10,6 +10,7 @@ import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Common
+import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Types
 
 getEasyspecSourceDir :: MonadIO m => m (Path Abs Dir)
@@ -27,8 +28,11 @@ rawDataFileFor ::
     -> m (Path Abs File)
 rawDataFileFor groupName is name strat =
     jsonDataFileWithComponents
-        ($(mkRelDir "raw") </> ES.inputSpecFile is)
-        [groupName ++ "/" ++ prettyPrint name, ES.sigInfStratName strat]
+        ($(mkRelDir "raw") </> $(mkRelFile "data"))
+        [ groupName ++ "/" ++ exampleModule is
+        , prettyPrint name
+        , ES.sigInfStratName strat
+        ]
 
 jsonDataFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
@@ -43,8 +47,11 @@ dataFileFor ::
     -> m (Path Abs File)
 dataFileFor groupName is name strat =
     csvDataFileWithComponents
-        ($(mkRelDir "evaluated") </> ES.inputSpecFile is)
-        [groupName ++ "/" ++ prettyPrint name, ES.sigInfStratName strat]
+        ($(mkRelDir "evaluated") </> $(mkRelFile "data"))
+        [ groupName ++ "/" ++ exampleModule is
+        , prettyPrint name
+        , ES.sigInfStratName strat
+        ]
 
 dataFileForExampleAndName ::
        MonadIO m => ES.InputSpec -> ES.EasyQName -> m (Path Abs File)

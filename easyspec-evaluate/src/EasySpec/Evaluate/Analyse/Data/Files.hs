@@ -32,7 +32,7 @@ rawDataFileFor groupName is name strat =
         ($(mkRelDir "raw") </> $(mkRelFile "data"))
         [ groupName ++ "/" ++ exampleModule is
         , prettyPrint name
-        , ES.sigInfStratName strat
+        , strategyName strat
         ]
 
 jsonDataFileWithComponents ::
@@ -52,7 +52,7 @@ dataFileForGranular groupName is name strat ev =
         ($(mkRelDir "evaluated") </> $(mkRelFile "data"))
         [ groupName ++ "/" ++ exampleModule is
         , prettyPrint name
-        , ES.sigInfStratName strat
+        , strategyName strat
         , evaluatorName ev
         ]
 
@@ -63,20 +63,11 @@ dataFileFor ::
     -> ExampleFunction
     -> SignatureInferenceStrategy
     -> m (Path Abs File)
-dataFileFor groupName is name strat =
-    csvDataFileWithComponents
-        ($(mkRelDir "combined-per-example-per-name-per-strategy") </> $(mkRelFile "data"))
-        [ groupName ++ "/" ++ exampleModule is
-        , prettyPrint name
-        , ES.sigInfStratName strat
-        ]
+dataFileFor = evaluatedFileForGroupExampleNameStrategy
 
 dataFileForExampleAndName ::
        MonadIO m => GroupName -> Example -> ExampleFunction -> m (Path Abs File)
-dataFileForExampleAndName groupName is name =
-    csvDataFileWithComponents
-        ($(mkRelDir "combined-per-example-per-name") </> ES.inputSpecFile is)
-        [groupName, prettyPrint name]
+dataFileForExampleAndName = evaluatedFileForGroupExampleName
 
 dataFilesForGroupExampleAndName ::
        MonadIO m
@@ -106,7 +97,7 @@ dataFilesForStrategy strat =
 dataFileForStrategy ::
        MonadIO m => ES.SignatureInferenceStrategy -> m (Path Abs File)
 dataFileForStrategy strat = do
-    fn <- liftIO $ parseRelFile $ ES.sigInfStratName strat
+    fn <- liftIO $ parseRelFile $ strategyName strat
     csvDataFileWithComponents ($(mkRelDir "combined-per-strategy") </> fn) []
 
 csvDataFileWithComponents ::
@@ -130,7 +121,7 @@ dataFileForExampleGroupAndStrategy ::
 dataFileForExampleGroupAndStrategy groupName s =
     csvDataFileWithComponents
         $(mkRelFile "combined-per-group-per-stragety/data")
-        [groupName, ES.sigInfStratName s]
+        [groupName, strategyName s]
 
 dataFilesForExampleGroup :: MonadIO m => String -> m [Path Abs File]
 dataFilesForExampleGroup groupName = do
@@ -149,3 +140,132 @@ allDataFile = (</> $(mkRelFile "evaluated/all.csv")) <$> dataDir
 dataFileWithComponents ::
        MonadIO m => String -> Path Rel File -> [String] -> m (Path Abs File)
 dataFileWithComponents = fileInDirWithExtensionAndComponents dataDir
+
+-- Better filenames below here
+evaluatedFileForGroup :: MonadIO m => GroupName -> m (Path Abs File)
+evaluatedFileForGroup g = evaluatedCSVFileWithComponents ["per-group"] [g]
+
+evaluatedFileForGroupStrategy ::
+       MonadIO m => GroupName -> SignatureInferenceStrategy -> m (Path Abs File)
+evaluatedFileForGroupStrategy g s =
+    evaluatedCSVFileWithComponents ["per-group-strategy", g] [strategyName s]
+
+evaluatedFileForGroupEvaluator ::
+       MonadIO m => GroupName -> Evaluator -> m (Path Abs File)
+evaluatedFileForGroupEvaluator g e =
+    evaluatedCSVFileWithComponents ["per-group-evaluator", g] [evaluatorName e]
+
+evaluatedFileForGroupStrategyEvaluator ::
+       MonadIO m
+    => GroupName
+    -> SignatureInferenceStrategy
+    -> Evaluator
+    -> m (Path Abs File)
+evaluatedFileForGroupStrategyEvaluator g s e =
+    evaluatedCSVFileWithComponents
+        ["per-group-strategy-evaluator", g, strategyName s]
+        [evaluatorName e]
+
+evaluatedFileForGroupExample ::
+       MonadIO m => GroupName -> Example -> m (Path Abs File)
+evaluatedFileForGroupExample g m =
+    evaluatedCSVFileWithComponents ["per-group-example", g] [exampleModule m]
+
+evaluatedFileForGroupExampleStrategy ::
+       MonadIO m
+    => GroupName
+    -> Example
+    -> SignatureInferenceStrategy
+    -> m (Path Abs File)
+evaluatedFileForGroupExampleStrategy g m s =
+    evaluatedCSVFileWithComponents
+        ["per-group-example-strategy", g, exampleModule m]
+        [strategyName s]
+
+evaluatedFileForGroupExampleEvaluator ::
+       MonadIO m => GroupName -> Example -> Evaluator -> m (Path Abs File)
+evaluatedFileForGroupExampleEvaluator g m e =
+    evaluatedCSVFileWithComponents
+        ["per-group-example-evaluator", g, exampleModule m]
+        [evaluatorName e]
+
+evaluatedFileForGroupExampleStrategyEvaluator ::
+       MonadIO m
+    => GroupName
+    -> Example
+    -> SignatureInferenceStrategy
+    -> Evaluator
+    -> m (Path Abs File)
+evaluatedFileForGroupExampleStrategyEvaluator g m s e =
+    evaluatedCSVFileWithComponents
+        [ "per-group-example-strategy-evaluator"
+        , g
+        , exampleModule m
+        , strategyName s
+        ]
+        [evaluatorName e]
+
+evaluatedFileForGroupExampleName ::
+       MonadIO m => GroupName -> Example -> ExampleFunction -> m (Path Abs File)
+evaluatedFileForGroupExampleName g m n =
+    evaluatedCSVFileWithComponents [g, exampleModule m] [prettyPrint n]
+
+evaluatedFileForGroupExampleNameStrategy ::
+       MonadIO m
+    => GroupName
+    -> Example
+    -> ExampleFunction
+    -> SignatureInferenceStrategy
+    -> m (Path Abs File)
+evaluatedFileForGroupExampleNameStrategy g m n s =
+    evaluatedCSVFileWithComponents
+        ["per-group-example-name-strategy", g, exampleModule m, prettyPrint n]
+        [strategyName s]
+
+evaluatedFileForGroupExampleNameEvaluator ::
+       MonadIO m
+    => GroupName
+    -> Example
+    -> ExampleFunction
+    -> Evaluator
+    -> m (Path Abs File)
+evaluatedFileForGroupExampleNameEvaluator g m n e =
+    evaluatedCSVFileWithComponents
+        ["per-group-example-name-evaluator", g, exampleModule m, prettyPrint n]
+        [evaluatorName e]
+
+evaluatedFileForGroupExampleNameStrategyEvaluator ::
+       MonadIO m
+    => GroupName
+    -> Example
+    -> ExampleFunction
+    -> SignatureInferenceStrategy
+    -> Evaluator
+    -> m (Path Abs File)
+evaluatedFileForGroupExampleNameStrategyEvaluator g m n s e =
+    evaluatedCSVFileWithComponents
+        [ "per-group-example-name-strategy-evaluator"
+        , g
+        , exampleModule m
+        , prettyPrint n
+        , strategyName s
+        ]
+        [evaluatorName e]
+
+evaluatedCSVFileWithComponents ::
+       MonadIO m => [String] -> [String] -> m (Path Abs File)
+evaluatedCSVFileWithComponents dirComps fileComps =
+    fileWithComponents ((</> $(mkRelDir "evaluated")) <$> dataDir) dirComps $
+    fileComps ++ [".csv"]
+
+fileWithComponents ::
+       MonadIO m
+    => m (Path Abs Dir)
+    -> [String]
+    -> [String]
+    -> m (Path Abs File)
+fileWithComponents genDir dirComps fileComps = do
+    pd <- genDir
+    let dirStr = intercalate "/" dirComps
+    let fileStr = intercalate "-" fileComps
+    liftIO $ resolveFile pd $ dirStr ++ "/" ++ fileStr

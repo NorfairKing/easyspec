@@ -162,3 +162,5 @@ type Example = ES.InputSpec
 type ExampleFunction = ES.EasyQName
 
 type SignatureInferenceStrategy = ES.SignatureInferenceStrategy
+
+strategyName = ES.sigInfStratName

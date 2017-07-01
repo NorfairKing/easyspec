@@ -36,20 +36,6 @@ linesPlotForEvaluator ev =
 linesPlotAnalysisScript :: MonadIO m => m (Path Abs File)
 linesPlotAnalysisScript = scriptFile "lines.r"
 
-singleEvaluatorBarPlotFileForExampleAndName ::
-       MonadIO m
-    => ES.InputSpec
-    -> ES.EasyQName
-    -> Evaluator
-    -> m (Path Abs File)
-singleEvaluatorBarPlotFileForExampleAndName is name ev =
-    pngPlotFileWithComponents
-        ($(mkRelDir "single-evaluator-bar") </> ES.inputSpecFile is)
-        [prettyPrint name, evaluatorName ev]
-
-singleEvaluatorBarAnalysisScript :: MonadIO m => m (Path Abs File)
-singleEvaluatorBarAnalysisScript = scriptFile "single_evaluator_bar.r"
-
 singleEvaluatorAverageBoxPlotFileForExample ::
        MonadIO m => ES.InputSpec -> Evaluator -> m (Path Abs File)
 singleEvaluatorAverageBoxPlotFileForExample is ev =

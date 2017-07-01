@@ -37,9 +37,10 @@ plotsRules = do
     allDataPlotsFs <- plotsRulesForAllData
     plotsFs <- concat <$> mapM (uncurry plotsRulesForExample) groupsAndExamples
     correlatingPointsRule <- plotRulesForPlotter correlatingPointsPlotter
+    barPlotsRule <- plotRulesForPlotter barPlotter
     plotsRule ~> do
-        need [correlatingPointsRule]
-        needP (allDataPlotsFs ++  plotsFs)
+        need [correlatingPointsRule, barPlotsRule]
+        needP (allDataPlotsFs ++ plotsFs)
 
 plotsRulesForAllData :: Rules [Path Abs File]
 plotsRulesForAllData = do
@@ -53,12 +54,4 @@ plotsRulesForAllData = do
 plotsRulesForExample :: GroupName -> Example -> Rules [Path Abs File]
 plotsRulesForExample groupName is = do
     names <- liftIO $ namesInSource is
-    bars <- fmap concat $ forM names $ plotsRulesForExampleAndName groupName is
-    boxes <-
-        forM evaluators $ perExampleAndEvaluatorAverageBoxPlotFor groupName is
-    pure $ bars ++ boxes
-
-plotsRulesForExampleAndName ::
-       GroupName -> Example -> ExampleFunction -> Rules [Path Abs File]
-plotsRulesForExampleAndName groupName is name =
-    forM evaluators $ perExampleNameAndEvaluatorBarPlotFor groupName is name
+    forM evaluators $ perExampleAndEvaluatorAverageBoxPlotFor groupName is

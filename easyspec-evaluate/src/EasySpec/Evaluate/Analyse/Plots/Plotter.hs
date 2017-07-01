@@ -417,5 +417,5 @@ plotterRawPlotFileWithComponents ::
 plotterRawPlotFileWithComponents Plotter {..} dirStrs comps = do
     pd <- plotsDir
     let dirStr = intercalate "/" dirStrs
-    let fileStr = dropExtensions $ intercalate "-" $ "plot" : comps
+    let fileStr = intercalate "-" $ "plot" : comps
     liftIO $ resolveFile pd $ dirStr ++ "/" ++ fileStr ++ ".png"

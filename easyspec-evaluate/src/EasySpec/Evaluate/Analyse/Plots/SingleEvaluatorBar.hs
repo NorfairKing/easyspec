@@ -1,8 +1,7 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar
-    ( perExampleNameAndEvaluatorBarPlotFor
+    ( barPlotter
     ) where
 
 import Import
@@ -21,16 +20,25 @@ import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
 import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
+import EasySpec.Evaluate.Analyse.Plots.Plotter
 import EasySpec.Evaluate.Analyse.R
 
+barPlotter :: Plotter
+barPlotter =
+    "evaluator-bar"
+    { plotterRulesGroupExampleNameEvaluator =
+          Just perExampleNameAndEvaluatorBarPlotFor
+    }
+
 perExampleNameAndEvaluatorBarPlotFor ::
-       GroupName
+       Path Abs File
+    -> Path Abs File
+    -> GroupName
     -> Example
     -> ExampleFunction
     -> Evaluator
-    -> Rules (Path Abs File)
-perExampleNameAndEvaluatorBarPlotFor groupName is name evaluator = do
-    plotFile <- singleEvaluatorBarPlotFileForExampleAndName is name evaluator
+    -> Rules ()
+perExampleNameAndEvaluatorBarPlotFor plotFile dataFile groupName is name evaluator =
     plotFile $%> do
         dependOnEvaluator evaluator
         dataFile <- dataFileForExampleAndName groupName is name
@@ -46,4 +54,6 @@ perExampleNameAndEvaluatorBarPlotFor groupName is name evaluator = do
             , evaluatorName evaluator
             , prettyIndication $ evaluatorIndication evaluator
             ]
-    pure plotFile
+
+singleEvaluatorBarAnalysisScript :: MonadIO m => m (Path Abs File)
+singleEvaluatorBarAnalysisScript = scriptFile "single_evaluator_bar.r"

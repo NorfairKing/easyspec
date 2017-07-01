@@ -30,7 +30,11 @@ import EasySpec.Evaluate.Analyse.R
 correlatingPointsPlotter :: Plotter
 correlatingPointsPlotter =
     "correlating-points"
-    { plotterRulesEvaluatorGroupExampleOrderedDistinct2Evaluator =
+    { plotterRulesEvaluatorGroupOrderedDistinct2Evaluator =
+          Just plotsRulesForPointsPlotsWithGroupsOfExamples
+    , plotterRulesEvaluatorGroupStrategyOrderedDistinct2Evaluator =
+          Just plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy
+    , plotterRulesEvaluatorGroupExampleOrderedDistinct2Evaluator =
           Just plotsRulesForPointsPlotWithEvaluatorsPerExample
     }
 
@@ -60,13 +64,13 @@ plotsRulesForPointsPlotWithEvaluatorsPerExample plotF dataF groupName is e1 e2 =
             ]
 
 plotsRulesForPointsPlotsWithGroupsOfExamples ::
-       String
-    -> [ES.InputSpec]
+       Path Abs File
+    -> Path Abs File
+    -> GroupName
     -> Evaluator
     -> Evaluator
-    -> Rules (Path Abs File)
-plotsRulesForPointsPlotsWithGroupsOfExamples groupName _ e1 e2 = do
-    plotF <- pointsPlotForEvaluatorsPerExampleGroup groupName e1 e2
+    -> Rules ()
+plotsRulesForPointsPlotsWithGroupsOfExamples plotF dataF groupName e1 e2 =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
@@ -83,17 +87,16 @@ plotsRulesForPointsPlotsWithGroupsOfExamples groupName _ e1 e2 = do
             , prettyIndication $ evaluatorIndication e1
             , prettyIndication $ evaluatorIndication e2
             ]
-    pure plotF
 
 plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy ::
-       String
-    -> [ES.InputSpec]
-    -> ES.SignatureInferenceStrategy
+       Path Abs File
+    -> Path Abs File
+    -> GroupName
+    -> SignatureInferenceStrategy
     -> Evaluator
     -> Evaluator
-    -> Rules (Path Abs File)
-plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy groupName _ s e1 e2 = do
-    plotF <- pointsPlotForEvaluatorsPerExampleGroupPerStrategy groupName s e1 e2
+    -> Rules ()
+plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy plotF dataF groupName s e1 e2 =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
@@ -111,7 +114,6 @@ plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy groupName _ s e1 e2 = do
             , prettyIndication $ evaluatorIndication e1
             , prettyIndication $ evaluatorIndication e2
             ]
-    pure plotF
 
 plotsRulesForPointsPlotWithEvaluators ::
        Evaluator -> Evaluator -> Rules (Path Abs File)

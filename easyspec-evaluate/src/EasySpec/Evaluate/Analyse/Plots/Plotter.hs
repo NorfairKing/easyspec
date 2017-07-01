@@ -15,6 +15,7 @@ import System.FilePath (dropExtensions)
 import Development.Shake
 import Development.Shake.Path
 
+import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
@@ -38,6 +39,66 @@ plotRulesForPlotter p@Plotter {..} = do
                 plotF <- plotterEvaluatorGroupPlot p group
                 func plotF dataF group
                 pure plotF
+    perGroupEvaluatorPlots <-
+        rule plotterRulesEvaluatorGroupEvaluator $ \func -> do
+            forM ((,) <$> groups <*> evaluators) $ \(group, evaluator) -> do
+                dataF <- evaluatedFileForGroupEvaluator group evaluator
+                plotF <- plotterEvaluatorGroupEvaluatorPlot p group evaluator
+                func plotF dataF group evaluator
+                pure plotF
+    perGroupOrderedDistinct2EvaluatorPlots <-
+        rule plotterRulesEvaluatorGroupOrderedDistinct2Evaluator $ \func ->
+            fmap concat $
+            forM groups $ \group ->
+                forM (orderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
+                    dataF <- evaluatedFileForGroup group
+                    plotF <-
+                        plotterEvaluatorGroupOrderedDistinct2EvaluatorPlot
+                            p
+                            group
+                            e1
+                            e2
+                    func plotF dataF group e1 e2
+                    pure plotF
+    perGroupStrategyPlots <-
+        rule plotterRulesEvaluatorGroupStrategy $ \func ->
+            forM ((,) <$> groups <*> signatureInferenceStrategies) $ \(group, strategy) -> do
+                dataF <- evaluatedFileForGroupStrategy group strategy
+                plotF <- plotterEvaluatorGroupStrategyPlot p group strategy
+                func plotF dataF group strategy
+                pure plotF
+    perGroupStrategyEvaluatorPlots <-
+        rule plotterRulesEvaluatorGroupStrategyEvaluator $ \func -> do
+            forM
+                ((,,) <$> groups <*> signatureInferenceStrategies <*> evaluators) $ \(group, strategy, evaluator) -> do
+                dataF <-
+                    evaluatedFileForGroupStrategyEvaluator
+                        group
+                        strategy
+                        evaluator
+                plotF <-
+                    plotterEvaluatorGroupStrategyEvaluatorPlot
+                        p
+                        group
+                        strategy
+                        evaluator
+                func plotF dataF group strategy evaluator
+                pure plotF
+    perGroupStrategyOrderedDistinct2EvaluatorPlots <-
+        rule plotterRulesEvaluatorGroupStrategyOrderedDistinct2Evaluator $ \func ->
+            fmap concat $
+            forM ((,) <$> groups <*> signatureInferenceStrategies) $ \(group, strategy) ->
+                forM (orderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
+                    dataF <- evaluatedFileForGroupStrategy group strategy
+                    plotF <-
+                        plotterEvaluatorGroupStrategyOrderedDistinct2EvaluatorPlot
+                            p
+                            group
+                            strategy
+                            e1
+                            e2
+                    func plotF dataF group strategy e1 e2
+                    pure plotF
     perGroupExamplePlots <-
         rule plotterRulesEvaluatorGroupExample $ \func ->
             forM groupsAndExamples $ \(group, example) -> do
@@ -126,6 +187,11 @@ plotRulesForPlotter p@Plotter {..} = do
         needP
             (concat
                  [ perGroupPlots
+                 , perGroupEvaluatorPlots
+                 , perGroupOrderedDistinct2EvaluatorPlots
+                 , perGroupStrategyPlots
+                 , perGroupStrategyEvaluatorPlots
+                 , perGroupStrategyOrderedDistinct2EvaluatorPlots
                  , perGroupExamplePlots
                  , perGroupExampleEvaluatorPlots
                  , perGroupExampleOrderedDistinct2EvaluatorPlots
@@ -142,6 +208,11 @@ plotRulesForPlotter p@Plotter {..} = do
 data Plotter = Plotter
     { plotterRule :: String
     , plotterRulesEvaluatorGroup :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Rules ())
+    , plotterRulesEvaluatorGroupEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Evaluator -> Rules ())
+    , plotterRulesEvaluatorGroupOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Evaluator -> Evaluator -> Rules ())
+    , plotterRulesEvaluatorGroupStrategy :: Maybe (Path Abs File -> Path Abs File -> GroupName -> SignatureInferenceStrategy -> Rules ())
+    , plotterRulesEvaluatorGroupStrategyEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> SignatureInferenceStrategy -> Evaluator -> Rules ())
+    , plotterRulesEvaluatorGroupStrategyOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> SignatureInferenceStrategy -> Evaluator -> Evaluator -> Rules ())
     , plotterRulesEvaluatorGroupExample :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> Rules ())
     , plotterRulesEvaluatorGroupExampleEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> Evaluator -> Rules ())
     , plotterRulesEvaluatorGroupExampleOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> Evaluator -> Evaluator -> Rules ())
@@ -158,6 +229,11 @@ plotter name =
     Plotter
     { plotterRule = name
     , plotterRulesEvaluatorGroup = Nothing
+    , plotterRulesEvaluatorGroupEvaluator = Nothing
+    , plotterRulesEvaluatorGroupOrderedDistinct2Evaluator = Nothing
+    , plotterRulesEvaluatorGroupStrategy = Nothing
+    , plotterRulesEvaluatorGroupStrategyEvaluator = Nothing
+    , plotterRulesEvaluatorGroupStrategyOrderedDistinct2Evaluator = Nothing
     , plotterRulesEvaluatorGroupExample = Nothing
     , plotterRulesEvaluatorGroupExampleEvaluator = Nothing
     , plotterRulesEvaluatorGroupExampleOrderedDistinct2Evaluator = Nothing
@@ -169,6 +245,60 @@ plotter name =
 plotterEvaluatorGroupPlot ::
        MonadIO m => Plotter -> GroupName -> m (Path Abs File)
 plotterEvaluatorGroupPlot p g = plotterPlotFile p ["per-group"] [g]
+
+plotterEvaluatorGroupEvaluatorPlot ::
+       MonadIO m => Plotter -> GroupName -> Evaluator -> m (Path Abs File)
+plotterEvaluatorGroupEvaluatorPlot p g e1 =
+    plotterPlotFile p ["per-group-evaluator"] [g, evaluatorName e1]
+
+plotterEvaluatorGroupOrderedDistinct2EvaluatorPlot ::
+       MonadIO m
+    => Plotter
+    -> GroupName
+    -> Evaluator
+    -> Evaluator
+    -> m (Path Abs File)
+plotterEvaluatorGroupOrderedDistinct2EvaluatorPlot p g e1 e2 =
+    plotterPlotFile
+        p
+        ["per-group-ordered-distinct-evaluators"]
+        [g, evaluatorName e1, evaluatorName e2]
+
+plotterEvaluatorGroupStrategyPlot ::
+       MonadIO m
+    => Plotter
+    -> GroupName
+    -> SignatureInferenceStrategy
+    -> m (Path Abs File)
+plotterEvaluatorGroupStrategyPlot p g s =
+    plotterPlotFile p ["per-group-strategy"] [g, strategyName s]
+
+plotterEvaluatorGroupStrategyEvaluatorPlot ::
+       MonadIO m
+    => Plotter
+    -> GroupName
+    -> SignatureInferenceStrategy
+    -> Evaluator
+    -> m (Path Abs File)
+plotterEvaluatorGroupStrategyEvaluatorPlot p g s e1 =
+    plotterPlotFile
+        p
+        ["per-group-strategy-evaluator"]
+        [g, strategyName s, evaluatorName e1]
+
+plotterEvaluatorGroupStrategyOrderedDistinct2EvaluatorPlot ::
+       MonadIO m
+    => Plotter
+    -> GroupName
+    -> SignatureInferenceStrategy
+    -> Evaluator
+    -> Evaluator
+    -> m (Path Abs File)
+plotterEvaluatorGroupStrategyOrderedDistinct2EvaluatorPlot p g s e1 e2 =
+    plotterPlotFile
+        p
+        ["per-group-strategy-ordered-distinct-evaluators"]
+        [g, strategyName s, evaluatorName e1, evaluatorName e2]
 
 plotterEvaluatorGroupExamplePlot ::
        MonadIO m => Plotter -> GroupName -> Example -> m (Path Abs File)

@@ -35,13 +35,11 @@ plotsRule = "plots"
 plotsRules :: Rules ()
 plotsRules = do
     allDataPlotsFs <- plotsRulesForAllData
-    groupPlotsFs <-
-        concat <$> mapM (uncurry plotsRulesForExampleGroup) exampleGroups
-    plotsFs <- concat <$> mapM (uncurry plotsRulesForExample ) groupsAndExamples
+    plotsFs <- concat <$> mapM (uncurry plotsRulesForExample) groupsAndExamples
     correlatingPointsRule <- plotRulesForPlotter correlatingPointsPlotter
     plotsRule ~> do
         need [correlatingPointsRule]
-        needP (allDataPlotsFs ++ groupPlotsFs ++ plotsFs)
+        needP (allDataPlotsFs ++  plotsFs)
 
 plotsRulesForAllData :: Rules [Path Abs File]
 plotsRulesForAllData = do
@@ -54,34 +52,6 @@ plotsRulesForAllData = do
     oosfies <- plotsRulesDistributionDistributionOccurrencesInSameEquation
     dsofs <- plotsRulesDistributionDistributionSizeOfProperty
     pure $ lfs ++ pfs ++ bfs ++ dnrdfs ++ oosfies ++ dsofs
-
-plotsRulesForExampleGroup :: String -> [ES.InputSpec] -> Rules [Path Abs File]
-plotsRulesForExampleGroup groupName exs = do
-    glob <-
-        mapM
-            (uncurry $
-             plotsRulesForPointsPlotsWithGroupsOfExamples groupName exs)
-            (unorderedCombinationsWithoutSelfCombinations evaluators)
-    locs <-
-        concat <$>
-        mapM
-            (plotsRulesForExampleGroupAndStrategy groupName exs)
-            signatureInferenceStrategies
-    pure $ glob ++ locs
-
-plotsRulesForExampleGroupAndStrategy ::
-       String
-    -> [ES.InputSpec]
-    -> ES.SignatureInferenceStrategy
-    -> Rules [Path Abs File]
-plotsRulesForExampleGroupAndStrategy groupName exs strat =
-    mapM
-        (uncurry $
-         plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy
-             groupName
-             exs
-             strat)
-        (unorderedCombinationsWithoutSelfCombinations evaluators)
 
 plotsRulesForExample :: GroupName -> Example -> Rules [Path Abs File]
 plotsRulesForExample groupName is = do

@@ -10,6 +10,8 @@ import Import
 
 import Development.Shake
 
+
+import EasySpec.Evaluate.Analyse.Plots.BarsPerGroup
 import EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
 import EasySpec.Evaluate.Analyse.Plots.DistributionFromRawPlotter
 import EasySpec.Evaluate.Analyse.Plots.DistributionNrDifferentFunctions
@@ -31,6 +33,7 @@ plotsRules = do
             [ correlatingPointsPlotter
             , barPlotter
             , boxPlotter
+            ,barsPerGroupEvaluatorsPlotter
             , dfrgPlotter dfrgSizeOfProperty
             , dfrgPlotter dfrgNrDifferentFunctions
             , dfrgPlotter dfrgOccurrencesInAllEquations

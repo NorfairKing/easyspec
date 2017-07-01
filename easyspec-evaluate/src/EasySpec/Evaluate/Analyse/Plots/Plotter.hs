@@ -74,6 +74,20 @@ plotRulesForPlotter p@Plotter {..} = do
                             e2
                     func plotF dataF group e1 e2
                     pure plotF
+    perGroupUnorderedDistinct2EvaluatorPlots <-
+        rule plotterRulesGroupUnorderedDistinct2Evaluator $ \func ->
+            fmap concat $
+            forM groups $ \group ->
+                forM (unorderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
+                    dataF <- evaluatedFileForGroup group
+                    plotF <-
+                        plotterEvaluatorGroupUnorderedDistinct2EvaluatorPlot
+                            p
+                            group
+                            e1
+                            e2
+                    func plotF dataF group e1 e2
+                    pure plotF
     perGroupStrategyPlots <-
         rule plotterRulesGroupStrategy $ \func ->
             forM ((,) <$> groups <*> signatureInferenceStrategies) $ \(group, strategy) -> do
@@ -234,6 +248,7 @@ plotRulesForPlotter p@Plotter {..} = do
                  , perGroupPlots
                  , perGroupEvaluatorPlots
                  , perGroupOrderedDistinct2EvaluatorPlots
+                 , perGroupUnorderedDistinct2EvaluatorPlots
                  , perGroupStrategyPlots
                  , perGroupStrategyEvaluatorPlots
                  , perGroupStrategyOrderedDistinct2EvaluatorPlots
@@ -259,6 +274,7 @@ data Plotter = Plotter
     , plotterRulesGroup :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Rules ())
     , plotterRulesGroupEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Evaluator -> Rules ())
     , plotterRulesGroupOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Evaluator -> Evaluator -> Rules ())
+    , plotterRulesGroupUnorderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Evaluator -> Evaluator -> Rules ())
     , plotterRulesGroupStrategy :: Maybe (Path Abs File -> Path Abs File -> GroupName -> SignatureInferenceStrategy -> Rules ())
     , plotterRulesGroupStrategyEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> SignatureInferenceStrategy -> Evaluator -> Rules ())
     , plotterRulesGroupStrategyOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> SignatureInferenceStrategy -> Evaluator -> Evaluator -> Rules ())
@@ -284,6 +300,7 @@ plotter name =
     , plotterRulesGroup = Nothing
     , plotterRulesGroupEvaluator = Nothing
     , plotterRulesGroupOrderedDistinct2Evaluator = Nothing
+    , plotterRulesGroupUnorderedDistinct2Evaluator = Nothing
     , plotterRulesGroupStrategy = Nothing
     , plotterRulesGroupStrategyEvaluator = Nothing
     , plotterRulesGroupStrategyOrderedDistinct2Evaluator = Nothing
@@ -330,6 +347,19 @@ plotterEvaluatorGroupOrderedDistinct2EvaluatorPlot p g e1 e2 =
     plotterPlotFile
         p
         ["per-group-ordered-distinct-evaluators"]
+        [g, evaluatorName e1, evaluatorName e2]
+
+plotterEvaluatorGroupUnorderedDistinct2EvaluatorPlot ::
+       MonadIO m
+    => Plotter
+    -> GroupName
+    -> Evaluator
+    -> Evaluator
+    -> m (Path Abs File)
+plotterEvaluatorGroupUnorderedDistinct2EvaluatorPlot p g e1 e2 =
+    plotterPlotFile
+        p
+        ["per-group-unordered-distinct-evaluators"]
         [g, evaluatorName e1, evaluatorName e2]
 
 plotterEvaluatorGroupStrategyPlot ::

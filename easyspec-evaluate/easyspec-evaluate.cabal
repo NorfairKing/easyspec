@@ -28,16 +28,17 @@ library
         EasySpec.Evaluate.Analyse.Hackage
         EasySpec.Evaluate.Analyse.Hackage.TH
         EasySpec.Evaluate.Analyse.Plots
-        EasySpec.Evaluate.Analyse.Plots.Plotter
+        EasySpec.Evaluate.Analyse.Plots.BarsPerGroup
         EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
-        EasySpec.Evaluate.Analyse.Plots.Files
-        EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar
-        EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
         EasySpec.Evaluate.Analyse.Plots.DistributionFromRawPlotter
         EasySpec.Evaluate.Analyse.Plots.DistributionNrDifferentFunctions
-        EasySpec.Evaluate.Analyse.Plots.DistributionSizeOfProperty
-        EasySpec.Evaluate.Analyse.Plots.DistributionOccurrencesInSameEquation
         EasySpec.Evaluate.Analyse.Plots.DistributionOccurrencesInAllEquations
+        EasySpec.Evaluate.Analyse.Plots.DistributionOccurrencesInSameEquation
+        EasySpec.Evaluate.Analyse.Plots.DistributionSizeOfProperty
+        EasySpec.Evaluate.Analyse.Plots.Files
+        EasySpec.Evaluate.Analyse.Plots.Plotter
+        EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar
+        EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
         EasySpec.Evaluate.Analyse.R
         EasySpec.Evaluate.Analyse.Utils
         EasySpec.Evaluate.Build

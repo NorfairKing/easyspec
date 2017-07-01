@@ -28,7 +28,7 @@ rawDataFileFor ::
     -> SignatureInferenceStrategy
     -> m (Path Abs File)
 rawDataFileFor g e n s =
-        fileWithComponentsAndExtension
+    fileWithComponentsAndExtension
         ((</> $(mkRelDir "raw")) <$> dataDir)
         [g, exampleModule e, prettyPrint n]
         [strategyName s]
@@ -73,11 +73,11 @@ dataFilesForStrategy ::
        MonadIO m => ES.SignatureInferenceStrategy -> m [Path Abs File]
 dataFilesForStrategy strat =
     fmap concat $
-    forM exampleGroups $ \(groupName, exs) -> do
+    forM exampleGroups $ \(groupName, exs) ->
         fmap concat $
-            forM exs $ \ex -> do
-                names <- liftIO $ namesInSource ex
-                forM names $ \name -> dataFileFor groupName ex name strat
+        forM exs $ \ex -> do
+            names <- liftIO $ namesInSource ex
+            forM names $ \name -> dataFileFor groupName ex name strat
 
 dataFileForStrategy ::
        MonadIO m => ES.SignatureInferenceStrategy -> m (Path Abs File)

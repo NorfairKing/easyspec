@@ -30,8 +30,15 @@ averageDataRule = "average-data"
 
 averageDataRules :: Rules ()
 averageDataRules = do
-    fs <- concat <$> mapM (uncurry averageOverNamesPerStrategyForExampleRules) groupsAndExamples
-    fss <- mapM (uncurry averageOverNamesAndStrategiesForExampleRules) groupsAndExamples
+    fs <-
+        concat <$>
+        mapM
+            (uncurry averageOverNamesPerStrategyForExampleRules)
+            groupsAndExamples
+    fss <-
+        mapM
+            (uncurry averageOverNamesAndStrategiesForExampleRules)
+            groupsAndExamples
     averageDataRule ~> needP (fs ++ fss)
 
 averageOverNamesPerStrategyForExampleRules ::
@@ -74,7 +81,7 @@ averageOverNamesPerStrategyForExampleJSONRules groupName is = do
 
 averageOverNamesPerStrategyForExampleCSVRules ::
        GroupName -> Example -> Rules (Path Abs File)
-averageOverNamesPerStrategyForExampleCSVRules groupName is = do
+averageOverNamesPerStrategyForExampleCSVRules _ is = do
     avgcsvF <- averageOverNamesPerStrategyForExampleCSVFile is
     avgcsvF $%> do
         sf <- averageOverNamesPerStrategyForExampleJSONFile is

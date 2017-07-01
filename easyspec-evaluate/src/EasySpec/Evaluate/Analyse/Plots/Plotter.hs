@@ -33,7 +33,7 @@ import EasySpec.Evaluate.Types
 plotRulesForPlotter :: Plotter -> Rules String
 plotRulesForPlotter p@Plotter {..} = do
     perEvaluatorPlots <-
-        rule plotterRulesEvaluator $ \func -> do
+        rule plotterRulesEvaluator $ \func ->
             forM evaluators $ \evaluator -> do
                 dataF <- evaluatedFileForEvaluator evaluator
                 plotF <- plotterEvaluatorEvaluatorPlot p evaluator
@@ -54,7 +54,7 @@ plotRulesForPlotter p@Plotter {..} = do
                 func plotF dataF group
                 pure plotF
     perGroupEvaluatorPlots <-
-        rule plotterRulesGroupEvaluator $ \func -> do
+        rule plotterRulesGroupEvaluator $ \func ->
             forM ((,) <$> groups <*> evaluators) $ \(group, evaluator) -> do
                 dataF <- evaluatedFileForGroupEvaluator group evaluator
                 plotF <- plotterEvaluatorGroupEvaluatorPlot p group evaluator
@@ -82,7 +82,7 @@ plotRulesForPlotter p@Plotter {..} = do
                 func plotF dataF group strategy
                 pure plotF
     perGroupStrategyEvaluatorPlots <-
-        rule plotterRulesGroupStrategyEvaluator $ \func -> do
+        rule plotterRulesGroupStrategyEvaluator $ \func ->
             forM
                 ((,,) <$> groups <*> signatureInferenceStrategies <*> evaluators) $ \(group, strategy, evaluator) -> do
                 dataF <-
@@ -130,7 +130,7 @@ plotRulesForPlotter p@Plotter {..} = do
                 func plotF dataF group example name
                 pure plotF
     perGroupExampleEvaluatorPlots <-
-        rule plotterRulesGroupExampleEvaluator $ \func -> do
+        rule plotterRulesGroupExampleEvaluator $ \func ->
             forM groupExampleEvaluators $ \(group, example, evaluator) -> do
                 dataF <-
                     evaluatedFileForGroupExampleEvaluator
@@ -198,7 +198,7 @@ plotRulesForPlotter p@Plotter {..} = do
                         func plotF dataF group example name e1 e2
                         pure plotF
     rawGroupStrategyPlots <-
-        rule plotterRulesRawGroupStrategy $ \func -> do
+        rule plotterRulesRawGroupStrategy $ \func ->
             forM ((,) <$> groups <*> signatureInferenceStrategies) $ \(group, strategy) -> do
                 plotF <- plotterEvaluatorRawGroupStrategy p group strategy
                 func
@@ -211,7 +211,6 @@ plotRulesForPlotter p@Plotter {..} = do
         rule plotterRulesRawGroupExampleNameStrategy $ \func -> do
             quads <- groupsExamplesNamesAndStrategies
             forM quads $ \(group, example, name, strategy) -> do
-                dataF <- rawDataFileFor group example name strategy
                 plotF <-
                     plotterEvaluatorRawGroupExampleNameStrategy
                         p
@@ -270,7 +269,7 @@ data Plotter = Plotter
     , plotterRulesGroupExampleNameEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Rules ())
     , plotterRulesGroupExampleNameOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Evaluator -> Rules ())
     , plotterRulesRawGroupStrategy :: Maybe (Path Abs File -> Action [EvaluationInputPoint] -> GroupName -> SignatureInferenceStrategy -> Rules ())
-    , plotterRulesRawGroupExampleNameStrategy :: Maybe (Path Abs File ->  Action EvaluationInputPoint -> GroupName -> Example -> ExampleFunction -> SignatureInferenceStrategy -> Rules ())
+    , plotterRulesRawGroupExampleNameStrategy :: Maybe (Path Abs File -> Action EvaluationInputPoint -> GroupName -> Example -> ExampleFunction -> SignatureInferenceStrategy -> Rules ())
     }
 
 instance IsString Plotter where

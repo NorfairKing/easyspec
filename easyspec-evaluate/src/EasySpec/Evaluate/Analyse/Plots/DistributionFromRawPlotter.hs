@@ -21,9 +21,6 @@ import Development.Shake.Path
 
 import qualified EasySpec.Discover.Types as ES
 
-import EasySpec.Evaluate.Analyse.Common
-import EasySpec.Evaluate.Analyse.Data.Common
-import EasySpec.Evaluate.Analyse.Data.Content
 import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.Plots.Plotter
@@ -49,7 +46,8 @@ dfrgPlotter dfrg@DistributionFromRawGatherer {..} =
     }
 
 perGroupStrategy ::
-       (ToNamedRecord r, DefaultOrdered r) => DistributionFromRawGatherer r
+       (ToNamedRecord r, DefaultOrdered r)
+    => DistributionFromRawGatherer r
     -> Path Abs File
     -> Action [EvaluationInputPoint]
     -> GroupName

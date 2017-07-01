@@ -1,6 +1,4 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module EasySpec.Evaluate.Analyse.Plots.DistributionSizeOfProperty
@@ -9,19 +7,15 @@ module EasySpec.Evaluate.Analyse.Plots.DistributionSizeOfProperty
 
 import Import hiding (Alt)
 
-import Language.Haskell.Exts.Pretty (prettyPrint)
 import Language.Haskell.Exts.Syntax
 
 import Data.Csv
-
-import Development.Shake
 
 import qualified EasySpec.Discover.CodeUtils as ES
 import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Analyse.Plots.DistributionFromRawPlotter
 import EasySpec.Evaluate.Analyse.Plots.Files
-import EasySpec.Evaluate.Analyse.Plots.ResultsPlots
 import EasySpec.Evaluate.Types
 
 {-# ANN module ("HLint: ignore Use const" :: String) #-}

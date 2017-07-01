@@ -16,9 +16,8 @@ import EasySpec.Evaluate.Types
 import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
-import EasySpec.Evaluate.Analyse.Data.Files
-import EasySpec.Evaluate.Analyse.Plots.Plotter
 import EasySpec.Evaluate.Analyse.Plots.Files
+import EasySpec.Evaluate.Analyse.Plots.Plotter
 import EasySpec.Evaluate.Analyse.R
 
 boxPlotter :: Plotter
@@ -36,10 +35,9 @@ perExampleAndEvaluatorAverageBoxPlotFor ::
     -> Example
     -> Evaluator
     -> Rules ()
-perExampleAndEvaluatorAverageBoxPlotFor plotF dataF groupName is evaluator =
+perExampleAndEvaluatorAverageBoxPlotFor plotF dataF _ is evaluator =
     plotF $%> do
         dependOnEvaluator evaluator
-        dataF <- dataFileForExample groupName is
         needP [dataF]
         scriptF <- singleEvaluatorAverageBoxAnalysisScript
         rscript
@@ -57,7 +55,6 @@ perEvaluatorGlobalAverageBoxPlotFor ::
 perEvaluatorGlobalAverageBoxPlotFor plotF dataF evaluator =
     plotF $%> do
         dependOnEvaluator evaluator
-        dataF <- allDataFile
         needP [dataF]
         scriptF <- singleEvaluatorAverageBoxGlobalAnalysisScript
         rscript

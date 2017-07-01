@@ -163,4 +163,5 @@ type ExampleFunction = ES.EasyQName
 
 type SignatureInferenceStrategy = ES.SignatureInferenceStrategy
 
+strategyName :: SignatureInferenceStrategy -> String
 strategyName = ES.sigInfStratName

@@ -18,7 +18,6 @@ import EasySpec.Evaluate.Types
 import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
-import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.Plots.Plotter
 import EasySpec.Evaluate.Analyse.R
@@ -38,10 +37,9 @@ perExampleNameAndEvaluatorBarPlotFor ::
     -> ExampleFunction
     -> Evaluator
     -> Rules ()
-perExampleNameAndEvaluatorBarPlotFor plotFile dataFile groupName is name evaluator =
+perExampleNameAndEvaluatorBarPlotFor plotFile dataFile _ is name evaluator =
     plotFile $%> do
         dependOnEvaluator evaluator
-        dataFile <- dataFileForExampleAndName groupName is name
         singleEvaluatorBarScript <- singleEvaluatorBarAnalysisScript
         needP [dataFile]
         rscript

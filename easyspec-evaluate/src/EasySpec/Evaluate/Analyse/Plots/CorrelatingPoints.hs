@@ -22,16 +22,17 @@ import EasySpec.Evaluate.Types
 import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
-import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.Plots.Plotter
 import EasySpec.Evaluate.Analyse.R
 
+{-# ANN module ("HLint: ignore Reduce duplication" :: String) #-}
+
 correlatingPointsPlotter :: Plotter
 correlatingPointsPlotter =
     "correlating-points"
-    { plotterRulesOrderedDistinct2Evaluator =Just
-          plotsRulesForPointsPlotWithEvaluators
+    { plotterRulesOrderedDistinct2Evaluator =
+          Just plotsRulesForPointsPlotWithEvaluators
     , plotterRulesGroupOrderedDistinct2Evaluator =
           Just plotsRulesForPointsPlotsWithGroupsOfExamples
     , plotterRulesGroupStrategyOrderedDistinct2Evaluator =
@@ -48,7 +49,7 @@ plotsRulesForPointsPlotWithEvaluatorsPerExample ::
     -> Evaluator
     -> Evaluator
     -> Rules ()
-plotsRulesForPointsPlotWithEvaluatorsPerExample plotF dataF groupName is e1 e2 =
+plotsRulesForPointsPlotWithEvaluatorsPerExample plotF dataF _ is e1 e2 =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
@@ -76,7 +77,6 @@ plotsRulesForPointsPlotsWithGroupsOfExamples plotF dataF groupName e1 e2 =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
-        dataF <- dataFileForExampleGroup groupName
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
         rscript
@@ -102,7 +102,6 @@ plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy plotF dataF groupName s 
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
-        dataF <- dataFileForExampleGroupAndStrategy groupName s
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
         rscript
@@ -123,7 +122,6 @@ plotsRulesForPointsPlotWithEvaluators plotF dataF e1 e2 =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
-        dataF <- allDataFile
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
         rscript
@@ -139,4 +137,3 @@ plotsRulesForPointsPlotWithEvaluators plotF dataF e1 e2 =
 
 pointsPlotAnalysisScript :: MonadIO m => m (Path Abs File)
 pointsPlotAnalysisScript = scriptFile "points.r"
-

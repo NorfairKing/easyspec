@@ -7,7 +7,6 @@ module EasySpec.Evaluate.Analyse.Plots.Files where
 
 import Import
 
-import Language.Haskell.Exts.Pretty (prettyPrint)
 import System.FilePath (dropExtensions)
 
 import qualified EasySpec.Discover.Types as ES
@@ -28,13 +27,6 @@ scriptFile fname = liftIO $ resolveFile' $ "rscripts/" ++ fname
 pngPlotFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
 pngPlotFileWithComponents = fileInDirWithExtensionAndComponents plotsDir "png"
-
-linesPlotForEvaluator :: MonadIO m => Evaluator -> m (Path Abs File)
-linesPlotForEvaluator ev =
-    pngPlotFileWithComponents $(mkRelFile "lines/lines-plot") [evaluatorName ev]
-
-linesPlotAnalysisScript :: MonadIO m => m (Path Abs File)
-linesPlotAnalysisScript = scriptFile "lines.r"
 
 singleEvaluatorAverageBoxPlotFileForExample ::
        MonadIO m => ES.InputSpec -> Evaluator -> m (Path Abs File)

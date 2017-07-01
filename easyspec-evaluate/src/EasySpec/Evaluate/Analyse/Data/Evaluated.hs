@@ -95,7 +95,16 @@ evaluatedDataRulesForStrategyEvaluator strategy evaluator =
 evaluatedDataRulesForGroupStrategyEvaluator ::
        GroupName -> SignatureInferenceStrategy -> Evaluator -> Rules ()
 evaluatedDataRulesForGroupStrategyEvaluator groupName strategy evaluator =
-    combine (evaluatedFileForGroupStrategyEvaluator groupName strategy evaluator) $ mapM (\n->evaluatedFileForGroupExampleStrategyEvaluator groupName n strategy evaluator)(groupExamples groupName)
+    combine
+        (evaluatedFileForGroupStrategyEvaluator groupName strategy evaluator) $
+    mapM
+        (\n ->
+             evaluatedFileForGroupExampleStrategyEvaluator
+                 groupName
+                 n
+                 strategy
+                 evaluator)
+        (groupExamples groupName)
 
 evaluatedDataRulesForGroupExample :: GroupName -> Example -> Rules ()
 evaluatedDataRulesForGroupExample groupName example =
@@ -229,7 +238,7 @@ evaluatedDataRulesForGroupExampleNameStrategyEvaluator groupName example name st
                 , "with evaluator"
                 , evaluatorName evaluator
                 ]
-        writeCSV csvF $ [evaluationInputPointCsvLine ip evaluator]
+        writeCSV csvF [evaluationInputPointCsvLine ip evaluator]
 
 combine :: Rules (Path Abs File) -> Rules [Path Abs File] -> Rules ()
 combine combFGen csvFsGen = do

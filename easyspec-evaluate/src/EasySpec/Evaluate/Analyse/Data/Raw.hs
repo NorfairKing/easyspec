@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
@@ -17,11 +16,8 @@ import Development.Shake.Path
 import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Evaluate
-import EasySpec.Evaluate.Evaluate.Evaluator
-import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Types
 
-import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Utils
 
@@ -32,7 +28,8 @@ rawDataRule = "raw-data"
 
 rawDataRules :: Resource -> Rules ()
 rawDataRules ghciResource = do
-    datFs <- groupsExamplesNamesAndStrategies >>=
+    datFs <-
+        groupsExamplesNamesAndStrategies >>=
         mapM (uncurry4 $ rawDataRulesForGroupFileNameAndStrat ghciResource)
     rawDataRule ~> needP datFs
 

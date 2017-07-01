@@ -1,6 +1,4 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module EasySpec.Evaluate.Analyse.Plots.DistributionOccurrencesInSameEquation
@@ -9,19 +7,14 @@ module EasySpec.Evaluate.Analyse.Plots.DistributionOccurrencesInSameEquation
 
 import Import
 
-import Language.Haskell.Exts.Pretty (prettyPrint)
-
 import Data.Csv
-
-import Development.Shake
 
 import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.Types as ES
 import qualified EasySpec.Discover.Utils as ES
 
-import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.Plots.DistributionFromRawPlotter
-import EasySpec.Evaluate.Analyse.Plots.ResultsPlots
+import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Types
 
 dfrgOccurrencesInSameEquation :: DistributionFromRawGatherer Occurrences

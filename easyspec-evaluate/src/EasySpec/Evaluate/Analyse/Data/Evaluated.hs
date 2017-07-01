@@ -34,7 +34,7 @@ evaluatedDataRules = do
         (,) <$> groups <*> evaluators
     mapM_ (uncurry evaluatedDataRulesForStrategyEvaluator) $
         (,) <$> signatureInferenceStrategies <*> evaluators
-    mapM_ (uncurry3 evaluatedFileForGroupStrategyEvaluator) $
+    mapM_ (uncurry3 evaluatedDataRulesForGroupStrategyEvaluator) $
         (,,) <$> groups <*> signatureInferenceStrategies <*> evaluators
     mapM_ (uncurry evaluatedDataRulesForGroupExample) groupsAndExamples
     mapM_ (uncurry3 evaluatedDataRulesForGroupExampleStrategy) $
@@ -91,6 +91,11 @@ evaluatedDataRulesForStrategyEvaluator strategy evaluator =
     mapM
         (\g -> evaluatedFileForGroupStrategyEvaluator g strategy evaluator)
         groups
+
+evaluatedDataRulesForGroupStrategyEvaluator ::
+       GroupName -> SignatureInferenceStrategy -> Evaluator -> Rules ()
+evaluatedDataRulesForGroupStrategyEvaluator groupName strategy evaluator =
+    combine (evaluatedFileForGroupStrategyEvaluator groupName strategy evaluator) $ mapM (\n->evaluatedFileForGroupExampleStrategyEvaluator groupName n strategy evaluator)(groupExamples groupName)
 
 evaluatedDataRulesForGroupExample :: GroupName -> Example -> Rules ()
 evaluatedDataRulesForGroupExample groupName example =

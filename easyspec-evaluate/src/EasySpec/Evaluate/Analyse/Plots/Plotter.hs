@@ -33,21 +33,21 @@ import EasySpec.Evaluate.Types
 plotRulesForPlotter :: Plotter -> Rules String
 plotRulesForPlotter p@Plotter {..} = do
     perGroupPlots <-
-        rule plotterRulesEvaluatorGroup $ \func ->
+        rule plotterRulesGroup $ \func ->
             forM groups $ \group -> do
                 dataF <- dataFileForExampleGroup group
                 plotF <- plotterEvaluatorGroupPlot p group
                 func plotF dataF group
                 pure plotF
     perGroupEvaluatorPlots <-
-        rule plotterRulesEvaluatorGroupEvaluator $ \func -> do
+        rule plotterRulesGroupEvaluator $ \func -> do
             forM ((,) <$> groups <*> evaluators) $ \(group, evaluator) -> do
                 dataF <- evaluatedFileForGroupEvaluator group evaluator
                 plotF <- plotterEvaluatorGroupEvaluatorPlot p group evaluator
                 func plotF dataF group evaluator
                 pure plotF
     perGroupOrderedDistinct2EvaluatorPlots <-
-        rule plotterRulesEvaluatorGroupOrderedDistinct2Evaluator $ \func ->
+        rule plotterRulesGroupOrderedDistinct2Evaluator $ \func ->
             fmap concat $
             forM groups $ \group ->
                 forM (orderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
@@ -61,14 +61,14 @@ plotRulesForPlotter p@Plotter {..} = do
                     func plotF dataF group e1 e2
                     pure plotF
     perGroupStrategyPlots <-
-        rule plotterRulesEvaluatorGroupStrategy $ \func ->
+        rule plotterRulesGroupStrategy $ \func ->
             forM ((,) <$> groups <*> signatureInferenceStrategies) $ \(group, strategy) -> do
                 dataF <- evaluatedFileForGroupStrategy group strategy
                 plotF <- plotterEvaluatorGroupStrategyPlot p group strategy
                 func plotF dataF group strategy
                 pure plotF
     perGroupStrategyEvaluatorPlots <-
-        rule plotterRulesEvaluatorGroupStrategyEvaluator $ \func -> do
+        rule plotterRulesGroupStrategyEvaluator $ \func -> do
             forM
                 ((,,) <$> groups <*> signatureInferenceStrategies <*> evaluators) $ \(group, strategy, evaluator) -> do
                 dataF <-
@@ -85,7 +85,7 @@ plotRulesForPlotter p@Plotter {..} = do
                 func plotF dataF group strategy evaluator
                 pure plotF
     perGroupStrategyOrderedDistinct2EvaluatorPlots <-
-        rule plotterRulesEvaluatorGroupStrategyOrderedDistinct2Evaluator $ \func ->
+        rule plotterRulesGroupStrategyOrderedDistinct2Evaluator $ \func ->
             fmap concat $
             forM ((,) <$> groups <*> signatureInferenceStrategies) $ \(group, strategy) ->
                 forM (orderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
@@ -100,14 +100,14 @@ plotRulesForPlotter p@Plotter {..} = do
                     func plotF dataF group strategy e1 e2
                     pure plotF
     perGroupExamplePlots <-
-        rule plotterRulesEvaluatorGroupExample $ \func ->
+        rule plotterRulesGroupExample $ \func ->
             forM groupsAndExamples $ \(group, example) -> do
                 dataF <- dataFileForExample group example
                 plotF <- plotterEvaluatorGroupExamplePlot p group example
                 func plotF dataF group example
                 pure plotF
     perGroupExampleNamePlots <-
-        rule plotterRulesEvaluatorGroupExampleName $ \func -> do
+        rule plotterRulesGroupExampleName $ \func -> do
             trips <- groupsExamplesAndNames
             forM trips $ \(group, example, name) -> do
                 dataF <- dataFileForExampleAndName group example name
@@ -116,7 +116,7 @@ plotRulesForPlotter p@Plotter {..} = do
                 func plotF dataF group example name
                 pure plotF
     perGroupExampleEvaluatorPlots <-
-        rule plotterRulesEvaluatorGroupExampleEvaluator $ \func -> do
+        rule plotterRulesGroupExampleEvaluator $ \func -> do
             forM groupExampleEvaluators $ \(group, example, evaluator) -> do
                 dataF <-
                     evaluatedFileForGroupExampleEvaluator
@@ -132,7 +132,7 @@ plotRulesForPlotter p@Plotter {..} = do
                 func plotF dataF group example evaluator
                 pure plotF
     perGroupExampleOrderedDistinct2EvaluatorPlots <-
-        rule plotterRulesEvaluatorGroupExampleOrderedDistinct2Evaluator $ \func ->
+        rule plotterRulesGroupExampleOrderedDistinct2Evaluator $ \func ->
             fmap concat $
             forM groupsAndExamples $ \(group, example) ->
                 forM (orderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
@@ -147,7 +147,7 @@ plotRulesForPlotter p@Plotter {..} = do
                     func plotF dataF group example e1 e2
                     pure plotF
     perGroupExampleNameEvaluatorPlots <-
-        rule plotterRulesEvaluatorGroupExampleNameEvaluator $ \func -> do
+        rule plotterRulesGroupExampleNameEvaluator $ \func -> do
             quads <- groupExamplesNamesAndEvaluators
             forM quads $ \(group, example, name, evaluator) -> do
                 dataF <-
@@ -166,7 +166,7 @@ plotRulesForPlotter p@Plotter {..} = do
                 func plotF dataF group example name evaluator
                 pure plotF
     perGroupExampleNameOrderedDistinct2EvaluatorPlots <-
-        rule plotterRulesEvaluatorGroupExampleNameOrderedDistinct2Evaluator $ \func -> do
+        rule plotterRulesGroupExampleNameOrderedDistinct2Evaluator $ \func -> do
             trips <- groupsExamplesAndNames
             fmap concat $
                 forM trips $ \(group, example, name) ->
@@ -207,18 +207,18 @@ plotRulesForPlotter p@Plotter {..} = do
 
 data Plotter = Plotter
     { plotterRule :: String
-    , plotterRulesEvaluatorGroup :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Rules ())
-    , plotterRulesEvaluatorGroupEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Evaluator -> Rules ())
-    , plotterRulesEvaluatorGroupOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Evaluator -> Evaluator -> Rules ())
-    , plotterRulesEvaluatorGroupStrategy :: Maybe (Path Abs File -> Path Abs File -> GroupName -> SignatureInferenceStrategy -> Rules ())
-    , plotterRulesEvaluatorGroupStrategyEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> SignatureInferenceStrategy -> Evaluator -> Rules ())
-    , plotterRulesEvaluatorGroupStrategyOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> SignatureInferenceStrategy -> Evaluator -> Evaluator -> Rules ())
-    , plotterRulesEvaluatorGroupExample :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> Rules ())
-    , plotterRulesEvaluatorGroupExampleEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> Evaluator -> Rules ())
-    , plotterRulesEvaluatorGroupExampleOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> Evaluator -> Evaluator -> Rules ())
-    , plotterRulesEvaluatorGroupExampleName :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Rules ())
-    , plotterRulesEvaluatorGroupExampleNameEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Rules ())
-    , plotterRulesEvaluatorGroupExampleNameOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Evaluator -> Rules ())
+    , plotterRulesGroup :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Rules ())
+    , plotterRulesGroupEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Evaluator -> Rules ())
+    , plotterRulesGroupOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Evaluator -> Evaluator -> Rules ())
+    , plotterRulesGroupStrategy :: Maybe (Path Abs File -> Path Abs File -> GroupName -> SignatureInferenceStrategy -> Rules ())
+    , plotterRulesGroupStrategyEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> SignatureInferenceStrategy -> Evaluator -> Rules ())
+    , plotterRulesGroupStrategyOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> SignatureInferenceStrategy -> Evaluator -> Evaluator -> Rules ())
+    , plotterRulesGroupExample :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> Rules ())
+    , plotterRulesGroupExampleEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> Evaluator -> Rules ())
+    , plotterRulesGroupExampleOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> Evaluator -> Evaluator -> Rules ())
+    , plotterRulesGroupExampleName :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Rules ())
+    , plotterRulesGroupExampleNameEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Rules ())
+    , plotterRulesGroupExampleNameOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Evaluator -> Rules ())
     }
 
 instance IsString Plotter where
@@ -228,18 +228,18 @@ plotter :: String -> Plotter
 plotter name =
     Plotter
     { plotterRule = name
-    , plotterRulesEvaluatorGroup = Nothing
-    , plotterRulesEvaluatorGroupEvaluator = Nothing
-    , plotterRulesEvaluatorGroupOrderedDistinct2Evaluator = Nothing
-    , plotterRulesEvaluatorGroupStrategy = Nothing
-    , plotterRulesEvaluatorGroupStrategyEvaluator = Nothing
-    , plotterRulesEvaluatorGroupStrategyOrderedDistinct2Evaluator = Nothing
-    , plotterRulesEvaluatorGroupExample = Nothing
-    , plotterRulesEvaluatorGroupExampleEvaluator = Nothing
-    , plotterRulesEvaluatorGroupExampleOrderedDistinct2Evaluator = Nothing
-    , plotterRulesEvaluatorGroupExampleName = Nothing
-    , plotterRulesEvaluatorGroupExampleNameEvaluator = Nothing
-    , plotterRulesEvaluatorGroupExampleNameOrderedDistinct2Evaluator = Nothing
+    , plotterRulesGroup = Nothing
+    , plotterRulesGroupEvaluator = Nothing
+    , plotterRulesGroupOrderedDistinct2Evaluator = Nothing
+    , plotterRulesGroupStrategy = Nothing
+    , plotterRulesGroupStrategyEvaluator = Nothing
+    , plotterRulesGroupStrategyOrderedDistinct2Evaluator = Nothing
+    , plotterRulesGroupExample = Nothing
+    , plotterRulesGroupExampleEvaluator = Nothing
+    , plotterRulesGroupExampleOrderedDistinct2Evaluator = Nothing
+    , plotterRulesGroupExampleName = Nothing
+    , plotterRulesGroupExampleNameEvaluator = Nothing
+    , plotterRulesGroupExampleNameOrderedDistinct2Evaluator = Nothing
     }
 
 plotterEvaluatorGroupPlot ::

@@ -30,11 +30,11 @@ import EasySpec.Evaluate.Analyse.R
 correlatingPointsPlotter :: Plotter
 correlatingPointsPlotter =
     "correlating-points"
-    { plotterRulesEvaluatorGroupOrderedDistinct2Evaluator =
+    { plotterRulesGroupOrderedDistinct2Evaluator =
           Just plotsRulesForPointsPlotsWithGroupsOfExamples
-    , plotterRulesEvaluatorGroupStrategyOrderedDistinct2Evaluator =
+    , plotterRulesGroupStrategyOrderedDistinct2Evaluator =
           Just plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy
-    , plotterRulesEvaluatorGroupExampleOrderedDistinct2Evaluator =
+    , plotterRulesGroupExampleOrderedDistinct2Evaluator =
           Just plotsRulesForPointsPlotWithEvaluatorsPerExample
     }
 

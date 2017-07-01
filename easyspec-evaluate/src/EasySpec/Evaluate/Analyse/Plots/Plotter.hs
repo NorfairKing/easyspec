@@ -32,6 +32,20 @@ import EasySpec.Evaluate.Types
 -- Evaluator
 plotRulesForPlotter :: Plotter -> Rules String
 plotRulesForPlotter p@Plotter {..} = do
+    perEvaluatorPlots <-
+        rule plotterRulesEvaluator $ \func -> do
+            forM evaluators $ \evaluator -> do
+                dataF <- evaluatedFileForEvaluator evaluator
+                plotF <- plotterEvaluatorEvaluatorPlot p evaluator
+                func plotF dataF evaluator
+                pure plotF
+    perOrderedDistinct2EvaluatorPlots <-
+        rule plotterRulesOrderedDistinct2Evaluator $ \func ->
+            forM (orderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
+                dataF <- evaluatedFileForAllData
+                plotF <- plotterEvaluatorOrderedDistinct2EvaluatorPlot p e1 e2
+                func plotF dataF e1 e2
+                pure plotF
     perGroupPlots <-
         rule plotterRulesGroup $ \func ->
             forM groups $ \group -> do
@@ -186,7 +200,9 @@ plotRulesForPlotter p@Plotter {..} = do
     plotterRule ~>
         needP
             (concat
-                 [ perGroupPlots
+                 [ perEvaluatorPlots
+                 , perOrderedDistinct2EvaluatorPlots
+                 , perGroupPlots
                  , perGroupEvaluatorPlots
                  , perGroupOrderedDistinct2EvaluatorPlots
                  , perGroupStrategyPlots
@@ -207,6 +223,8 @@ plotRulesForPlotter p@Plotter {..} = do
 
 data Plotter = Plotter
     { plotterRule :: String
+    , plotterRulesEvaluator :: Maybe (Path Abs File -> Path Abs File -> Evaluator -> Rules ())
+    , plotterRulesOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> Evaluator -> Evaluator -> Rules ())
     , plotterRulesGroup :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Rules ())
     , plotterRulesGroupEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Evaluator -> Rules ())
     , plotterRulesGroupOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Evaluator -> Evaluator -> Rules ())
@@ -228,6 +246,8 @@ plotter :: String -> Plotter
 plotter name =
     Plotter
     { plotterRule = name
+    , plotterRulesEvaluator = Nothing
+    , plotterRulesOrderedDistinct2Evaluator = Nothing
     , plotterRulesGroup = Nothing
     , plotterRulesGroupEvaluator = Nothing
     , plotterRulesGroupOrderedDistinct2Evaluator = Nothing
@@ -241,6 +261,19 @@ plotter name =
     , plotterRulesGroupExampleNameEvaluator = Nothing
     , plotterRulesGroupExampleNameOrderedDistinct2Evaluator = Nothing
     }
+
+plotterEvaluatorEvaluatorPlot ::
+       MonadIO m => Plotter -> Evaluator -> m (Path Abs File)
+plotterEvaluatorEvaluatorPlot p e1 =
+    plotterPlotFile p ["per-evaluator"] [evaluatorName e1]
+
+plotterEvaluatorOrderedDistinct2EvaluatorPlot ::
+       MonadIO m => Plotter -> Evaluator -> Evaluator -> m (Path Abs File)
+plotterEvaluatorOrderedDistinct2EvaluatorPlot p e1 e2 =
+    plotterPlotFile
+        p
+        ["per-ordered-distinct-evaluators"]
+        [evaluatorName e1, evaluatorName e2]
 
 plotterEvaluatorGroupPlot ::
        MonadIO m => Plotter -> GroupName -> m (Path Abs File)

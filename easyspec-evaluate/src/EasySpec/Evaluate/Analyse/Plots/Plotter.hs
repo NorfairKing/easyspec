@@ -10,13 +10,13 @@ import Import hiding (group)
 
 import Data.String
 import Language.Haskell.Exts.Pretty (prettyPrint)
-import System.FilePath (dropExtensions)
 
 import Development.Shake
 import Development.Shake.Path
 
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Common
+import EasySpec.Evaluate.Analyse.Data.Content
 import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.Utils
@@ -197,6 +197,16 @@ plotRulesForPlotter p@Plotter {..} = do
                                 e2
                         func plotF dataF group example name e1 e2
                         pure plotF
+    rawGroupStrategyPlots <-
+        rule plotterRulesRawGroupStrategy $ \func -> do
+            forM ((,) <$> groups <*> signatureInferenceStrategies) $ \(group, strategy) -> do
+                plotF <- plotterEvaluatorRawGroupStrategy p group strategy
+                func
+                    plotF
+                    (rawDataFromGroupStrategy group strategy)
+                    group
+                    strategy
+                pure plotF
     rawGroupExampleNameStrategyPlots <-
         rule plotterRulesRawGroupExampleNameStrategy $ \func -> do
             quads <- groupsExamplesNamesAndStrategies
@@ -209,7 +219,13 @@ plotRulesForPlotter p@Plotter {..} = do
                         example
                         name
                         strategy
-                func plotF dataF group example name strategy
+                func
+                    plotF
+                    (rawDataFrom group example name strategy)
+                    group
+                    example
+                    name
+                    strategy
                 pure plotF
     plotterRule ~>
         needP
@@ -228,7 +244,8 @@ plotRulesForPlotter p@Plotter {..} = do
                  , perGroupExampleNamePlots
                  , perGroupExampleNameEvaluatorPlots
                  , perGroupExampleNameOrderedDistinct2EvaluatorPlots
-                , rawGroupExampleNameStrategyPlots
+                 , rawGroupStrategyPlots
+                 , rawGroupExampleNameStrategyPlots
                  ])
     pure plotterRule
   where
@@ -252,7 +269,8 @@ data Plotter = Plotter
     , plotterRulesGroupExampleName :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Rules ())
     , plotterRulesGroupExampleNameEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Rules ())
     , plotterRulesGroupExampleNameOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Evaluator -> Rules ())
-    , plotterRulesRawGroupExampleNameStrategy :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> SignatureInferenceStrategy -> Rules ())
+    , plotterRulesRawGroupStrategy :: Maybe (Path Abs File -> Action [EvaluationInputPoint] -> GroupName -> SignatureInferenceStrategy -> Rules ())
+    , plotterRulesRawGroupExampleNameStrategy :: Maybe (Path Abs File ->  Action EvaluationInputPoint -> GroupName -> Example -> ExampleFunction -> SignatureInferenceStrategy -> Rules ())
     }
 
 instance IsString Plotter where
@@ -276,6 +294,7 @@ plotter name =
     , plotterRulesGroupExampleName = Nothing
     , plotterRulesGroupExampleNameEvaluator = Nothing
     , plotterRulesGroupExampleNameOrderedDistinct2Evaluator = Nothing
+    , plotterRulesRawGroupStrategy = Nothing
     , plotterRulesRawGroupExampleNameStrategy = Nothing
     }
 
@@ -437,6 +456,15 @@ plotterEvaluatorRawGroupExampleNameStrategy p g e n s =
         p
         ["raw-per-group-example-name-strategy"]
         [g, exampleModule e, prettyPrint n, strategyName s]
+
+plotterEvaluatorRawGroupStrategy ::
+       MonadIO m
+    => Plotter
+    -> GroupName
+    -> SignatureInferenceStrategy
+    -> m (Path Abs File)
+plotterEvaluatorRawGroupStrategy p g s =
+    plotterPlotFile p ["raw-per-group-strategy"] [g, strategyName s]
 
 plotterPlotFile ::
        MonadIO m => Plotter -> [String] -> [String] -> m (Path Abs File)

@@ -39,6 +39,15 @@ rawDataFromExample groupName e =
             (uncurry $ rawDataFileFor groupName e)
             ((,) <$> names <*> signatureInferenceStrategies)
 
+rawDataFromGroupStrategy ::
+       GroupName -> SignatureInferenceStrategy -> Action [EvaluationInputPoint]
+rawDataFromGroupStrategy g s =
+    rawDataFromWith $
+    fmap concat $
+    forM (groupExamples g) $ \example -> do
+        names <- liftIO $ namesInSource example
+        mapM (\n -> rawDataFileFor g example n s) names
+
 rawDataFromStrategy ::
        ES.SignatureInferenceStrategy -> Action [EvaluationInputPoint]
 rawDataFromStrategy s =
@@ -53,7 +62,7 @@ rawDataFromWith :: Action [Path Abs File] -> Action [EvaluationInputPoint]
 rawDataFromWith getFilePaths = do
     dataFiles <- getFilePaths
     needP dataFiles
-    concat <$> mapM readJSON dataFiles
+    mapM readJSON dataFiles
 
 dataFrom ::
        GroupName
@@ -65,7 +74,7 @@ dataFrom groupName is name strat =
     dataFromWith $ dataFileFor groupName is name strat
 
 dataFromExampleAndName ::
-       GroupName -> Example ->ExampleFunction  -> Action [EvaluatorCsvLine]
+       GroupName -> Example -> ExampleFunction -> Action [EvaluatorCsvLine]
 dataFromExampleAndName groupName is name =
     dataFromWith $ dataFileForExampleAndName groupName is name
 

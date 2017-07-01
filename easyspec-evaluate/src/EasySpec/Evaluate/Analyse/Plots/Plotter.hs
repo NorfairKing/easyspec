@@ -197,6 +197,20 @@ plotRulesForPlotter p@Plotter {..} = do
                                 e2
                         func plotF dataF group example name e1 e2
                         pure plotF
+    rawGroupExampleNameStrategyPlots <-
+        rule plotterRulesRawGroupExampleNameStrategy $ \func -> do
+            quads <- groupsExamplesNamesAndStrategies
+            forM quads $ \(group, example, name, strategy) -> do
+                dataF <- rawDataFileFor group example name strategy
+                plotF <-
+                    plotterEvaluatorRawGroupExampleNameStrategy
+                        p
+                        group
+                        example
+                        name
+                        strategy
+                func plotF dataF group example name strategy
+                pure plotF
     plotterRule ~>
         needP
             (concat
@@ -214,6 +228,7 @@ plotRulesForPlotter p@Plotter {..} = do
                  , perGroupExampleNamePlots
                  , perGroupExampleNameEvaluatorPlots
                  , perGroupExampleNameOrderedDistinct2EvaluatorPlots
+                , rawGroupExampleNameStrategyPlots
                  ])
     pure plotterRule
   where
@@ -237,6 +252,7 @@ data Plotter = Plotter
     , plotterRulesGroupExampleName :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Rules ())
     , plotterRulesGroupExampleNameEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Rules ())
     , plotterRulesGroupExampleNameOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Evaluator -> Rules ())
+    , plotterRulesRawGroupExampleNameStrategy :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> SignatureInferenceStrategy -> Rules ())
     }
 
 instance IsString Plotter where
@@ -260,6 +276,7 @@ plotter name =
     , plotterRulesGroupExampleName = Nothing
     , plotterRulesGroupExampleNameEvaluator = Nothing
     , plotterRulesGroupExampleNameOrderedDistinct2Evaluator = Nothing
+    , plotterRulesRawGroupExampleNameStrategy = Nothing
     }
 
 plotterEvaluatorEvaluatorPlot ::
@@ -406,6 +423,20 @@ plotterEvaluatorGroupExampleNameOrderedDistinct2EvaluatorPlot p g e n e1 e2 =
         p
         ["per-group-example-name-ordered-distinct-evaluators"]
         [g, exampleModule e, prettyPrint n, evaluatorName e1, evaluatorName e2]
+
+plotterEvaluatorRawGroupExampleNameStrategy ::
+       MonadIO m
+    => Plotter
+    -> GroupName
+    -> Example
+    -> ExampleFunction
+    -> SignatureInferenceStrategy
+    -> m (Path Abs File)
+plotterEvaluatorRawGroupExampleNameStrategy p g e n s =
+    plotterPlotFile
+        p
+        ["raw-per-group-example-name-strategy"]
+        [g, exampleModule e, prettyPrint n, strategyName s]
 
 plotterPlotFile ::
        MonadIO m => Plotter -> [String] -> [String] -> m (Path Abs File)

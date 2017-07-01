@@ -20,11 +20,11 @@ import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
+import EasySpec.Evaluate.Analyse.Plots.DistributionFromRawPlotter
 import EasySpec.Evaluate.Analyse.Plots.DistributionNrDifferentFunctions
 import EasySpec.Evaluate.Analyse.Plots.DistributionOccurrencesInSameEquation
 import EasySpec.Evaluate.Analyse.Plots.DistributionSizeOfProperty
 import EasySpec.Evaluate.Analyse.Plots.Plotter
-import EasySpec.Evaluate.Analyse.Plots.RelativeLines
 import EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar
 import EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
 import EasySpec.Evaluate.Analyse.Utils
@@ -35,11 +35,16 @@ plotsRule = "plots"
 plotsRules :: Rules ()
 plotsRules = do
     allDataPlotsFs <- plotsRulesForAllData
-    correlatingPointsRule <- plotRulesForPlotter correlatingPointsPlotter
-    barPlotsRule <- plotRulesForPlotter barPlotter
-    boxPlotsRule <- plotRulesForPlotter boxPlotter
+    rules <-
+        mapM
+            plotRulesForPlotter
+            [ correlatingPointsPlotter
+            , barPlotter
+            , boxPlotter
+            , dfrgPlotter dfrgSizeOfProperty
+            ]
     plotsRule ~> do
-        need [correlatingPointsRule, barPlotsRule]
+        need rules
         needP allDataPlotsFs
 
 plotsRulesForAllData :: Rules [Path Abs File]
@@ -47,4 +52,4 @@ plotsRulesForAllData = do
     dnrdfs <- plotsRulesDistributionNrDifferentFunctions
     oosfies <- plotsRulesDistributionDistributionOccurrencesInSameEquation
     dsofs <- plotsRulesDistributionDistributionSizeOfProperty
-    pure $  dnrdfs ++ oosfies ++ dsofs
+    pure $ dnrdfs ++ oosfies ++ dsofs

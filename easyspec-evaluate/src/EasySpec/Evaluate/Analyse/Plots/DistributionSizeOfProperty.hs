@@ -4,7 +4,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module EasySpec.Evaluate.Analyse.Plots.DistributionSizeOfProperty
-    ( plotsRulesDistributionDistributionSizeOfProperty
+    ( dfrgSizeOfProperty
+    , plotsRulesDistributionDistributionSizeOfProperty
     ) where
 
 import Import hiding (Alt)
@@ -19,11 +20,20 @@ import Development.Shake
 import qualified EasySpec.Discover.CodeUtils as ES
 import qualified EasySpec.Discover.Types as ES
 
+import EasySpec.Evaluate.Analyse.Plots.DistributionFromRawPlotter
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.Plots.ResultsPlots
 import EasySpec.Evaluate.Types
 
 {-# ANN module ("HLint: ignore Use const" :: String) #-}
+
+dfrgSizeOfProperty :: DistributionFromRawGatherer Size
+dfrgSizeOfProperty =
+    DistributionFromRawGatherer
+    { dfrgName = "size-of-property"
+    , dfrgGatherFromPoints = sizesFromData
+    , dfrgScript = scriptFile "size-of-property.r"
+    }
 
 plotsRulesDistributionDistributionSizeOfProperty :: Rules [Path Abs File]
 plotsRulesDistributionDistributionSizeOfProperty = do

@@ -44,14 +44,11 @@ plotsRules = do
 plotsRulesForAllData :: Rules [Path Abs File]
 plotsRulesForAllData = do
     lfs <- mapM plotsRulesForLinesPlotWithEvaluator evaluators
-    pfs <-
-        mapM (uncurry plotsRulesForPointsPlotWithEvaluators) $
-        unorderedCombinationsWithoutSelfCombinations evaluators
     bfs <- mapM perEvaluatorGlobalAverageBoxPlotFor evaluators
     dnrdfs <- plotsRulesDistributionNrDifferentFunctions
     oosfies <- plotsRulesDistributionDistributionOccurrencesInSameEquation
     dsofs <- plotsRulesDistributionDistributionSizeOfProperty
-    pure $ lfs ++ pfs ++ bfs ++ dnrdfs ++ oosfies ++ dsofs
+    pure $ lfs ++ bfs ++ dnrdfs ++ oosfies ++ dsofs
 
 plotsRulesForExample :: GroupName -> Example -> Rules [Path Abs File]
 plotsRulesForExample groupName is = do

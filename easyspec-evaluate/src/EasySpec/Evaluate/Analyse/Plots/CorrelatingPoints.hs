@@ -30,7 +30,9 @@ import EasySpec.Evaluate.Analyse.R
 correlatingPointsPlotter :: Plotter
 correlatingPointsPlotter =
     "correlating-points"
-    { plotterRulesGroupOrderedDistinct2Evaluator =
+    { plotterRulesOrderedDistinct2Evaluator =Just
+          plotsRulesForPointsPlotWithEvaluators
+    , plotterRulesGroupOrderedDistinct2Evaluator =
           Just plotsRulesForPointsPlotsWithGroupsOfExamples
     , plotterRulesGroupStrategyOrderedDistinct2Evaluator =
           Just plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy
@@ -116,9 +118,8 @@ plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy plotF dataF groupName s 
             ]
 
 plotsRulesForPointsPlotWithEvaluators ::
-       Evaluator -> Evaluator -> Rules (Path Abs File)
-plotsRulesForPointsPlotWithEvaluators e1 e2 = do
-    plotF <- pointsPlotForEvaluators e1 e2
+       Path Abs File -> Path Abs File -> Evaluator -> Evaluator -> Rules ()
+plotsRulesForPointsPlotWithEvaluators plotF dataF e1 e2 =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
@@ -135,4 +136,7 @@ plotsRulesForPointsPlotWithEvaluators e1 e2 = do
             , prettyIndication $ evaluatorIndication e1
             , prettyIndication $ evaluatorIndication e2
             ]
-    pure plotF
+
+pointsPlotAnalysisScript :: MonadIO m => m (Path Abs File)
+pointsPlotAnalysisScript = scriptFile "points.r"
+

@@ -36,42 +36,6 @@ linesPlotForEvaluator ev =
 linesPlotAnalysisScript :: MonadIO m => m (Path Abs File)
 linesPlotAnalysisScript = scriptFile "lines.r"
 
-pointsPlotForEvaluators ::
-       MonadIO m => Evaluator -> Evaluator -> m (Path Abs File)
-pointsPlotForEvaluators e1 e2 =
-    pngPlotFileWithComponents
-        $(mkRelFile "points/global/points-plot")
-        [evaluatorName e1, evaluatorName e2]
-
-pointsPlotForEvaluatorsPerExample ::
-       MonadIO m => ES.InputSpec -> Evaluator -> Evaluator -> m (Path Abs File)
-pointsPlotForEvaluatorsPerExample is e1 e2 =
-    pngPlotFileWithComponents
-        ($(mkRelDir "points/per-example") </> ES.inputSpecFile is)
-        [evaluatorName e1, evaluatorName e2]
-
-pointsPlotForEvaluatorsPerExampleGroup ::
-       MonadIO m => GroupName -> Evaluator -> Evaluator -> m (Path Abs File)
-pointsPlotForEvaluatorsPerExampleGroup groupName e1 e2 =
-    pngPlotFileWithComponents
-        $(mkRelFile "points/per-group/group")
-        [groupName, evaluatorName e1, evaluatorName e2]
-
-pointsPlotForEvaluatorsPerExampleGroupPerStrategy ::
-       MonadIO m
-    => String
-    -> ES.SignatureInferenceStrategy
-    -> Evaluator
-    -> Evaluator
-    -> m (Path Abs File)
-pointsPlotForEvaluatorsPerExampleGroupPerStrategy groupName s e1 e2 =
-    pngPlotFileWithComponents
-        $(mkRelFile "points/per-group-per-strategy/points")
-        [groupName, ES.sigInfStratName s, evaluatorName e1, evaluatorName e2]
-
-pointsPlotAnalysisScript :: MonadIO m => m (Path Abs File)
-pointsPlotAnalysisScript = scriptFile "points.r"
-
 singleEvaluatorBarPlotFileForExampleAndName ::
        MonadIO m
     => ES.InputSpec

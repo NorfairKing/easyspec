@@ -5,7 +5,6 @@
 
 module EasySpec.Evaluate.Analyse.Plots.DistributionSizeOfProperty
     ( dfrgSizeOfProperty
-    , plotsRulesDistributionDistributionSizeOfProperty
     ) where
 
 import Import hiding (Alt)
@@ -34,36 +33,6 @@ dfrgSizeOfProperty =
     , dfrgGatherFromPoints = sizesFromData
     , dfrgScript = scriptFile "size-of-property.r"
     }
-
-plotsRulesDistributionDistributionSizeOfProperty :: Rules [Path Abs File]
-plotsRulesDistributionDistributionSizeOfProperty = do
-    plotF <- scriptFile "size-of-property.r"
-    resultsPlotsFor
-        EvaluationFunc
-        { evaluationFuncDir = $(mkRelDir "size-of-property")
-        , evaluationFuncEval = sizesFromData
-        , evaluationFuncIndividualMessage =
-              \_ e n s csvF ->
-                  unwords
-                      [ "Calculating the size of properties in the results of running easyspec on"
-                      , toFilePath $ ES.inputSpecAbsFile e
-                      , "with focus"
-                      , show $ prettyPrint n
-                      , "with signature inference strategy"
-                      , show $ ES.sigInfStratName s
-                      , "and writing the results to"
-                      , toFilePath csvF
-                      ]
-        , evaluationFuncPerStrategyMessage =
-              \_ s csvF ->
-                  unwords
-                      [ "Calculating the size of properties in the results of running easyspec on all examples and names, but with signature inference strategy"
-                      , show $ ES.sigInfStratName s
-                      , "and writing the results to"
-                      , toFilePath csvF
-                      ]
-        , evaluationFuncPlotScript = plotF
-        }
 
 sizesFromData :: [EvaluationInputPoint] -> [Size]
 sizesFromData dats = map Size $ concatMap sizesFrom dats

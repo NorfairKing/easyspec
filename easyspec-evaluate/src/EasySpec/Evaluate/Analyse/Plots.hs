@@ -35,23 +35,16 @@ plotsRule = "plots"
 plotsRules :: Rules ()
 plotsRules = do
     allDataPlotsFs <- plotsRulesForAllData
-    plotsFs <- concat <$> mapM (uncurry plotsRulesForExample) groupsAndExamples
     correlatingPointsRule <- plotRulesForPlotter correlatingPointsPlotter
     barPlotsRule <- plotRulesForPlotter barPlotter
+    boxPlotsRule <- plotRulesForPlotter boxPlotter
     plotsRule ~> do
         need [correlatingPointsRule, barPlotsRule]
-        needP (allDataPlotsFs ++ plotsFs)
+        needP allDataPlotsFs
 
 plotsRulesForAllData :: Rules [Path Abs File]
 plotsRulesForAllData = do
-    lfs <- mapM plotsRulesForLinesPlotWithEvaluator evaluators
-    bfs <- mapM perEvaluatorGlobalAverageBoxPlotFor evaluators
     dnrdfs <- plotsRulesDistributionNrDifferentFunctions
     oosfies <- plotsRulesDistributionDistributionOccurrencesInSameEquation
     dsofs <- plotsRulesDistributionDistributionSizeOfProperty
-    pure $ lfs ++ bfs ++ dnrdfs ++ oosfies ++ dsofs
-
-plotsRulesForExample :: GroupName -> Example -> Rules [Path Abs File]
-plotsRulesForExample groupName is = do
-    names <- liftIO $ namesInSource is
-    forM evaluators $ perExampleAndEvaluatorAverageBoxPlotFor groupName is
+    pure $  dnrdfs ++ oosfies ++ dsofs

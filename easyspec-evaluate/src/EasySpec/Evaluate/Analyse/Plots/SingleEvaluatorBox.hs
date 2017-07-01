@@ -1,9 +1,7 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
-    ( perExampleAndEvaluatorAverageBoxPlotFor
-    , perEvaluatorGlobalAverageBoxPlotFor
+    ( boxPlotter
     ) where
 
 import Import
@@ -19,13 +17,26 @@ import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
 import EasySpec.Evaluate.Analyse.Data.Files
+import EasySpec.Evaluate.Analyse.Plots.Plotter
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.R
 
+boxPlotter :: Plotter
+boxPlotter =
+    "evaluator-box"
+    { plotterRulesGroupExampleEvaluator =
+          Just perExampleAndEvaluatorAverageBoxPlotFor
+    , plotterRulesEvaluator = Just perEvaluatorGlobalAverageBoxPlotFor
+    }
+
 perExampleAndEvaluatorAverageBoxPlotFor ::
-       GroupName -> Example -> Evaluator -> Rules (Path Abs File)
-perExampleAndEvaluatorAverageBoxPlotFor groupName is evaluator = do
-    plotF <- singleEvaluatorAverageBoxPlotFileForExample is evaluator
+       Path Abs File
+    -> Path Abs File
+    -> GroupName
+    -> Example
+    -> Evaluator
+    -> Rules ()
+perExampleAndEvaluatorAverageBoxPlotFor plotF dataF groupName is evaluator =
     plotF $%> do
         dependOnEvaluator evaluator
         dataF <- dataFileForExample groupName is
@@ -40,11 +51,10 @@ perExampleAndEvaluatorAverageBoxPlotFor groupName is evaluator = do
             , evaluatorName evaluator
             , prettyIndication $ evaluatorIndication evaluator
             ]
-    pure plotF
 
-perEvaluatorGlobalAverageBoxPlotFor :: Evaluator -> Rules (Path Abs File)
-perEvaluatorGlobalAverageBoxPlotFor evaluator = do
-    plotF <- singleEvaluatorAverageGlobalBoxPlotFileForExample evaluator
+perEvaluatorGlobalAverageBoxPlotFor ::
+       Path Abs File -> Path Abs File -> Evaluator -> Rules ()
+perEvaluatorGlobalAverageBoxPlotFor plotF dataF evaluator =
     plotF $%> do
         dependOnEvaluator evaluator
         dataF <- allDataFile
@@ -57,4 +67,3 @@ perEvaluatorGlobalAverageBoxPlotFor evaluator = do
             , evaluatorName evaluator
             , prettyIndication $ evaluatorIndication evaluator
             ]
-    pure plotF

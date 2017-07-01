@@ -1,56 +1,30 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module EasySpec.Evaluate.Analyse.Plots.DistributionNrDifferentFunctions where
+module EasySpec.Evaluate.Analyse.Plots.DistributionNrDifferentFunctions
+    ( dfrgNrDifferentFunctions
+    ) where
 
 import Import
 
-import Language.Haskell.Exts.Pretty (prettyPrint)
-
 import Data.Csv
-
-import Development.Shake
 
 import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.Types as ES
 import qualified EasySpec.Discover.Utils as ES
 
+import EasySpec.Evaluate.Analyse.Plots.DistributionFromRawPlotter
 import EasySpec.Evaluate.Analyse.Plots.Files
-import EasySpec.Evaluate.Analyse.Plots.ResultsPlots
 import EasySpec.Evaluate.Types
 
-plotsRulesDistributionNrDifferentFunctions :: Rules [Path Abs File]
-plotsRulesDistributionNrDifferentFunctions = do
-    plotF <- scriptFile "distribution-nr-different-functions-per-equation.r"
-    resultsPlotsFor
-        EvaluationFunc
-        { evaluationFuncDir =
-              $(mkRelDir "distribution-nr-different-functions-per-equation")
-        , evaluationFuncEval = nrsDifferentFunctionsFromData
-        , evaluationFuncIndividualMessage =
-              \e n s csvF ->
-                  unwords
-                      [ "Calculating the number of different functions per equation in the results of running easyspec on"
-                      , toFilePath $ ES.inputSpecAbsFile e
-                      , "with focus"
-                      , show $ prettyPrint n
-                      , "with signature inference strategy"
-                      , show $ ES.sigInfStratName s
-                      , "and writing the results to"
-                      , toFilePath csvF
-                      ]
-        , evaluationFuncPerStrategyMessage =
-              \s csvF ->
-                  unwords
-                      [ "Calculating the number of different functions per equation in the results of running easyspec on all examples and names, but with signature inference strategy"
-                      , show $ ES.sigInfStratName s
-                      , "and writing the results to"
-                      , toFilePath csvF
-                      ]
-        , evaluationFuncPlotScript = plotF
-        }
+dfrgNrDifferentFunctions :: DistributionFromRawGatherer NrDifferentFunctions
+dfrgNrDifferentFunctions =
+    DistributionFromRawGatherer
+    { dfrgName = "nr-different-functions-per-equation"
+    , dfrgGatherFromPoints = nrsDifferentFunctionsFromData
+    , dfrgScript =
+          scriptFile "distribution-nr-different-functions-per-equation.r"
+    }
 
 nrsDifferentFunctionsFromData ::
        [EvaluationInputPoint] -> [NrDifferentFunctions]

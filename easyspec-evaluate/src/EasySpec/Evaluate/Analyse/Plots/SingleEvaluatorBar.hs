@@ -1,8 +1,7 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar
-    ( perExampleNameAndEvaluatorBarPlotFor
+    ( barPlotter
     ) where
 
 import Import
@@ -14,20 +13,33 @@ import qualified EasySpec.Discover.Types as ES
 import Development.Shake
 import Development.Shake.Path
 
+import EasySpec.Evaluate.Types
+
 import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
-import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
+import EasySpec.Evaluate.Analyse.Plots.Plotter
 import EasySpec.Evaluate.Analyse.R
 
+barPlotter :: Plotter
+barPlotter =
+    "evaluator-bar"
+    { plotterRulesGroupExampleNameEvaluator =
+          Just perExampleNameAndEvaluatorBarPlotFor
+    }
+
 perExampleNameAndEvaluatorBarPlotFor ::
-       ES.InputSpec -> ES.EasyQName -> Evaluator -> Rules (Path Abs File)
-perExampleNameAndEvaluatorBarPlotFor is name evaluator = do
-    plotFile <- singleEvaluatorBarPlotFileForExampleAndName is name evaluator
+       Path Abs File
+    -> Path Abs File
+    -> GroupName
+    -> Example
+    -> ExampleFunction
+    -> Evaluator
+    -> Rules ()
+perExampleNameAndEvaluatorBarPlotFor plotFile dataFile _ is name evaluator =
     plotFile $%> do
         dependOnEvaluator evaluator
-        dataFile <- dataFileForExampleAndName is name
         singleEvaluatorBarScript <- singleEvaluatorBarAnalysisScript
         needP [dataFile]
         rscript
@@ -40,4 +52,6 @@ perExampleNameAndEvaluatorBarPlotFor is name evaluator = do
             , evaluatorName evaluator
             , prettyIndication $ evaluatorIndication evaluator
             ]
-    pure plotFile
+
+singleEvaluatorBarAnalysisScript :: MonadIO m => m (Path Abs File)
+singleEvaluatorBarAnalysisScript = scriptFile "single_evaluator_bar.r"

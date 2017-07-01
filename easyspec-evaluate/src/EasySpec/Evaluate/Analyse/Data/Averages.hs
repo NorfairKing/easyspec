@@ -30,23 +30,30 @@ averageDataRule = "average-data"
 
 averageDataRules :: Rules ()
 averageDataRules = do
-    fs <- concat <$> mapM averageOverNamesPerStrategyForExampleRules examples
-    fss <- mapM averageOverNamesAndStrategiesForExampleRules examples
+    fs <-
+        concat <$>
+        mapM
+            (uncurry averageOverNamesPerStrategyForExampleRules)
+            groupsAndExamples
+    fss <-
+        mapM
+            (uncurry averageOverNamesAndStrategiesForExampleRules)
+            groupsAndExamples
     averageDataRule ~> needP (fs ++ fss)
 
 averageOverNamesPerStrategyForExampleRules ::
-       ES.InputSpec -> Rules [Path Abs File]
-averageOverNamesPerStrategyForExampleRules is = do
-    jf <- averageOverNamesPerStrategyForExampleJSONRules is
-    cf <- averageOverNamesPerStrategyForExampleCSVRules is
+       GroupName -> Example -> Rules [Path Abs File]
+averageOverNamesPerStrategyForExampleRules groupName is = do
+    jf <- averageOverNamesPerStrategyForExampleJSONRules groupName is
+    cf <- averageOverNamesPerStrategyForExampleCSVRules groupName is
     pure [jf, cf]
 
 averageOverNamesPerStrategyForExampleJSONRules ::
-       ES.InputSpec -> Rules (Path Abs File)
-averageOverNamesPerStrategyForExampleJSONRules is = do
+       GroupName -> Example -> Rules (Path Abs File)
+averageOverNamesPerStrategyForExampleJSONRules groupName is = do
     avgF <- averageOverNamesPerStrategyForExampleJSONFile is
     avgF $%> do
-        dataPoints <- dataFromExample is
+        dataPoints <- dataFromExample groupName is
         let averages =
                 flip
                     map
@@ -73,8 +80,8 @@ averageOverNamesPerStrategyForExampleJSONRules is = do
     pure avgF
 
 averageOverNamesPerStrategyForExampleCSVRules ::
-       ES.InputSpec -> Rules (Path Abs File)
-averageOverNamesPerStrategyForExampleCSVRules is = do
+       GroupName -> Example -> Rules (Path Abs File)
+averageOverNamesPerStrategyForExampleCSVRules _ is = do
     avgcsvF <- averageOverNamesPerStrategyForExampleCSVFile is
     avgcsvF $%> do
         sf <- averageOverNamesPerStrategyForExampleJSONFile is
@@ -133,11 +140,11 @@ instance FromJSON AverageEvaluatorPerStrategyOutput where
             o .: "average"
 
 averageOverNamesAndStrategiesForExampleRules ::
-       ES.InputSpec -> Rules (Path Abs File)
-averageOverNamesAndStrategiesForExampleRules is = do
+       GroupName -> Example -> Rules (Path Abs File)
+averageOverNamesAndStrategiesForExampleRules groupName is = do
     avgF <- averageOverNamesAndStrategiesForExampleFile is
     avgF $%> do
-        dataPoints <- dataFromExample is
+        dataPoints <- dataFromExample groupName is
         let averages =
                 map
                     (\(n, a) ->

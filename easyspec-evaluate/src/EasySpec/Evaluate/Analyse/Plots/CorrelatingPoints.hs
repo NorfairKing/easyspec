@@ -1,8 +1,10 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
-    ( plotsRulesForPointsPlotWithEvaluatorsPerExample
+    ( correlatingPointsPlotter
+    , plotsRulesForPointsPlotWithEvaluatorsPerExample
     , plotsRulesForPointsPlotsWithGroupsOfExamples
     , plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy
     , plotsRulesForPointsPlotWithEvaluators
@@ -15,21 +17,42 @@ import Development.Shake.Path
 
 import qualified EasySpec.Discover.Types as ES
 
+import EasySpec.Evaluate.Types
+
 import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
-import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
+import EasySpec.Evaluate.Analyse.Plots.Plotter
 import EasySpec.Evaluate.Analyse.R
 
+{-# ANN module ("HLint: ignore Reduce duplication" :: String) #-}
+
+correlatingPointsPlotter :: Plotter
+correlatingPointsPlotter =
+    "correlating-points"
+    { plotterRulesOrderedDistinct2Evaluator =
+          Just plotsRulesForPointsPlotWithEvaluators
+    , plotterRulesGroupOrderedDistinct2Evaluator =
+          Just plotsRulesForPointsPlotsWithGroupsOfExamples
+    , plotterRulesGroupStrategyOrderedDistinct2Evaluator =
+          Just plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy
+    , plotterRulesGroupExampleOrderedDistinct2Evaluator =
+          Just plotsRulesForPointsPlotWithEvaluatorsPerExample
+    }
+
 plotsRulesForPointsPlotWithEvaluatorsPerExample ::
-       ES.InputSpec -> Evaluator -> Evaluator -> Rules (Path Abs File)
-plotsRulesForPointsPlotWithEvaluatorsPerExample is e1 e2 = do
-    plotF <- pointsPlotForEvaluatorsPerExample is e1 e2
+       Path Abs File
+    -> Path Abs File
+    -> GroupName
+    -> Example
+    -> Evaluator
+    -> Evaluator
+    -> Rules ()
+plotsRulesForPointsPlotWithEvaluatorsPerExample plotF dataF _ is e1 e2 =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
-        dataF <- dataFileForExample is
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
         rscript
@@ -42,20 +65,18 @@ plotsRulesForPointsPlotWithEvaluatorsPerExample is e1 e2 = do
             , prettyIndication $ evaluatorIndication e1
             , prettyIndication $ evaluatorIndication e2
             ]
-    pure plotF
 
 plotsRulesForPointsPlotsWithGroupsOfExamples ::
-       String
-    -> [ES.InputSpec]
+       Path Abs File
+    -> Path Abs File
+    -> GroupName
     -> Evaluator
     -> Evaluator
-    -> Rules (Path Abs File)
-plotsRulesForPointsPlotsWithGroupsOfExamples groupName _ e1 e2 = do
-    plotF <- pointsPlotForEvaluatorsPerExampleGroup groupName e1 e2
+    -> Rules ()
+plotsRulesForPointsPlotsWithGroupsOfExamples plotF dataF groupName e1 e2 =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
-        dataF <- dataFileForExampleGroup groupName
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
         rscript
@@ -68,21 +89,19 @@ plotsRulesForPointsPlotsWithGroupsOfExamples groupName _ e1 e2 = do
             , prettyIndication $ evaluatorIndication e1
             , prettyIndication $ evaluatorIndication e2
             ]
-    pure plotF
 
 plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy ::
-       String
-    -> [ES.InputSpec]
-    -> ES.SignatureInferenceStrategy
+       Path Abs File
+    -> Path Abs File
+    -> GroupName
+    -> SignatureInferenceStrategy
     -> Evaluator
     -> Evaluator
-    -> Rules (Path Abs File)
-plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy groupName _ s e1 e2 = do
-    plotF <- pointsPlotForEvaluatorsPerExampleGroupPerStrategy groupName s e1 e2
+    -> Rules ()
+plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy plotF dataF groupName s e1 e2 =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
-        dataF <- dataFileForExampleGroupAndStrategy groupName s
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
         rscript
@@ -96,16 +115,13 @@ plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy groupName _ s e1 e2 = do
             , prettyIndication $ evaluatorIndication e1
             , prettyIndication $ evaluatorIndication e2
             ]
-    pure plotF
 
 plotsRulesForPointsPlotWithEvaluators ::
-       Evaluator -> Evaluator -> Rules (Path Abs File)
-plotsRulesForPointsPlotWithEvaluators e1 e2 = do
-    plotF <- pointsPlotForEvaluators e1 e2
+       Path Abs File -> Path Abs File -> Evaluator -> Evaluator -> Rules ()
+plotsRulesForPointsPlotWithEvaluators plotF dataF e1 e2 =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
-        dataF <- allDataFile
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
         rscript
@@ -118,4 +134,6 @@ plotsRulesForPointsPlotWithEvaluators e1 e2 = do
             , prettyIndication $ evaluatorIndication e1
             , prettyIndication $ evaluatorIndication e2
             ]
-    pure plotF
+
+pointsPlotAnalysisScript :: MonadIO m => m (Path Abs File)
+pointsPlotAnalysisScript = scriptFile "points.r"

@@ -1,59 +1,32 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module EasySpec.Evaluate.Analyse.Plots.DistributionSizeOfProperty
-    ( plotsRulesDistributionDistributionSizeOfProperty
+    ( dfrgSizeOfProperty
     ) where
 
 import Import hiding (Alt)
 
-import Language.Haskell.Exts.Pretty (prettyPrint)
 import Language.Haskell.Exts.Syntax
 
 import Data.Csv
 
-import Development.Shake
-
 import qualified EasySpec.Discover.CodeUtils as ES
 import qualified EasySpec.Discover.Types as ES
 
+import EasySpec.Evaluate.Analyse.Plots.DistributionFromRawPlotter
 import EasySpec.Evaluate.Analyse.Plots.Files
-import EasySpec.Evaluate.Analyse.Plots.ResultsPlots
 import EasySpec.Evaluate.Types
 
 {-# ANN module ("HLint: ignore Use const" :: String) #-}
 
-plotsRulesDistributionDistributionSizeOfProperty :: Rules [Path Abs File]
-plotsRulesDistributionDistributionSizeOfProperty = do
-    plotF <- scriptFile "size-of-property.r"
-    resultsPlotsFor
-        EvaluationFunc
-        { evaluationFuncDir = $(mkRelDir "size-of-property")
-        , evaluationFuncEval = sizesFromData
-        , evaluationFuncIndividualMessage =
-              \e n s csvF ->
-                  unwords
-                      [ "Calculating the size of properties in the results of running easyspec on"
-                      , toFilePath $ ES.inputSpecAbsFile e
-                      , "with focus"
-                      , show $ prettyPrint n
-                      , "with signature inference strategy"
-                      , show $ ES.sigInfStratName s
-                      , "and writing the results to"
-                      , toFilePath csvF
-                      ]
-        , evaluationFuncPerStrategyMessage =
-              \s csvF ->
-                  unwords
-                      [ "Calculating the size of properties in the results of running easyspec on all examples and names, but with signature inference strategy"
-                      , show $ ES.sigInfStratName s
-                      , "and writing the results to"
-                      , toFilePath csvF
-                      ]
-        , evaluationFuncPlotScript = plotF
-        }
+dfrgSizeOfProperty :: DistributionFromRawGatherer Size
+dfrgSizeOfProperty =
+    DistributionFromRawGatherer
+    { dfrgName = "size-of-property"
+    , dfrgGatherFromPoints = sizesFromData
+    , dfrgScript = scriptFile "size-of-property.r"
+    }
 
 sizesFromData :: [EvaluationInputPoint] -> [Size]
 sizesFromData dats = map Size $ concatMap sizesFrom dats

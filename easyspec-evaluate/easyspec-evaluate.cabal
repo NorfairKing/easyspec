@@ -21,18 +21,19 @@ library
         EasySpec.Evaluate.Analyse.Data.Common
         EasySpec.Evaluate.Analyse.Data.Common.TH
         EasySpec.Evaluate.Analyse.Data.Content
+        EasySpec.Evaluate.Analyse.Data.Evaluated
         EasySpec.Evaluate.Analyse.Data.Files
         EasySpec.Evaluate.Analyse.Data.Raw
         EasySpec.Evaluate.Analyse.Data.Types
         EasySpec.Evaluate.Analyse.Hackage
         EasySpec.Evaluate.Analyse.Hackage.TH
         EasySpec.Evaluate.Analyse.Plots
+        EasySpec.Evaluate.Analyse.Plots.Plotter
         EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
         EasySpec.Evaluate.Analyse.Plots.Files
-        EasySpec.Evaluate.Analyse.Plots.RelativeLines
-        EasySpec.Evaluate.Analyse.Plots.ResultsPlots
         EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar
         EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
+        EasySpec.Evaluate.Analyse.Plots.DistributionFromRawPlotter
         EasySpec.Evaluate.Analyse.Plots.DistributionNrDifferentFunctions
         EasySpec.Evaluate.Analyse.Plots.DistributionSizeOfProperty
         EasySpec.Evaluate.Analyse.Plots.DistributionOccurrencesInSameEquation

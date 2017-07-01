@@ -154,3 +154,14 @@ instance DefaultOrdered EvaluatorCsvLine where
             , "quantity"
             , "pretty output"
             ]
+
+type GroupName = String
+
+type Example = ES.InputSpec
+
+type ExampleFunction = ES.EasyQName
+
+type SignatureInferenceStrategy = ES.SignatureInferenceStrategy
+
+strategyName :: SignatureInferenceStrategy -> String
+strategyName = ES.sigInfStratName

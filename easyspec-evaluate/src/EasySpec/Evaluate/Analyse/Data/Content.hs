@@ -15,56 +15,71 @@ import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Utils
 
 rawDataFrom ::
-       ES.InputSpec
-    -> ES.EasyQName
-    -> ES.SignatureInferenceStrategy
+       GroupName
+    -> Example
+    -> ExampleFunction
+    -> SignatureInferenceStrategy
     -> Action EvaluationInputPoint
-rawDataFrom i n s = do
-    dataFile <- rawDataFileFor i n s
+rawDataFrom groupName i n s = do
+    dataFile <- rawDataFileFor groupName i n s
     needP [dataFile]
     readJSON dataFile
 
 rawDataFromExampleAndName ::
-       ES.InputSpec -> ES.EasyQName -> Action [EvaluationInputPoint]
-rawDataFromExampleAndName e n =
-    rawDataFromWith $ mapM (rawDataFileFor e n) signatureInferenceStrategies
+       GroupName -> Example -> ExampleFunction -> Action [EvaluationInputPoint]
+rawDataFromExampleAndName groupName e n =
+    rawDataFromWith $
+    mapM (rawDataFileFor groupName e n) signatureInferenceStrategies
 
-rawDataFromExample :: ES.InputSpec -> Action [EvaluationInputPoint]
-rawDataFromExample e =
+rawDataFromExample :: GroupName -> Example -> Action [EvaluationInputPoint]
+rawDataFromExample groupName e =
     rawDataFromWith $ do
         names <- liftIO $ namesInSource e
         mapM
-            (uncurry $ rawDataFileFor e)
+            (uncurry $ rawDataFileFor groupName e)
             ((,) <$> names <*> signatureInferenceStrategies)
+
+rawDataFromGroupStrategy ::
+       GroupName -> SignatureInferenceStrategy -> Action [EvaluationInputPoint]
+rawDataFromGroupStrategy g s =
+    rawDataFromWith $
+    fmap concat $
+    forM (groupExamples g) $ \example -> do
+        names <- liftIO $ namesInSource example
+        mapM (\n -> rawDataFileFor g example n s) names
 
 rawDataFromStrategy ::
        ES.SignatureInferenceStrategy -> Action [EvaluationInputPoint]
 rawDataFromStrategy s =
     rawDataFromWith $
-    fmap concat <$> forM examples $ \example -> do
-        names <- liftIO $ namesInSource example
-        mapM (\n -> rawDataFileFor example n s) names
+    fmap concat <$> forM exampleGroups $ \(groupName, exs) ->
+        fmap concat $
+        forM exs $ \example -> do
+            names <- liftIO $ namesInSource example
+            mapM (\n -> rawDataFileFor groupName example n s) names
 
 rawDataFromWith :: Action [Path Abs File] -> Action [EvaluationInputPoint]
 rawDataFromWith getFilePaths = do
     dataFiles <- getFilePaths
     needP dataFiles
-    concat <$> mapM readJSON dataFiles
+    mapM readJSON dataFiles
 
 dataFrom ::
-       ES.InputSpec
-    -> ES.EasyQName
-    -> ES.SignatureInferenceStrategy
+       GroupName
+    -> Example
+    -> ExampleFunction
+    -> SignatureInferenceStrategy
     -> Action [EvaluatorCsvLine]
-dataFrom is name strat = dataFromWith $ dataFileFor is name strat
+dataFrom groupName is name strat =
+    dataFromWith $ dataFileFor groupName is name strat
 
 dataFromExampleAndName ::
-       ES.InputSpec -> ES.EasyQName -> Action [EvaluatorCsvLine]
-dataFromExampleAndName is name =
-    dataFromWith $ dataFileForExampleAndName is name
+       GroupName -> Example -> ExampleFunction -> Action [EvaluatorCsvLine]
+dataFromExampleAndName groupName is name =
+    dataFromWith $ dataFileForExampleAndName groupName is name
 
-dataFromExample :: ES.InputSpec -> Action [EvaluatorCsvLine]
-dataFromExample is = dataFromWith $ dataFileForExample is
+dataFromExample :: GroupName -> Example -> Action [EvaluatorCsvLine]
+dataFromExample groupName is = dataFromWith $ dataFileForExample groupName is
 
 dataFromAll :: Action [EvaluatorCsvLine]
 dataFromAll = dataFromWith allDataFile

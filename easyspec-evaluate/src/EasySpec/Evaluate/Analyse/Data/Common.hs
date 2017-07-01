@@ -2,13 +2,19 @@
 
 module EasySpec.Evaluate.Analyse.Data.Common where
 
-import Import
+import Import hiding (group)
 
 import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Common.TH
-import EasySpec.Evaluate.Types ()
+import EasySpec.Evaluate.Analyse.Utils
+import EasySpec.Evaluate.Evaluate.Evaluator
+import EasySpec.Evaluate.Evaluate.Evaluator.Types
+import EasySpec.Evaluate.Types
+
+groups :: [String]
+groups = nub . sort . map fst $ exampleGroups
 
 exampleGroups :: [(String, [ES.InputSpec])]
 exampleGroups = $(buildExamples)
@@ -16,12 +22,30 @@ exampleGroups = $(buildExamples)
 groupExamples :: String -> [ES.InputSpec]
 groupExamples name = fromMaybe [] $ lookup name exampleGroups
 
+groupsAndExamples :: [(String, ES.InputSpec)]
+groupsAndExamples = concatMap (\(gn, iss) -> (,) gn <$> iss) exampleGroups
+
 groupExamplesAndNames :: MonadIO m => String -> m [(ES.InputSpec, ES.EasyQName)]
 groupExamplesAndNames name =
     fmap concat $
     forM (groupExamples name) $ \example -> do
         names <- liftIO $ namesInSource example
         pure $ (,) example <$> names
+
+groupsExamplesAndNames :: MonadIO m => m [(String, ES.InputSpec, ES.EasyQName)]
+groupsExamplesAndNames =
+    fmap concat $
+    forM exampleGroups $ \(group, es) ->
+        fmap concat $
+        forM es $ \example -> do
+            names <- liftIO $ namesInSource example
+            pure $ (,,) group example <$> names
+
+groupExamplesNamesAndEvaluators ::
+       MonadIO m => m [(String, ES.InputSpec, ES.EasyQName, Evaluator)]
+groupExamplesNamesAndEvaluators = do
+    trips <- groupsExamplesAndNames
+    pure $ concatMap (\(a, b, c) -> (,,,) a b c <$> evaluators) trips
 
 examples :: [ES.InputSpec]
 examples = concatMap snd exampleGroups
@@ -40,9 +64,12 @@ examplesAndNames =
         names <- liftIO $ namesInSource example
         pure $ (,) example <$> names
 
-examplesNamesAndStrategies ::
+groupsExamplesNamesAndStrategies ::
        MonadIO m
-    => m [(ES.InputSpec, ES.EasyQName, ES.SignatureInferenceStrategy)]
-examplesNamesAndStrategies = do
-    exns <- examplesAndNames
-    pure [(e, n, s) | (e, n) <- exns, s <- signatureInferenceStrategies]
+    => m [(GroupName, Example, ExampleFunction, SignatureInferenceStrategy)]
+groupsExamplesNamesAndStrategies = do
+    exns <- groupsExamplesAndNames
+    pure [(g, e, n, s) | (g, e, n) <- exns, s <- signatureInferenceStrategies]
+
+groupExampleEvaluators :: [(GroupName, Example, Evaluator)]
+groupExampleEvaluators = lTuple groupsAndExamples evaluators

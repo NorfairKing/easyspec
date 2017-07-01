@@ -1,9 +1,7 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
-    ( perExampleAndEvaluatorAverageBoxPlotFor
-    , perEvaluatorGlobalAverageBoxPlotFor
+    ( boxPlotter
     ) where
 
 import Import
@@ -13,20 +11,33 @@ import qualified EasySpec.Discover.Types as ES
 import Development.Shake
 import Development.Shake.Path
 
+import EasySpec.Evaluate.Types
+
 import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
-import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
+import EasySpec.Evaluate.Analyse.Plots.Plotter
 import EasySpec.Evaluate.Analyse.R
 
+boxPlotter :: Plotter
+boxPlotter =
+    "evaluator-box"
+    { plotterRulesGroupExampleEvaluator =
+          Just perExampleAndEvaluatorAverageBoxPlotFor
+    , plotterRulesEvaluator = Just perEvaluatorGlobalAverageBoxPlotFor
+    }
+
 perExampleAndEvaluatorAverageBoxPlotFor ::
-       ES.InputSpec -> Evaluator -> Rules (Path Abs File)
-perExampleAndEvaluatorAverageBoxPlotFor is evaluator = do
-    plotF <- singleEvaluatorAverageBoxPlotFileForExample is evaluator
+       Path Abs File
+    -> Path Abs File
+    -> GroupName
+    -> Example
+    -> Evaluator
+    -> Rules ()
+perExampleAndEvaluatorAverageBoxPlotFor plotF dataF _ is evaluator =
     plotF $%> do
         dependOnEvaluator evaluator
-        dataF <- dataFileForExample is
         needP [dataF]
         scriptF <- singleEvaluatorAverageBoxAnalysisScript
         rscript
@@ -38,14 +49,12 @@ perExampleAndEvaluatorAverageBoxPlotFor is evaluator = do
             , evaluatorName evaluator
             , prettyIndication $ evaluatorIndication evaluator
             ]
-    pure plotF
 
-perEvaluatorGlobalAverageBoxPlotFor :: Evaluator -> Rules (Path Abs File)
-perEvaluatorGlobalAverageBoxPlotFor evaluator = do
-    plotF <- singleEvaluatorAverageGlobalBoxPlotFileForExample evaluator
+perEvaluatorGlobalAverageBoxPlotFor ::
+       Path Abs File -> Path Abs File -> Evaluator -> Rules ()
+perEvaluatorGlobalAverageBoxPlotFor plotF dataF evaluator =
     plotF $%> do
         dependOnEvaluator evaluator
-        dataF <- allDataFile
         needP [dataF]
         scriptF <- singleEvaluatorAverageBoxGlobalAnalysisScript
         rscript
@@ -55,4 +64,3 @@ perEvaluatorGlobalAverageBoxPlotFor evaluator = do
             , evaluatorName evaluator
             , prettyIndication $ evaluatorIndication evaluator
             ]
-    pure plotF

@@ -7,12 +7,13 @@ module EasySpec.Evaluate.Analyse.Plots.Files where
 
 import Import
 
-import Language.Haskell.Exts.Pretty (prettyPrint)
+import System.FilePath (dropExtensions)
 
 import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
+import EasySpec.Evaluate.Types
 
 commonRFile :: MonadIO m => m (Path Abs File)
 commonRFile = scriptFile "common.r"
@@ -26,63 +27,6 @@ scriptFile fname = liftIO $ resolveFile' $ "rscripts/" ++ fname
 pngPlotFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
 pngPlotFileWithComponents = fileInDirWithExtensionAndComponents plotsDir "png"
-
-linesPlotForEvaluator :: MonadIO m => Evaluator -> m (Path Abs File)
-linesPlotForEvaluator ev =
-    pngPlotFileWithComponents $(mkRelFile "lines/lines-plot") [evaluatorName ev]
-
-linesPlotAnalysisScript :: MonadIO m => m (Path Abs File)
-linesPlotAnalysisScript = scriptFile "lines.r"
-
-pointsPlotForEvaluators ::
-       MonadIO m => Evaluator -> Evaluator -> m (Path Abs File)
-pointsPlotForEvaluators e1 e2 =
-    pngPlotFileWithComponents
-        $(mkRelFile "points/global/points-plot")
-        [evaluatorName e1, evaluatorName e2]
-
-pointsPlotForEvaluatorsPerExample ::
-       MonadIO m => ES.InputSpec -> Evaluator -> Evaluator -> m (Path Abs File)
-pointsPlotForEvaluatorsPerExample is e1 e2 =
-    pngPlotFileWithComponents
-        ($(mkRelDir "points/per-example") </> ES.inputSpecFile is)
-        [evaluatorName e1, evaluatorName e2]
-
-pointsPlotForEvaluatorsPerExampleGroup ::
-       MonadIO m => String -> Evaluator -> Evaluator -> m (Path Abs File)
-pointsPlotForEvaluatorsPerExampleGroup groupName e1 e2 =
-    pngPlotFileWithComponents
-        $(mkRelFile "points/per-group/group")
-        [groupName, evaluatorName e1, evaluatorName e2]
-
-pointsPlotForEvaluatorsPerExampleGroupPerStrategy ::
-       MonadIO m
-    => String
-    -> ES.SignatureInferenceStrategy
-    -> Evaluator
-    -> Evaluator
-    -> m (Path Abs File)
-pointsPlotForEvaluatorsPerExampleGroupPerStrategy groupName s e1 e2 =
-    pngPlotFileWithComponents
-        $(mkRelFile "points/per-group-per-strategy/points")
-        [groupName, ES.sigInfStratName s, evaluatorName e1, evaluatorName e2]
-
-pointsPlotAnalysisScript :: MonadIO m => m (Path Abs File)
-pointsPlotAnalysisScript = scriptFile "points.r"
-
-singleEvaluatorBarPlotFileForExampleAndName ::
-       MonadIO m
-    => ES.InputSpec
-    -> ES.EasyQName
-    -> Evaluator
-    -> m (Path Abs File)
-singleEvaluatorBarPlotFileForExampleAndName is name ev =
-    pngPlotFileWithComponents
-        ($(mkRelDir "single-evaluator-bar") </> ES.inputSpecFile is)
-        [prettyPrint name, evaluatorName ev]
-
-singleEvaluatorBarAnalysisScript :: MonadIO m => m (Path Abs File)
-singleEvaluatorBarAnalysisScript = scriptFile "single_evaluator_bar.r"
 
 singleEvaluatorAverageBoxPlotFileForExample ::
        MonadIO m => ES.InputSpec -> Evaluator -> m (Path Abs File)
@@ -105,3 +49,10 @@ singleEvaluatorAverageGlobalBoxPlotFileForExample ev =
 singleEvaluatorAverageBoxGlobalAnalysisScript :: MonadIO m => m (Path Abs File)
 singleEvaluatorAverageBoxGlobalAnalysisScript =
     scriptFile "single_evaluator_boxplot_average_global.r"
+
+exampleModule :: Example -> String
+exampleModule = map go . dropExtensions . toFilePath . ES.inputSpecFile
+  where
+    go :: Char -> Char
+    go '/' = '.'
+    go c = c

@@ -3,6 +3,12 @@
 module EasySpec.Evaluate.Evaluate.Evaluator
     ( evaluators
     , dependOnEvaluator
+    , scopeSizeEvaluator
+    , equationsEvaluator
+    , runtimeEvaluator
+    , relevantEquationsEvaluator
+    , relevantFunctionsEvaluator
+    , maximumRelatedFunctionsEvaluator
     ) where
 
 import Import

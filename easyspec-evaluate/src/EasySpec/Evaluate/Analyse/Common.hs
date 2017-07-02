@@ -1,20 +1,38 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module EasySpec.Evaluate.Analyse.Common where
 
 import Import
 
+import Data.FileEmbed
+import Language.Haskell.TH
 import System.FilePath (dropExtensions)
 
 import qualified EasySpec.Discover.SignatureInference as ES
 import qualified EasySpec.Discover.Types as ES
 
+buildDir :: MonadIO m => m (Path Abs Dir)
+buildDir =
+    liftIO $
+    parseAbsDir
+        $(makeRelativeToProject "." >>=
+          (\d -> toFilePath <$> runIO (resolveDir' d)) >>=
+          strToExp)
+
 examplesDir :: MonadIO m => m (Path Abs Dir)
-examplesDir = liftIO $ resolveDir' "../examples"
+examplesDir = do
+    bd <- buildDir
+    liftIO $ resolveDir bd "../examples"
 
 tmpDir :: MonadIO m => m (Path Abs Dir)
-tmpDir = liftIO $ resolveDir' "tmp"
+tmpDir = do
+    bd <- buildDir
+    liftIO $ resolveDir bd "tmp"
 
 outDir :: MonadIO m => m (Path Abs Dir)
-outDir = liftIO $ resolveDir' "out"
+outDir = do
+    bd <- buildDir
+    liftIO $ resolveDir bd "out"
 
 fileInDirWithExtensionAndComponents ::
        MonadIO m

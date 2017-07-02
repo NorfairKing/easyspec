@@ -12,3 +12,4 @@ easyspecEvaluate = do
     case disp of
         DispatchEvaluate fs -> runEvaluate fs
         DispatchBuild t -> runBuild t
+        DispatchBuildEverything -> runBuildEverything

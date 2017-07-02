@@ -12,6 +12,7 @@ data Command
     = CommandEvaluate (Maybe FilePath)
                       (Maybe FilePath)
     | CommandBuild String
+    | CommandBuildEverything
     deriving (Show, Eq)
 
 data Flags =
@@ -25,6 +26,7 @@ data Configuration =
 data Dispatch
     = DispatchEvaluate [ES.InputSpec]
     | DispatchBuild String
+    | DispatchBuildEverything
     deriving (Show, Eq)
 
 data Settings =

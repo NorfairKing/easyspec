@@ -7,6 +7,4 @@ import TestImport
 import EasySpec.Evaluate.Build
 
 spec :: Spec
-spec =
-    describe "easyspec-evaluate" $
-    it "builds the entire analysis" $ runBuild "analyse"
+spec = describe "easyspec-evaluate" $ it "builds everything" runBuildEverything

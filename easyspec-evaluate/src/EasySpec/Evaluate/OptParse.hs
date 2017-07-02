@@ -42,6 +42,7 @@ combineToInstructions cmd Flags Configuration = (,) <$> disp <*> pure Settings
                             listDirRecur bd
                 pure $ DispatchEvaluate $ map (ES.InputSpec bd) fs
             CommandBuild target -> pure $ DispatchBuild target
+            CommandBuildEverything -> pure DispatchBuildEverything
 
 getConfiguration :: Command -> Flags -> IO Configuration
 getConfiguration _ _ = pure Configuration
@@ -80,6 +81,7 @@ parseCommand =
     mconcat
         [ command "evaluate" parseCommandEvaluate
         , command "build" parseCommandBuild
+        , command "build-everything" parseCommandBuildEverything
         ]
 
 parseCommandEvaluate :: ParserInfo Command
@@ -113,6 +115,13 @@ parseCommandBuild = info parser modifier
         CommandBuild <$>
         strArgument (mconcat [metavar "TARGET", help "the target to build."])
     modifier = fullDesc <> progDesc "Build a target in the evaluation system."
+
+parseCommandBuildEverything :: ParserInfo Command
+parseCommandBuildEverything = info parser modifier
+  where
+    parser = pure CommandBuildEverything
+    modifier =
+        fullDesc <> progDesc "Build all targets in the evaluation system."
 
 parseFlags :: Parser Flags
 parseFlags = pure Flags

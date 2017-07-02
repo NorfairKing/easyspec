@@ -41,5 +41,8 @@ runBuild target = do
                 }
                 shakeBuild
 
+runBuildEverything :: IO ()
+runBuildEverything = runBuild analyseRule
+
 shakeBuild :: Rules ()
 shakeBuild = analyseRules

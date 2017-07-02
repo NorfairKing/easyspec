@@ -67,17 +67,17 @@ evaluatedCartRule ::
        (Cart a, EvaluatedData a) => EvaluatedCartPlotter a -> Rules String
 evaluatedCartRule = cartRuleWith getDataFileFor
 
-plotFileFor :: Cart a => CartPlotter a b -> a -> Rules (Path Abs File)
+plotFileFor :: (MonadIO m, Cart a) => CartPlotter a b -> a -> m (Path Abs File)
 plotFileFor cp = cartFile "png" plotsDir (cartPlotterRule cp) "plot"
 
 cartFile ::
-       Cart a
+       (MonadIO m, Cart a)
     => String
-    -> Rules (Path Abs Dir)
+    -> m (Path Abs Dir)
     -> String
     -> String
     -> a
-    -> Rules (Path Abs File)
+    -> m (Path Abs File)
 cartFile ext genDir extraDirPrefix extraFilePrefix option = do
     pd <- genDir
     let (mFileComp, dirComps) =

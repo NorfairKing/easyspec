@@ -1,16 +1,19 @@
 library(ggplot2)
 args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) != 6) {
-  stop("Usage: evaluators_bars_per_group.r common.r input.csv output.png groupName evaluator1 evaluator2")
+if (length(args) != 9) {
+  stop("Usage: evaluators_bars_per_group.r common.r input.csv output.png granularity groupName evaluator1 indication1 evaluator2 indication2")
 }
 
 common <- args[1]
 inFile <- args[2]
 outPng <- args[3]
-groupName <- args[4]
-e1 <- args[5]
-e2 <- args[6]
+# granularity <- args[4]
+groupName <- args[5]
+e1 <- args[6]
+i1 <- args[7]
+e2 <- args[8]
+i2 <- args[9]
 
 source(common)
 

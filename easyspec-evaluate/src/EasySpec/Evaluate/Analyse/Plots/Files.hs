@@ -28,21 +28,6 @@ pngPlotFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
 pngPlotFileWithComponents = fileInDirWithExtensionAndComponents plotsDir "png"
 
-singleEvaluatorAverageBoxPlotFileForExample ::
-       MonadIO m => ES.InputSpec -> Evaluator -> m (Path Abs File)
-singleEvaluatorAverageBoxPlotFileForExample is ev =
-    pngPlotFileWithComponents
-        ($(mkRelDir "single-evaluator-per-example-box") </> ES.inputSpecFile is)
-        [evaluatorName ev]
-
-singleEvaluatorAverageGlobalBoxPlotFileForExample ::
-       MonadIO m => Evaluator -> m (Path Abs File)
-singleEvaluatorAverageGlobalBoxPlotFileForExample ev =
-    pngPlotFileWithComponents
-        ($(mkRelDir "single-evaluator-global-box") </> $(mkRelFile "global"))
-        [evaluatorName ev]
-
-
 exampleModule :: Example -> String
 exampleModule = map go . dropExtensions . toFilePath . ES.inputSpecFile
   where

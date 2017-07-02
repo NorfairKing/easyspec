@@ -1,16 +1,18 @@
 args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) != 7) {
-  stop("Usage: single_evaluator_boxplot_average.r common.r input.csv output.png basedir sourcefile evaluator indication")
+if (length(args) != 8) {
+  print(args)
+  stop("Usage: single_evaluator_boxplot_average.r common.r input.csv output.png granularity group example evaluator indication")
 }
 
 common <- args[1]
 inFile <- args[2]
 outPng <- args[3]
-basedir <- args[4]
-sourcefile <- args[5]
-evaluator <- args[6]
-indication <- args[7]
+# granularity <- args[4]
+group <- args[5]
+sourcefile <- args[6]
+evaluator <- args[7]
+indication <- args[8]
 
 source(common)
 

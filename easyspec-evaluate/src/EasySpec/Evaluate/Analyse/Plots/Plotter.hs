@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE OverlappingInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeApplications #-}
@@ -12,6 +13,7 @@ module EasySpec.Evaluate.Analyse.Plots.Plotter
     , evaluatedCartRule
     , OrderedDistinct(..)
     , UnorderedDistinct(..)
+    , standardisedEvaluatedPlotruleFor
     , Cart
     , EvaluatedData
     ) where
@@ -30,6 +32,7 @@ import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Data.Content
 import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
+import EasySpec.Evaluate.Analyse.R
 import EasySpec.Evaluate.Analyse.Utils
 import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
@@ -298,10 +301,10 @@ evaluatedCartRule cp = do
     options <- getAllOptions
     plotFs <-
         forM options $ \option -> do
-            plotF <- plotFileFor  cp option
+            plotF <- plotFileFor cp option
             cartPlotterFunc cp plotF (getDataFileFor option) option
             pure plotF
-    let rule = cartPlotterName cp
+    let rule = cartPlotterRule cp
     rule ~> needP plotFs
     pure rule
 
@@ -320,10 +323,34 @@ plotFileFor cp a = do
                 Just fileComp -> ["plot", fileComp]
     liftIO $ resolveFile pd $ dirStr ++ "/" ++ fileStr ++ ".png"
 
+standardisedEvaluatedPlotruleFor ::
+       forall a. Cart a
+    => Action (Path Abs File)
+    -> Path Abs File
+    -> Action (Path Abs File)
+    -> a
+    -> Rules ()
+standardisedEvaluatedPlotruleFor genScriptF plotF genDataF option =
+    plotF $%> do
+        dependencies option
+        dataF <- genDataF
+        needP [dataF]
+        scriptF <- genScriptF
+        rscript scriptF $
+            [ toFilePath dataF
+            , toFilePath plotF
+            , intercalate "-" $ ruleComps $ Proxy @a
+            ] ++
+            plotArgs option
+
 class Cart a where
     getAllOptions :: Rules [a]
     fileComps :: a -> [String]
     ruleComps :: Proxy a -> [String]
+    dependencies :: a -> Action ()
+    dependencies _ = pure ()
+    plotArgs :: a -> [String] -- Warning: changing this instance function breaks cross-script modularity
+    plotArgs = fileComps
 
 instance Cart GroupName where
     getAllOptions = pure groups
@@ -344,6 +371,8 @@ instance Cart Evaluator where
     getAllOptions = pure evaluators
     fileComps e = [evaluatorName e]
     ruleComps Proxy = ["evaluator"]
+    dependencies = dependOnEvaluator
+    plotArgs ev = [evaluatorName ev, prettyIndication $ evaluatorIndication ev]
 
 data OrderedDistinct a =
     OrderedDistinct a
@@ -356,6 +385,10 @@ instance Cart a => Cart (OrderedDistinct a) where
         getAllOptions
     fileComps (OrderedDistinct a b) = fileComps a ++ fileComps b
     ruleComps Proxy = ["ordered", "distinct"] ++ ruleComps (Proxy @a)
+    dependencies (OrderedDistinct a b) = do
+        dependencies a
+        dependencies b
+    plotArgs (OrderedDistinct a b) = plotArgs a ++ plotArgs b
 
 data UnorderedDistinct a =
     UnorderedDistinct a
@@ -368,6 +401,10 @@ instance Cart a => Cart (UnorderedDistinct a) where
         getAllOptions
     fileComps (UnorderedDistinct a b) = fileComps a ++ fileComps b
     ruleComps Proxy = ["unordered", "distinct"] ++ ruleComps (Proxy @a)
+    dependencies (UnorderedDistinct a b) = do
+        dependencies a
+        dependencies b
+    plotArgs (UnorderedDistinct a b) = plotArgs a ++ plotArgs b
 
 instance Cart SignatureInferenceStrategy where
     getAllOptions = pure signatureInferenceStrategies
@@ -381,6 +418,10 @@ instance (Cart a, Cart b) => Cart (a, b) where
         pure $ (,) <$> as <*> bs
     fileComps (a, b) = fileComps a ++ fileComps b
     ruleComps Proxy = ruleComps (Proxy @a) ++ ruleComps (Proxy @b)
+    dependencies (a, b) = do
+        dependencies a
+        dependencies b
+    plotArgs (a, b) = plotArgs a ++ plotArgs b
 
 instance (Cart a, Cart b, Cart c) => Cart (a, b, c) where
     getAllOptions = do
@@ -391,12 +432,23 @@ instance (Cart a, Cart b, Cart c) => Cart (a, b, c) where
     fileComps (a, b, c) = fileComps a ++ fileComps b ++ fileComps c
     ruleComps Proxy =
         ruleComps (Proxy @a) ++ ruleComps (Proxy @b) ++ ruleComps (Proxy @c)
+    dependencies (a, b, c) = do
+        dependencies a
+        dependencies b
+        dependencies c
+    plotArgs (a, b, c) = plotArgs a ++ plotArgs b ++ plotArgs c
 
 class EvaluatedData a where
     getDataFileFor :: a -> Action (Path Abs File)
 
 instance EvaluatedData (GroupName, UnorderedDistinct Evaluator) where
     getDataFileFor (g, _) = evaluatedFileForGroup g
+
+instance EvaluatedData ((GroupName, Example), Evaluator) where
+    getDataFileFor ((g, e), ev) = evaluatedFileForGroupExampleEvaluator g e ev
+
+instance EvaluatedData Evaluator where
+    getDataFileFor = evaluatedFileForEvaluator
 
 data Plotter = Plotter
     { plotterRule :: String

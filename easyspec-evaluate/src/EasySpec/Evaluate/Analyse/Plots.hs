@@ -31,11 +31,15 @@ plotsRules = do
             plotRulesForPlotter
             [ correlatingPointsPlotter
             , barPlotter
-            , boxPlotter
             , dfrgPlotter dfrgSizeOfProperty
             , dfrgPlotter dfrgNrDifferentFunctions
             , dfrgPlotter dfrgOccurrencesInAllEquations
             , dfrgPlotter dfrgOccurrencesInSameEquation
             ]
-    bprs <- evaluatedCartRule $ barsPerGroupEvaluatorsPlotter
-    plotsRule ~> need (bprs : rules)
+    rules' <-
+        sequence
+            [ evaluatedCartRule barsPerGroupEvaluatorsPlotter
+            , evaluatedCartRule boxPlotterPerGroupExampleEvaluator
+            , evaluatedCartRule boxPlotterPerEvaluator
+            ]
+    plotsRule ~> need (rules ++ rules')

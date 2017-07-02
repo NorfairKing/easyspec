@@ -6,7 +6,6 @@ module EasySpec.Evaluate.Analyse.Plots.BarsPerGroup
 
 import Import
 
-
 import EasySpec.Evaluate.Types
 
 import EasySpec.Evaluate.Evaluate.Evaluator.Types

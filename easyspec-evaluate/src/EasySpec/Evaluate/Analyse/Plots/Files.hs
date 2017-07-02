@@ -12,7 +12,6 @@ import System.FilePath (dropExtensions)
 import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Analyse.Common
-import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Types
 
 commonRFile :: MonadIO m => m (Path Abs File)

@@ -5,15 +5,13 @@ module EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
 
 import Import
 
-import EasySpec.Evaluate.Types
-
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.Plots.Plotter
 
 boxPlotterPerGroupExampleEvaluator ::
-       EvaluatedCartPlotter ((GroupName, Example), Evaluator)
+       EvaluatedCartPlotter (GroupAndExample, Evaluator)
 boxPlotterPerGroupExampleEvaluator =
     CartPlotter
     { cartPlotterName = "evaluator-box"

@@ -27,12 +27,12 @@ plotsRule = "plots"
 plotsRules :: Rules ()
 plotsRules = do
     rules <-
-        mapM
-            plotRulesForPlotter
-            [ dfrgPlotter dfrgSizeOfProperty
-            , dfrgPlotter dfrgNrDifferentFunctions
-            , dfrgPlotter dfrgOccurrencesInAllEquations
-            , dfrgPlotter dfrgOccurrencesInSameEquation
+        concat <$>
+        sequence
+            [ dfrgRules dfrgSizeOfProperty
+            , dfrgRules dfrgNrDifferentFunctions
+            , dfrgRules dfrgOccurrencesInAllEquations
+            , dfrgRules dfrgOccurrencesInSameEquation
             ]
     rules' <-
         sequence

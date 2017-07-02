@@ -1,28 +1,29 @@
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE OverlappingInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeApplications #-}
 
 module EasySpec.Evaluate.Analyse.Plots.Plotter
-    ( Plotter(..)
-    , plotter
-    , plotRulesForPlotter
-    , CartPlotter(..)
+    ( CartPlotter(..)
     , EvaluatedCartPlotter
+    , RawCartPlotter
     , evaluatedCartRule
+    , plotFileFor
+    , cartFile
+    , granularityStr
+    , rawCartRule
     , OrderedDistinct(..)
     , UnorderedDistinct(..)
     , standardisedEvaluatedPlotruleFor
-    , Cart
+    , GroupAndExample(..)
+    , GroupAndExampleAndName(..)
+    , Cart(..)
     , EvaluatedData
     ) where
 
 import Import hiding (group)
 
 import Data.Proxy
-import Data.String
 import Language.Haskell.Exts.Pretty (prettyPrint)
 
 import Development.Shake
@@ -45,243 +46,7 @@ import EasySpec.Evaluate.Types
 --
 -- Strategy
 -- Evaluator
-plotRulesForPlotter :: Plotter -> Rules String
-plotRulesForPlotter p@Plotter {..} = do
-    perEvaluatorPlots <-
-        rule plotterRulesEvaluator $ \func ->
-            forM evaluators $ \evaluator -> do
-                dataF <- evaluatedFileForEvaluator evaluator
-                plotF <- plotterEvaluatorEvaluatorPlot p evaluator
-                func plotF dataF evaluator
-                pure plotF
-    perOrderedDistinct2EvaluatorPlots <-
-        rule plotterRulesOrderedDistinct2Evaluator $ \func ->
-            forM (orderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
-                dataF <- evaluatedFileForAllData
-                plotF <- plotterEvaluatorOrderedDistinct2EvaluatorPlot p e1 e2
-                func plotF dataF e1 e2
-                pure plotF
-    perGroupPlots <-
-        rule plotterRulesGroup $ \func ->
-            forM groups $ \group -> do
-                dataF <- dataFileForExampleGroup group
-                plotF <- plotterEvaluatorGroupPlot p group
-                func plotF dataF group
-                pure plotF
-    perGroupEvaluatorPlots <-
-        rule plotterRulesGroupEvaluator $ \func ->
-            forM ((,) <$> groups <*> evaluators) $ \(group, evaluator) -> do
-                dataF <- evaluatedFileForGroupEvaluator group evaluator
-                plotF <- plotterEvaluatorGroupEvaluatorPlot p group evaluator
-                func plotF dataF group evaluator
-                pure plotF
-    perGroupOrderedDistinct2EvaluatorPlots <-
-        rule plotterRulesGroupOrderedDistinct2Evaluator $ \func ->
-            fmap concat $
-            forM groups $ \group ->
-                forM (orderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
-                    dataF <- evaluatedFileForGroup group
-                    plotF <-
-                        plotterEvaluatorGroupOrderedDistinct2EvaluatorPlot
-                            p
-                            group
-                            e1
-                            e2
-                    func plotF dataF group e1 e2
-                    pure plotF
-    perGroupUnorderedDistinct2EvaluatorPlots <-
-        rule plotterRulesGroupUnorderedDistinct2Evaluator $ \func ->
-            fmap concat $
-            forM groups $ \group ->
-                forM (unorderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
-                    dataF <- evaluatedFileForGroup group
-                    plotF <-
-                        plotterEvaluatorGroupUnorderedDistinct2EvaluatorPlot
-                            p
-                            group
-                            e1
-                            e2
-                    func plotF dataF group e1 e2
-                    pure plotF
-    perGroupStrategyPlots <-
-        rule plotterRulesGroupStrategy $ \func ->
-            forM ((,) <$> groups <*> signatureInferenceStrategies) $ \(group, strategy) -> do
-                dataF <- evaluatedFileForGroupStrategy group strategy
-                plotF <- plotterEvaluatorGroupStrategyPlot p group strategy
-                func plotF dataF group strategy
-                pure plotF
-    perGroupStrategyEvaluatorPlots <-
-        rule plotterRulesGroupStrategyEvaluator $ \func ->
-            forM
-                ((,,) <$> groups <*> signatureInferenceStrategies <*> evaluators) $ \(group, strategy, evaluator) -> do
-                dataF <-
-                    evaluatedFileForGroupStrategyEvaluator
-                        group
-                        strategy
-                        evaluator
-                plotF <-
-                    plotterEvaluatorGroupStrategyEvaluatorPlot
-                        p
-                        group
-                        strategy
-                        evaluator
-                func plotF dataF group strategy evaluator
-                pure plotF
-    perGroupStrategyOrderedDistinct2EvaluatorPlots <-
-        rule plotterRulesGroupStrategyOrderedDistinct2Evaluator $ \func ->
-            fmap concat $
-            forM ((,) <$> groups <*> signatureInferenceStrategies) $ \(group, strategy) ->
-                forM (orderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
-                    dataF <- evaluatedFileForGroupStrategy group strategy
-                    plotF <-
-                        plotterEvaluatorGroupStrategyOrderedDistinct2EvaluatorPlot
-                            p
-                            group
-                            strategy
-                            e1
-                            e2
-                    func plotF dataF group strategy e1 e2
-                    pure plotF
-    perGroupExamplePlots <-
-        rule plotterRulesGroupExample $ \func ->
-            forM groupsAndExamples $ \(group, example) -> do
-                dataF <- dataFileForExample group example
-                plotF <- plotterEvaluatorGroupExamplePlot p group example
-                func plotF dataF group example
-                pure plotF
-    perGroupExampleNamePlots <-
-        rule plotterRulesGroupExampleName $ \func -> do
-            trips <- groupsExamplesAndNames
-            forM trips $ \(group, example, name) -> do
-                dataF <- dataFileForExampleAndName group example name
-                plotF <-
-                    plotterEvaluatorGroupExampleNamePlot p group example name
-                func plotF dataF group example name
-                pure plotF
-    perGroupExampleEvaluatorPlots <-
-        rule plotterRulesGroupExampleEvaluator $ \func ->
-            forM groupExampleEvaluators $ \(group, example, evaluator) -> do
-                dataF <-
-                    evaluatedFileForGroupExampleEvaluator
-                        group
-                        example
-                        evaluator
-                plotF <-
-                    plotterEvaluatorGroupExampleEvaluatorPlot
-                        p
-                        group
-                        example
-                        evaluator
-                func plotF dataF group example evaluator
-                pure plotF
-    perGroupExampleOrderedDistinct2EvaluatorPlots <-
-        rule plotterRulesGroupExampleOrderedDistinct2Evaluator $ \func ->
-            fmap concat $
-            forM groupsAndExamples $ \(group, example) ->
-                forM (orderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
-                    dataF <- evaluatedFileForGroupExample group example
-                    plotF <-
-                        plotterEvaluatorGroupExampleOrderedDistinct2EvaluatorPlot
-                            p
-                            group
-                            example
-                            e1
-                            e2
-                    func plotF dataF group example e1 e2
-                    pure plotF
-    perGroupExampleNameEvaluatorPlots <-
-        rule plotterRulesGroupExampleNameEvaluator $ \func -> do
-            quads <- groupExamplesNamesAndEvaluators
-            forM quads $ \(group, example, name, evaluator) -> do
-                dataF <-
-                    evaluatedFileForGroupExampleNameEvaluator
-                        group
-                        example
-                        name
-                        evaluator
-                plotF <-
-                    plotterEvaluatorGroupExampleNameEvaluatorPlot
-                        p
-                        group
-                        example
-                        name
-                        evaluator
-                func plotF dataF group example name evaluator
-                pure plotF
-    perGroupExampleNameOrderedDistinct2EvaluatorPlots <-
-        rule plotterRulesGroupExampleNameOrderedDistinct2Evaluator $ \func -> do
-            trips <- groupsExamplesAndNames
-            fmap concat $
-                forM trips $ \(group, example, name) ->
-                    forM (orderedCombinationsWithoutSelfCombinations evaluators) $ \(e1, e2) -> do
-                        dataF <-
-                            evaluatedFileForGroupExampleName group example name
-                        plotF <-
-                            plotterEvaluatorGroupExampleNameOrderedDistinct2EvaluatorPlot
-                                p
-                                group
-                                example
-                                name
-                                e1
-                                e2
-                        func plotF dataF group example name e1 e2
-                        pure plotF
-    rawGroupStrategyPlots <-
-        rule plotterRulesRawGroupStrategy $ \func ->
-            forM ((,) <$> groups <*> signatureInferenceStrategies) $ \(group, strategy) -> do
-                plotF <- plotterEvaluatorRawGroupStrategy p group strategy
-                func
-                    plotF
-                    (rawDataFromGroupStrategy group strategy)
-                    group
-                    strategy
-                pure plotF
-    rawGroupExampleNameStrategyPlots <-
-        rule plotterRulesRawGroupExampleNameStrategy $ \func -> do
-            quads <- groupsExamplesNamesAndStrategies
-            forM quads $ \(group, example, name, strategy) -> do
-                plotF <-
-                    plotterEvaluatorRawGroupExampleNameStrategy
-                        p
-                        group
-                        example
-                        name
-                        strategy
-                func
-                    plotF
-                    (rawDataFrom group example name strategy)
-                    group
-                    example
-                    name
-                    strategy
-                pure plotF
-    plotterRule ~>
-        needP
-            (concat
-                 [ perEvaluatorPlots
-                 , perOrderedDistinct2EvaluatorPlots
-                 , perGroupPlots
-                 , perGroupEvaluatorPlots
-                 , perGroupOrderedDistinct2EvaluatorPlots
-                 , perGroupUnorderedDistinct2EvaluatorPlots
-                 , perGroupStrategyPlots
-                 , perGroupStrategyEvaluatorPlots
-                 , perGroupStrategyOrderedDistinct2EvaluatorPlots
-                 , perGroupExamplePlots
-                 , perGroupExampleEvaluatorPlots
-                 , perGroupExampleOrderedDistinct2EvaluatorPlots
-                 , perGroupExampleNamePlots
-                 , perGroupExampleNameEvaluatorPlots
-                 , perGroupExampleNameOrderedDistinct2EvaluatorPlots
-                 , rawGroupStrategyPlots
-                 , rawGroupExampleNameStrategyPlots
-                 ])
-    pure plotterRule
-  where
-    rule :: Applicative f => Maybe a -> (a -> f [b]) -> f [b]
-    rule Nothing _ = pure []
-    rule (Just a) func = func a
-
+--
 -- Something that makes a plot for every option of a, with an input of b
 data CartPlotter a b = CartPlotter
     { cartPlotterName :: String
@@ -289,6 +54,8 @@ data CartPlotter a b = CartPlotter
     }
 
 type EvaluatedCartPlotter a = CartPlotter a (Path Abs File)
+
+type RawCartPlotter a = CartPlotter a [EvaluationInputPoint]
 
 cartPlotterRule ::
        forall a b. Cart a
@@ -298,31 +65,34 @@ cartPlotterRule cp = intercalate "-" $ cartPlotterName cp : ruleComps (Proxy @a)
 
 evaluatedCartRule ::
        (Cart a, EvaluatedData a) => EvaluatedCartPlotter a -> Rules String
-evaluatedCartRule cp = do
-    options <- getAllOptions
-    plotFs <-
-        forM options $ \option -> do
-            plotF <- plotFileFor cp option
-            cartPlotterFunc cp plotF (getDataFileFor option) option
-            pure plotF
-    let rule = cartPlotterRule cp
-    rule ~> needP plotFs
-    pure rule
+evaluatedCartRule = cartRuleWith getDataFileFor
 
 plotFileFor :: Cart a => CartPlotter a b -> a -> Rules (Path Abs File)
-plotFileFor cp a = do
-    pd <- plotsDir
+plotFileFor cp = cartFile "png" plotsDir (cartPlotterRule cp) "plot"
+
+cartFile ::
+       Cart a
+    => String
+    -> Rules (Path Abs Dir)
+    -> String
+    -> String
+    -> a
+    -> Rules (Path Abs File)
+cartFile ext genDir extraDirPrefix extraFilePrefix option = do
+    pd <- genDir
     let (mFileComp, dirComps) =
-            case fileComps a of
+            case fileComps option of
                 [] -> (Nothing, [])
                 (x:rs) -> (Just x, rs)
-    let dirStr = intercalate "/" $ cartPlotterRule cp : dirComps
+    let dirStr = intercalate "/" $ extraDirPrefix : dirComps
     let fileStr =
-            intercalate "-" $
-            case mFileComp of
-                Nothing -> ["plot"]
-                Just fileComp -> ["plot", fileComp]
-    liftIO $ resolveFile pd $ dirStr ++ "/" ++ fileStr ++ ".png"
+            intercalate
+                "-"
+                (extraFilePrefix :
+                 case mFileComp of
+                     Nothing -> []
+                     Just fileComp -> [fileComp])
+    liftIO $ resolveFile pd $ dirStr ++ "/" ++ fileStr ++ "." ++ ext
 
 standardisedEvaluatedPlotruleFor ::
        forall a. Cart a
@@ -338,11 +108,38 @@ standardisedEvaluatedPlotruleFor genScriptF plotF genDataF option =
         needP [dataF]
         scriptF <- genScriptF
         rscript scriptF $
-            [ toFilePath dataF
-            , toFilePath plotF
-            , intercalate "-" $ ruleComps $ Proxy @a
-            ] ++
+            [toFilePath dataF, toFilePath plotF, granularityStr $ Proxy @a] ++
             plotArgs option
+
+granularityStr ::
+       forall a. Cart a
+    => Proxy a
+    -> String
+granularityStr Proxy = intercalate "-" $ ruleComps $ Proxy @a
+
+rawCartRule :: (Cart a, RawData a) => RawCartPlotter a -> Rules String
+rawCartRule = cartRuleWith getRawDataFor
+
+cartRuleWith :: Cart a => (a -> Action b) -> CartPlotter a b -> Rules String
+cartRuleWith dataGetter cp = do
+    options <- getAllOptions
+    plotFs <-
+        forM options $ \option -> do
+            plotF <- plotFileFor cp option
+            cartPlotterFunc cp plotF (dataGetter option) option
+            pure plotF
+    let rule = cartPlotterRule cp
+    rule ~> needP plotFs
+    pure rule
+
+data GroupAndExample =
+    GE GroupName
+       Example
+
+data GroupAndExampleAndName =
+    GEN GroupName
+        Example
+        ExampleFunction
 
 class Cart a where
     getAllOptions :: Rules [a]
@@ -358,14 +155,14 @@ instance Cart GroupName where
     fileComps g = [g]
     ruleComps Proxy = ["group"]
 
-instance Cart (GroupName, Example) where
-    getAllOptions = pure groupsAndExamples
-    fileComps (g, e) = [g, exampleModule e]
+instance Cart GroupAndExample where
+    getAllOptions = pure $ map (uncurry GE) groupsAndExamples
+    fileComps (GE g e) = [g, exampleModule e]
     ruleComps Proxy = ["group", "example"]
 
-instance Cart (GroupName, Example, ExampleFunction) where
-    getAllOptions = groupsExamplesAndNames
-    fileComps (g, e, n) = [g, exampleModule e, prettyPrint n]
+instance Cart GroupAndExampleAndName where
+    getAllOptions = map (uncurry3 GEN) <$> groupsExamplesAndNames
+    fileComps (GEN g e n) = [g, exampleModule e, prettyPrint n]
     ruleComps Proxy = ["group", "example", "name"]
 
 instance Cart Evaluator where
@@ -467,252 +264,21 @@ instance EvaluatedData Evaluator where
 instance EvaluatedData (GroupName, SignatureInferenceStrategy) where
     getDataFileFor (g, s) = evaluatedFileForGroupStrategy g s
 
-instance EvaluatedData (GroupName, Example) where
-    getDataFileFor (g, e) = evaluatedFileForGroupExample g e
+instance EvaluatedData GroupAndExample where
+    getDataFileFor (GE g e) = evaluatedFileForGroupExample g e
 
-instance EvaluatedData ((GroupName, Example), Evaluator) where
-    getDataFileFor ((g, e), ev) = evaluatedFileForGroupExampleEvaluator g e ev
+instance EvaluatedData (GroupAndExample, Evaluator) where
+    getDataFileFor (GE g e, ev) = evaluatedFileForGroupExampleEvaluator g e ev
 
-instance EvaluatedData ((GroupName, Example, ExampleFunction), Evaluator) where
-    getDataFileFor ((g, e, n), ev) = evaluatedFileForGroupExampleNameEvaluator g e n ev
+instance EvaluatedData (GroupAndExampleAndName, Evaluator) where
+    getDataFileFor (GEN g e n, ev) =
+        evaluatedFileForGroupExampleNameEvaluator g e n ev
 
-data Plotter = Plotter
-    { plotterRule :: String
-    , plotterRulesEvaluator :: Maybe (Path Abs File -> Path Abs File -> Evaluator -> Rules ())
-    , plotterRulesOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> Evaluator -> Evaluator -> Rules ())
-    , plotterRulesGroup :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Rules ())
-    , plotterRulesGroupEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Evaluator -> Rules ())
-    , plotterRulesGroupOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Evaluator -> Evaluator -> Rules ())
-    , plotterRulesGroupUnorderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Evaluator -> Evaluator -> Rules ())
-    , plotterRulesGroupStrategy :: Maybe (Path Abs File -> Path Abs File -> GroupName -> SignatureInferenceStrategy -> Rules ())
-    , plotterRulesGroupStrategyEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> SignatureInferenceStrategy -> Evaluator -> Rules ())
-    , plotterRulesGroupStrategyOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> SignatureInferenceStrategy -> Evaluator -> Evaluator -> Rules ())
-    , plotterRulesGroupExample :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> Rules ())
-    , plotterRulesGroupExampleEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> Evaluator -> Rules ())
-    , plotterRulesGroupExampleOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> Evaluator -> Evaluator -> Rules ())
-    , plotterRulesGroupExampleName :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Rules ())
-    , plotterRulesGroupExampleNameEvaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Rules ())
-    , plotterRulesGroupExampleNameOrderedDistinct2Evaluator :: Maybe (Path Abs File -> Path Abs File -> GroupName -> Example -> ExampleFunction -> Evaluator -> Evaluator -> Rules ())
-    , plotterRulesRawGroupStrategy :: Maybe (Path Abs File -> Action [EvaluationInputPoint] -> GroupName -> SignatureInferenceStrategy -> Rules ())
-    , plotterRulesRawGroupExampleNameStrategy :: Maybe (Path Abs File -> Action EvaluationInputPoint -> GroupName -> Example -> ExampleFunction -> SignatureInferenceStrategy -> Rules ())
-    }
+class RawData a where
+    getRawDataFor :: a -> Action [EvaluationInputPoint]
 
-instance IsString Plotter where
-    fromString = plotter
+instance RawData (GroupName, SignatureInferenceStrategy) where
+    getRawDataFor (g, s) = rawDataFromGroupStrategy g s
 
-plotter :: String -> Plotter
-plotter name =
-    Plotter
-    { plotterRule = name
-    , plotterRulesEvaluator = Nothing
-    , plotterRulesOrderedDistinct2Evaluator = Nothing
-    , plotterRulesGroup = Nothing
-    , plotterRulesGroupEvaluator = Nothing
-    , plotterRulesGroupOrderedDistinct2Evaluator = Nothing
-    , plotterRulesGroupUnorderedDistinct2Evaluator = Nothing
-    , plotterRulesGroupStrategy = Nothing
-    , plotterRulesGroupStrategyEvaluator = Nothing
-    , plotterRulesGroupStrategyOrderedDistinct2Evaluator = Nothing
-    , plotterRulesGroupExample = Nothing
-    , plotterRulesGroupExampleEvaluator = Nothing
-    , plotterRulesGroupExampleOrderedDistinct2Evaluator = Nothing
-    , plotterRulesGroupExampleName = Nothing
-    , plotterRulesGroupExampleNameEvaluator = Nothing
-    , plotterRulesGroupExampleNameOrderedDistinct2Evaluator = Nothing
-    , plotterRulesRawGroupStrategy = Nothing
-    , plotterRulesRawGroupExampleNameStrategy = Nothing
-    }
-
-plotterEvaluatorEvaluatorPlot ::
-       MonadIO m => Plotter -> Evaluator -> m (Path Abs File)
-plotterEvaluatorEvaluatorPlot p e1 =
-    plotterPlotFile p ["per-evaluator"] [evaluatorName e1]
-
-plotterEvaluatorOrderedDistinct2EvaluatorPlot ::
-       MonadIO m => Plotter -> Evaluator -> Evaluator -> m (Path Abs File)
-plotterEvaluatorOrderedDistinct2EvaluatorPlot p e1 e2 =
-    plotterPlotFile
-        p
-        ["per-ordered-distinct-evaluators"]
-        [evaluatorName e1, evaluatorName e2]
-
-plotterEvaluatorGroupPlot ::
-       MonadIO m => Plotter -> GroupName -> m (Path Abs File)
-plotterEvaluatorGroupPlot p g = plotterPlotFile p ["per-group"] [g]
-
-plotterEvaluatorGroupEvaluatorPlot ::
-       MonadIO m => Plotter -> GroupName -> Evaluator -> m (Path Abs File)
-plotterEvaluatorGroupEvaluatorPlot p g e1 =
-    plotterPlotFile p ["per-group-evaluator"] [g, evaluatorName e1]
-
-plotterEvaluatorGroupOrderedDistinct2EvaluatorPlot ::
-       MonadIO m
-    => Plotter
-    -> GroupName
-    -> Evaluator
-    -> Evaluator
-    -> m (Path Abs File)
-plotterEvaluatorGroupOrderedDistinct2EvaluatorPlot p g e1 e2 =
-    plotterPlotFile
-        p
-        ["per-group-ordered-distinct-evaluators"]
-        [g, evaluatorName e1, evaluatorName e2]
-
-plotterEvaluatorGroupUnorderedDistinct2EvaluatorPlot ::
-       MonadIO m
-    => Plotter
-    -> GroupName
-    -> Evaluator
-    -> Evaluator
-    -> m (Path Abs File)
-plotterEvaluatorGroupUnorderedDistinct2EvaluatorPlot p g e1 e2 =
-    plotterPlotFile
-        p
-        ["per-group-unordered-distinct-evaluators"]
-        [g, evaluatorName e1, evaluatorName e2]
-
-plotterEvaluatorGroupStrategyPlot ::
-       MonadIO m
-    => Plotter
-    -> GroupName
-    -> SignatureInferenceStrategy
-    -> m (Path Abs File)
-plotterEvaluatorGroupStrategyPlot p g s =
-    plotterPlotFile p ["per-group-strategy"] [g, strategyName s]
-
-plotterEvaluatorGroupStrategyEvaluatorPlot ::
-       MonadIO m
-    => Plotter
-    -> GroupName
-    -> SignatureInferenceStrategy
-    -> Evaluator
-    -> m (Path Abs File)
-plotterEvaluatorGroupStrategyEvaluatorPlot p g s e1 =
-    plotterPlotFile
-        p
-        ["per-group-strategy-evaluator"]
-        [g, strategyName s, evaluatorName e1]
-
-plotterEvaluatorGroupStrategyOrderedDistinct2EvaluatorPlot ::
-       MonadIO m
-    => Plotter
-    -> GroupName
-    -> SignatureInferenceStrategy
-    -> Evaluator
-    -> Evaluator
-    -> m (Path Abs File)
-plotterEvaluatorGroupStrategyOrderedDistinct2EvaluatorPlot p g s e1 e2 =
-    plotterPlotFile
-        p
-        ["per-group-strategy-ordered-distinct-evaluators"]
-        [g, strategyName s, evaluatorName e1, evaluatorName e2]
-
-plotterEvaluatorGroupExamplePlot ::
-       MonadIO m => Plotter -> GroupName -> Example -> m (Path Abs File)
-plotterEvaluatorGroupExamplePlot p g e =
-    plotterPlotFile p ["per-group-example"] [g, exampleModule e]
-
-plotterEvaluatorGroupExampleEvaluatorPlot ::
-       MonadIO m
-    => Plotter
-    -> GroupName
-    -> Example
-    -> Evaluator
-    -> m (Path Abs File)
-plotterEvaluatorGroupExampleEvaluatorPlot p g e e1 =
-    plotterPlotFile
-        p
-        ["per-group-example-evaluator"]
-        [g, exampleModule e, evaluatorName e1]
-
-plotterEvaluatorGroupExampleOrderedDistinct2EvaluatorPlot ::
-       MonadIO m
-    => Plotter
-    -> GroupName
-    -> Example
-    -> Evaluator
-    -> Evaluator
-    -> m (Path Abs File)
-plotterEvaluatorGroupExampleOrderedDistinct2EvaluatorPlot p g e e1 e2 =
-    plotterPlotFile
-        p
-        ["per-group-example-ordered-distinct-evaluators"]
-        [g, exampleModule e, evaluatorName e1, evaluatorName e2]
-
-plotterEvaluatorGroupExampleNamePlot ::
-       MonadIO m
-    => Plotter
-    -> GroupName
-    -> Example
-    -> ExampleFunction
-    -> m (Path Abs File)
-plotterEvaluatorGroupExampleNamePlot p g e n =
-    plotterPlotFile
-        p
-        ["per-group-example-name"]
-        [g, exampleModule e, prettyPrint n]
-
-plotterEvaluatorGroupExampleNameEvaluatorPlot ::
-       MonadIO m
-    => Plotter
-    -> GroupName
-    -> Example
-    -> ExampleFunction
-    -> Evaluator
-    -> m (Path Abs File)
-plotterEvaluatorGroupExampleNameEvaluatorPlot p g e n e1 =
-    plotterPlotFile
-        p
-        ["per-group-example-name-evaluator"]
-        [g, exampleModule e, prettyPrint n, evaluatorName e1]
-
-plotterEvaluatorGroupExampleNameOrderedDistinct2EvaluatorPlot ::
-       MonadIO m
-    => Plotter
-    -> GroupName
-    -> Example
-    -> ExampleFunction
-    -> Evaluator
-    -> Evaluator
-    -> m (Path Abs File)
-plotterEvaluatorGroupExampleNameOrderedDistinct2EvaluatorPlot p g e n e1 e2 =
-    plotterPlotFile
-        p
-        ["per-group-example-name-ordered-distinct-evaluators"]
-        [g, exampleModule e, prettyPrint n, evaluatorName e1, evaluatorName e2]
-
-plotterEvaluatorRawGroupExampleNameStrategy ::
-       MonadIO m
-    => Plotter
-    -> GroupName
-    -> Example
-    -> ExampleFunction
-    -> SignatureInferenceStrategy
-    -> m (Path Abs File)
-plotterEvaluatorRawGroupExampleNameStrategy p g e n s =
-    plotterPlotFile
-        p
-        ["raw-per-group-example-name-strategy"]
-        [g, exampleModule e, prettyPrint n, strategyName s]
-
-plotterEvaluatorRawGroupStrategy ::
-       MonadIO m
-    => Plotter
-    -> GroupName
-    -> SignatureInferenceStrategy
-    -> m (Path Abs File)
-plotterEvaluatorRawGroupStrategy p g s =
-    plotterPlotFile p ["raw-per-group-strategy"] [g, strategyName s]
-
-plotterPlotFile ::
-       MonadIO m => Plotter -> [String] -> [String] -> m (Path Abs File)
-plotterPlotFile p dircomps =
-    plotterRawPlotFileWithComponents p (plotterRule p : dircomps)
-
-plotterRawPlotFileWithComponents ::
-       MonadIO m => Plotter -> [String] -> [String] -> m (Path Abs File)
-plotterRawPlotFileWithComponents Plotter {..} dirStrs comps = do
-    pd <- plotsDir
-    let dirStr = intercalate "/" dirStrs
-    let fileStr = intercalate "-" $ "plot" : comps
-    liftIO $ resolveFile pd $ dirStr ++ "/" ++ fileStr ++ ".png"
+instance RawData (GroupAndExampleAndName, SignatureInferenceStrategy) where
+    getRawDataFor (GEN g e n, s) = (: []) <$> rawDataFrom g e n s

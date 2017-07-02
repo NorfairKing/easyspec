@@ -38,9 +38,9 @@ correlatingPointsPlotterPerGroup =
 plotsRulesForPointsPlotWithEvaluatorsPerExample ::
        Path Abs File
     -> Action (Path Abs File)
-    -> ((GroupName, Example), OrderedDistinct Evaluator)
+    -> (GroupAndExample, OrderedDistinct Evaluator)
     -> Rules ()
-plotsRulesForPointsPlotWithEvaluatorsPerExample plotF genDataF ((_, is), OrderedDistinct e1 e2) =
+plotsRulesForPointsPlotWithEvaluatorsPerExample plotF genDataF (GE _ is, OrderedDistinct e1 e2) =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
@@ -59,7 +59,7 @@ plotsRulesForPointsPlotWithEvaluatorsPerExample plotF genDataF ((_, is), Ordered
             ]
 
 correlatingPointsPlotterPerGroupExample ::
-       EvaluatedCartPlotter ((GroupName, Example), OrderedDistinct Evaluator)
+       EvaluatedCartPlotter (GroupAndExample, OrderedDistinct Evaluator)
 correlatingPointsPlotterPerGroupExample =
     CartPlotter
     { cartPlotterName = "correlating-points"

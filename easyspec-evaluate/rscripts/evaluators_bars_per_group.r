@@ -16,7 +16,7 @@ source(common)
 
 res = read.csv(inFile, header=TRUE)
 
-res$origin <- paste(res$path, res$focus)
+res$origin <- paste(res$file, res$focus, res$strategy)
 
 # Select the right data
 res1 <- res[res$evaluator == e1,]
@@ -32,7 +32,6 @@ dat <- merge(res1, res2, by = "origin")
 dat <- dat[!is.na(dat$output.x),]
 dat <- dat[!is.na(dat$output.y),]
 
-head(dat)
 if (length(dat$origin) != 0) {
     png( outPng
     , height=600
@@ -48,24 +47,9 @@ if (length(dat$origin) != 0) {
     , main = "title"
     )
 
-  strats = unique(res$strategy)
-  for (i in seq_along(strats)) {
-    strat = strats[i]
-    sdat <- dat[dat$strategy.x == strat,]
-    lines(sdat$output.x
-      , sdat$output.y
-      , col = i
-      )
-  }
-
-
-  # To draw legend outside of graph
-  legend("right"
-    , inset=c(-0.8, 0)
-    , legend=levels(factor(strats))
-    , col=as.numeric(unique(factor(strats)))
-    , lty = 1
-    )
+  ggplot(dat, aes(output.x, output.y, fill = strategy.x)) +
+    geom_bar(stat="identity", position = "dodge") +
+    scale_fill_brewer(palette = "Set1")
 
 } else {
   invalidDataPng(outPng)

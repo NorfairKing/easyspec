@@ -6,10 +6,6 @@ module EasySpec.Evaluate.Analyse.Plots.BarsPerGroup
 
 import Import
 
-import Language.Haskell.Exts.Pretty (prettyPrint)
-
-import qualified EasySpec.Discover.Types as ES
-
 import Development.Shake
 import Development.Shake.Path
 
@@ -21,7 +17,6 @@ import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.Plots.Plotter
 import EasySpec.Evaluate.Analyse.R
-import EasySpec.Evaluate.Types
 
 barsPerGroupEvaluatorsPlotter :: Plotter
 barsPerGroupEvaluatorsPlotter =
@@ -42,9 +37,9 @@ perGroupEvaluatorsBarsPlotFor plotF dataF g e1 e2 =
         dependOnEvaluator e1
         dependOnEvaluator e2
         needP [dataF]
-        scriptFile <- scriptFile "evaluators_bars_per_group.r"
+        scriptF <- scriptFile "evaluators_bars_per_group.r"
         rscript
-            scriptFile
+            scriptF
             [ toFilePath dataF
             , toFilePath plotF
             , g

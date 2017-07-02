@@ -16,6 +16,8 @@ source(common)
 
 res = read.csv(inFile, header=TRUE)
 
+res <- res[res$strategy == "full-background" | res$strategy == "full-breakthrough-1",]
+
 res$origin <- paste(res$file, res$focus, res$strategy)
 
 # Select the right data
@@ -39,17 +41,11 @@ if (length(dat$origin) != 0) {
     , bg="white"
     )
 
-  par(xpd=TRUE, mar=c(4,4,4,35))
-
-  plot(dat$output.x
-    , dat$output.y
-    , type = "n" # Don't plot yet.
-    , main = "title"
-    )
-
   ggplot(dat, aes(output.x, output.y, fill = strategy.x)) +
     geom_bar(stat="identity", position = "dodge") +
-    scale_fill_brewer(palette = "Set1")
+    scale_fill_brewer(palette = "Set1") +
+    ggtitle(paste(e2, "in terms of", e1)) +
+    labs(x = e1) + labs(y = e2)
 
 } else {
   invalidDataPng(outPng)

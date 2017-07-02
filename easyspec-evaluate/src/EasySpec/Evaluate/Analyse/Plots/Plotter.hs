@@ -1,13 +1,24 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeApplications #-}
 
 module EasySpec.Evaluate.Analyse.Plots.Plotter
     ( Plotter(..)
     , plotter
     , plotRulesForPlotter
+    , CartPlotter(..)
+    , EvaluatedCartPlotter
+    , evaluatedCartRule
+    , OrderedDistinct(..)
+    , UnorderedDistinct(..)
+    , Cart
+    , EvaluatedData
     ) where
 
 import Import hiding (group)
 
+import Data.Proxy
 import Data.String
 import Language.Haskell.Exts.Pretty (prettyPrint)
 
@@ -266,6 +277,126 @@ plotRulesForPlotter p@Plotter {..} = do
     rule :: Applicative f => Maybe a -> (a -> f [b]) -> f [b]
     rule Nothing _ = pure []
     rule (Just a) func = func a
+
+-- Something that makes a plot for every option of a, with an input of b
+data CartPlotter a b = CartPlotter
+    { cartPlotterName :: String
+    , cartPlotterFunc :: Path Abs File -> Action b -> a -> Rules ()
+    }
+
+type EvaluatedCartPlotter a = CartPlotter a (Path Abs File)
+
+cartPlotterRule ::
+       forall a b. Cart a
+    => CartPlotter a b
+    -> String
+cartPlotterRule cp = intercalate "-" $ cartPlotterName cp : ruleComps (Proxy @a)
+
+evaluatedCartRule ::
+       (Cart a, EvaluatedData a) => EvaluatedCartPlotter a -> Rules String
+evaluatedCartRule cp = do
+    options <- getAllOptions
+    plotFs <-
+        forM options $ \option -> do
+            plotF <- plotFileFor  cp option
+            cartPlotterFunc cp plotF (getDataFileFor option) option
+            pure plotF
+    let rule = cartPlotterName cp
+    rule ~> needP plotFs
+    pure rule
+
+plotFileFor :: Cart a => CartPlotter a b -> a -> Rules (Path Abs File)
+plotFileFor cp a = do
+    pd <- plotsDir
+    let (mFileComp, dirComps) =
+            case fileComps a of
+                [] -> (Nothing, [])
+                (x:rs) -> (Just x, rs)
+    let dirStr = intercalate "/" $ cartPlotterRule cp : dirComps
+    let fileStr =
+            intercalate "-" $
+            case mFileComp of
+                Nothing -> ["plot"]
+                Just fileComp -> ["plot", fileComp]
+    liftIO $ resolveFile pd $ dirStr ++ "/" ++ fileStr ++ ".png"
+
+class Cart a where
+    getAllOptions :: Rules [a]
+    fileComps :: a -> [String]
+    ruleComps :: Proxy a -> [String]
+
+instance Cart GroupName where
+    getAllOptions = pure groups
+    fileComps g = [g]
+    ruleComps Proxy = ["group"]
+
+instance Cart (GroupName, Example) where
+    getAllOptions = pure groupsAndExamples
+    fileComps (g, e) = [g, exampleModule e]
+    ruleComps Proxy = ["group", "example"]
+
+instance Cart (GroupName, Example, ExampleFunction) where
+    getAllOptions = groupsExamplesAndNames
+    fileComps (g, e, n) = [g, exampleModule e, prettyPrint n]
+    ruleComps Proxy = ["group", "example", "name"]
+
+instance Cart Evaluator where
+    getAllOptions = pure evaluators
+    fileComps e = [evaluatorName e]
+    ruleComps Proxy = ["evaluator"]
+
+data OrderedDistinct a =
+    OrderedDistinct a
+                    a
+
+instance Cart a => Cart (OrderedDistinct a) where
+    getAllOptions =
+        (map (uncurry OrderedDistinct) .
+         orderedCombinationsWithoutSelfCombinations) <$>
+        getAllOptions
+    fileComps (OrderedDistinct a b) = fileComps a ++ fileComps b
+    ruleComps Proxy = ["ordered", "distinct"] ++ ruleComps (Proxy @a)
+
+data UnorderedDistinct a =
+    UnorderedDistinct a
+                      a
+
+instance Cart a => Cart (UnorderedDistinct a) where
+    getAllOptions =
+        (map (uncurry UnorderedDistinct) .
+         unorderedCombinationsWithoutSelfCombinations) <$>
+        getAllOptions
+    fileComps (UnorderedDistinct a b) = fileComps a ++ fileComps b
+    ruleComps Proxy = ["unordered", "distinct"] ++ ruleComps (Proxy @a)
+
+instance Cart SignatureInferenceStrategy where
+    getAllOptions = pure signatureInferenceStrategies
+    fileComps s = [strategyName s]
+    ruleComps Proxy = ["strategy"]
+
+instance (Cart a, Cart b) => Cart (a, b) where
+    getAllOptions = do
+        as <- getAllOptions
+        bs <- getAllOptions
+        pure $ (,) <$> as <*> bs
+    fileComps (a, b) = fileComps a ++ fileComps b
+    ruleComps Proxy = ruleComps (Proxy @a) ++ ruleComps (Proxy @b)
+
+instance (Cart a, Cart b, Cart c) => Cart (a, b, c) where
+    getAllOptions = do
+        as <- getAllOptions
+        bs <- getAllOptions
+        cs <- getAllOptions
+        pure $ (,,) <$> as <*> bs <*> cs
+    fileComps (a, b, c) = fileComps a ++ fileComps b ++ fileComps c
+    ruleComps Proxy =
+        ruleComps (Proxy @a) ++ ruleComps (Proxy @b) ++ ruleComps (Proxy @c)
+
+class EvaluatedData a where
+    getDataFileFor :: a -> Action (Path Abs File)
+
+instance EvaluatedData (GroupName, UnorderedDistinct Evaluator) where
+    getDataFileFor (g, _) = evaluatedFileForGroup g
 
 data Plotter = Plotter
     { plotterRule :: String

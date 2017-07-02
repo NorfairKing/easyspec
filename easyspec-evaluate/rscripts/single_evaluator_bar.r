@@ -1,17 +1,18 @@
 args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) != 8) {
-  stop("Usage: single_evaluator_bar.r common.r input.csv output.png basedir sourcefile funcname evaluator indication")
+if (length(args) != 9) {
+  stop("Usage: single_evaluator_bar.r common.r input.csv output.png granularity group example funcname evaluator indication")
 }
 
 common <- args[1]
 inFile <- args[2]
 outPng <- args[3]
-basedir <- args[4]
-sourcefile <- args[5]
-funcname <- args[6]
-evaluator <- args[7]
-indication <- args[8]
+# granularity <- args[4]
+group <- args[5]
+sourcefile <- args[6]
+funcname <- args[7]
+evaluator <- args[8]
+indication <- args[9]
 
 source(common)
 

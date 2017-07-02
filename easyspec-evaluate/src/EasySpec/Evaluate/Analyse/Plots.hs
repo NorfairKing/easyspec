@@ -29,17 +29,20 @@ plotsRules = do
     rules <-
         mapM
             plotRulesForPlotter
-            [ correlatingPointsPlotter
-            , barPlotter
-            , dfrgPlotter dfrgSizeOfProperty
+            [ dfrgPlotter dfrgSizeOfProperty
             , dfrgPlotter dfrgNrDifferentFunctions
             , dfrgPlotter dfrgOccurrencesInAllEquations
             , dfrgPlotter dfrgOccurrencesInSameEquation
             ]
     rules' <-
         sequence
-            [ evaluatedCartRule barsPerGroupEvaluatorsPlotter
+            [ evaluatedCartRule barPlotter
+            , evaluatedCartRule barsPerGroupEvaluatorsPlotter
             , evaluatedCartRule boxPlotterPerGroupExampleEvaluator
             , evaluatedCartRule boxPlotterPerEvaluator
+            , evaluatedCartRule correlatingPointsPlotterAll
+            , evaluatedCartRule correlatingPointsPlotterPerGroup
+            , evaluatedCartRule correlatingPointsPlotterPerGroupExample
+            , evaluatedCartRule correlatingPointsPlotterPerGroupStrategy
             ]
     plotsRule ~> need (rules ++ rules')

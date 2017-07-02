@@ -2,6 +2,7 @@
 {-# LANGUAGE OverlappingInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeApplications #-}
 
 module EasySpec.Evaluate.Analyse.Plots.Plotter
@@ -441,14 +442,39 @@ instance (Cart a, Cart b, Cart c) => Cart (a, b, c) where
 class EvaluatedData a where
     getDataFileFor :: a -> Action (Path Abs File)
 
-instance EvaluatedData (GroupName, UnorderedDistinct Evaluator) where
-    getDataFileFor (g, _) = evaluatedFileForGroup g
+instance EvaluatedData (OrderedDistinct Evaluator) where
+    getDataFileFor _ = evaluatedFileForAllData
+
+instance EvaluatedData a => EvaluatedData (a, OrderedDistinct Evaluator) where
+    getDataFileFor (a, _) = getDataFileFor a
+
+instance EvaluatedData (a, b) =>
+         EvaluatedData (a, b, OrderedDistinct Evaluator) where
+    getDataFileFor (a, b, _) = getDataFileFor (a, b)
+
+instance EvaluatedData (UnorderedDistinct Evaluator) where
+    getDataFileFor _ = evaluatedFileForAllData
+
+instance EvaluatedData a => EvaluatedData (a, UnorderedDistinct Evaluator) where
+    getDataFileFor (g, _) = getDataFileFor g
+
+instance EvaluatedData GroupName where
+    getDataFileFor = evaluatedFileForGroup
+
+instance EvaluatedData Evaluator where
+    getDataFileFor = evaluatedFileForEvaluator
+
+instance EvaluatedData (GroupName, SignatureInferenceStrategy) where
+    getDataFileFor (g, s) = evaluatedFileForGroupStrategy g s
+
+instance EvaluatedData (GroupName, Example) where
+    getDataFileFor (g, e) = evaluatedFileForGroupExample g e
 
 instance EvaluatedData ((GroupName, Example), Evaluator) where
     getDataFileFor ((g, e), ev) = evaluatedFileForGroupExampleEvaluator g e ev
 
-instance EvaluatedData Evaluator where
-    getDataFileFor = evaluatedFileForEvaluator
+instance EvaluatedData ((GroupName, Example, ExampleFunction), Evaluator) where
+    getDataFileFor ((g, e, n), ev) = evaluatedFileForGroupExampleNameEvaluator g e n ev
 
 data Plotter = Plotter
     { plotterRule :: String

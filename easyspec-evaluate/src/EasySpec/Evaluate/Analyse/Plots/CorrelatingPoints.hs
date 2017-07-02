@@ -3,11 +3,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
-    ( correlatingPointsPlotter
-    , plotsRulesForPointsPlotWithEvaluatorsPerExample
-    , plotsRulesForPointsPlotsWithGroupsOfExamples
-    , plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy
-    , plotsRulesForPointsPlotWithEvaluators
+    ( correlatingPointsPlotterAll
+    , correlatingPointsPlotterPerGroup
+    , correlatingPointsPlotterPerGroupExample
+    , correlatingPointsPlotterPerGroupStrategy
     ) where
 
 import Import
@@ -28,31 +27,24 @@ import EasySpec.Evaluate.Analyse.R
 
 {-# ANN module ("HLint: ignore Reduce duplication" :: String) #-}
 
-correlatingPointsPlotter :: Plotter
-correlatingPointsPlotter =
-    "correlating-points"
-    { plotterRulesOrderedDistinct2Evaluator =
-          Just plotsRulesForPointsPlotWithEvaluators
-    , plotterRulesGroupOrderedDistinct2Evaluator =
-          Just plotsRulesForPointsPlotsWithGroupsOfExamples
-    , plotterRulesGroupStrategyOrderedDistinct2Evaluator =
-          Just plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy
-    , plotterRulesGroupExampleOrderedDistinct2Evaluator =
-          Just plotsRulesForPointsPlotWithEvaluatorsPerExample
+correlatingPointsPlotterPerGroup ::
+       EvaluatedCartPlotter (GroupName, OrderedDistinct Evaluator)
+correlatingPointsPlotterPerGroup =
+    CartPlotter
+    { cartPlotterName = "correlating-points"
+    , cartPlotterFunc = plotsRulesForPointsPlotsWithGroupsOfExamples
     }
 
 plotsRulesForPointsPlotWithEvaluatorsPerExample ::
        Path Abs File
-    -> Path Abs File
-    -> GroupName
-    -> Example
-    -> Evaluator
-    -> Evaluator
+    -> Action (Path Abs File)
+    -> ((GroupName, Example), OrderedDistinct Evaluator)
     -> Rules ()
-plotsRulesForPointsPlotWithEvaluatorsPerExample plotF dataF _ is e1 e2 =
+plotsRulesForPointsPlotWithEvaluatorsPerExample plotF genDataF ((_, is), OrderedDistinct e1 e2) =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
+        dataF <- genDataF
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
         rscript
@@ -66,17 +58,24 @@ plotsRulesForPointsPlotWithEvaluatorsPerExample plotF dataF _ is e1 e2 =
             , prettyIndication $ evaluatorIndication e2
             ]
 
+correlatingPointsPlotterPerGroupExample ::
+       EvaluatedCartPlotter ((GroupName, Example), OrderedDistinct Evaluator)
+correlatingPointsPlotterPerGroupExample =
+    CartPlotter
+    { cartPlotterName = "correlating-points"
+    , cartPlotterFunc = plotsRulesForPointsPlotWithEvaluatorsPerExample
+    }
+
 plotsRulesForPointsPlotsWithGroupsOfExamples ::
        Path Abs File
-    -> Path Abs File
-    -> GroupName
-    -> Evaluator
-    -> Evaluator
+    -> Action (Path Abs File)
+    -> (GroupName, OrderedDistinct Evaluator)
     -> Rules ()
-plotsRulesForPointsPlotsWithGroupsOfExamples plotF dataF groupName e1 e2 =
+plotsRulesForPointsPlotsWithGroupsOfExamples plotF genDataF (groupName, OrderedDistinct e1 e2) =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
+        dataF <- genDataF
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
         rscript
@@ -90,18 +89,26 @@ plotsRulesForPointsPlotsWithGroupsOfExamples plotF dataF groupName e1 e2 =
             , prettyIndication $ evaluatorIndication e2
             ]
 
+correlatingPointsPlotterPerGroupStrategy ::
+       EvaluatedCartPlotter ( GroupName
+                            , SignatureInferenceStrategy
+                            , OrderedDistinct Evaluator)
+correlatingPointsPlotterPerGroupStrategy =
+    CartPlotter
+    { cartPlotterName = "correlating-points"
+    , cartPlotterFunc = plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy
+    }
+
 plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy ::
        Path Abs File
-    -> Path Abs File
-    -> GroupName
-    -> SignatureInferenceStrategy
-    -> Evaluator
-    -> Evaluator
+    -> Action (Path Abs File)
+    -> (GroupName, SignatureInferenceStrategy, OrderedDistinct Evaluator)
     -> Rules ()
-plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy plotF dataF groupName s e1 e2 =
+plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy plotF genDataF (groupName, s, OrderedDistinct e1 e2) =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
+        dataF <- genDataF
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
         rscript
@@ -116,12 +123,23 @@ plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy plotF dataF groupName s 
             , prettyIndication $ evaluatorIndication e2
             ]
 
+correlatingPointsPlotterAll :: EvaluatedCartPlotter (OrderedDistinct Evaluator)
+correlatingPointsPlotterAll =
+    CartPlotter
+    { cartPlotterName = "correlating-points"
+    , cartPlotterFunc = plotsRulesForPointsPlotWithEvaluators
+    }
+
 plotsRulesForPointsPlotWithEvaluators ::
-       Path Abs File -> Path Abs File -> Evaluator -> Evaluator -> Rules ()
-plotsRulesForPointsPlotWithEvaluators plotF dataF e1 e2 =
+       Path Abs File
+    -> Action (Path Abs File)
+    -> OrderedDistinct Evaluator
+    -> Rules ()
+plotsRulesForPointsPlotWithEvaluators plotF genDataF (OrderedDistinct e1 e2) =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
+        dataF <- genDataF
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
         rscript

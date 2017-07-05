@@ -1,5 +1,5 @@
-Easyspec: Automatic functional property discovery in Haskell
-============================================================
+Easyspec: Automatic Functional Property Discovery using Signature Inference in Haskell
+======================================================================================
 
 
 # Disclaimer
@@ -30,17 +30,19 @@ stack install
 
 Running `easyspec` without arguments or `easyspec --help` will show you the usage of `easyspec`.
 
-## Discovering properties
+# Dependencies
 
-To discover properties, ghc must have access to `QuickSpec`, among other dependencies.
+To discover properties, the internals of the ghc API that `easyspec` uses must have access to `QuickSpec`.
 You can either install `quickspec` globally with `cabal install quickspec`, or you can have `stack` arrange everything for you by using `stack exec` to run the commands described below.
 For example, instead of running `easyspec discover MyFile.hs`, you would have to run `stack exec easyspec -- discover MyFile.hs`.
+
+# Discovering properties
 
 To discover the properties of a functlon `func` in a file `File.hs` in the directory 'example-dir', you can run `easyspec discover File.hs File.func --base-dir example-dir`.
 Easyspec will find all the functions that are in scope at the top-level of a module (including all the imported functions).
 Then it performs its magic and uses `quickspec` to discover the properties of the chosen function with respect to all the other functions in scope.
 
-### Example
+## Example
 
 There are plenty of examples in the `examples` directory, but here is a worked example:
 

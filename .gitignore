@@ -1,1 +1,8 @@
-.stack-work
+tmp/
+out/
+.shake/
+.stack-work/
+*.prof
+*.html
+*.hi
+*.o

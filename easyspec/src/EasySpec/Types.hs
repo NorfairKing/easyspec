@@ -1,0 +1,1 @@
+module EasySpec.Types where

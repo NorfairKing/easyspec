@@ -1,0 +1,23 @@
+flags: {}
+packages:
+- './easyspec'
+- './easyspec-evaluate'
+- location:
+      git: git@github.com:NorfairKing/quickspec.git
+      commit: 58d2c4ef66da806f938281159dc66bf2a9d062a1
+  extra-dep: true
+extra-deps:
+- optparse-applicative-0.13.2.0
+- validity-containers-0.1.0.2
+- quickspec-0.9.6
+- validity-0.3.2.0
+- validity-path-0.1.0.0
+- genvalidity-0.3.1.0
+- genvalidity-hspec-0.3.1.0
+- genvalidity-path-0.1.0.0
+- jukebox-0.2.17
+- twee-0.1
+- minisat-0.1.2
+- shake-path-0.0.0.0
+- edit-distance-vector-1.0.0.4
+resolver: lts-8.6

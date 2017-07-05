@@ -1,0 +1,118 @@
+name: easyspec-evaluate
+version: 0.0.0.0
+cabal-version: >=1.10
+build-type: Simple
+license: AllRightsReserved
+license-file: LICENSE
+copyright: Copyright: (c) 2016 Tom Sydney Kerckhove
+maintainer: syd.kerckhove@gmail.com
+homepage: http://cs-syd.eu
+category: CsSyd
+author: Tom Sydney Kerckhove
+
+library
+    exposed-modules:
+        EasySpec.Evaluate
+        EasySpec.Evaluate.Analyse
+        EasySpec.Evaluate.Analyse.Archive
+        EasySpec.Evaluate.Analyse.Common
+        EasySpec.Evaluate.Analyse.Data
+        EasySpec.Evaluate.Analyse.Data.Averages
+        EasySpec.Evaluate.Analyse.Data.Common
+        EasySpec.Evaluate.Analyse.Data.Common.TH
+        EasySpec.Evaluate.Analyse.Data.Content
+        EasySpec.Evaluate.Analyse.Data.Evaluated
+        EasySpec.Evaluate.Analyse.Data.Files
+        EasySpec.Evaluate.Analyse.Data.Raw
+        EasySpec.Evaluate.Analyse.Data.Types
+        EasySpec.Evaluate.Analyse.Hackage
+        EasySpec.Evaluate.Analyse.Hackage.TH
+        EasySpec.Evaluate.Analyse.Plots
+        EasySpec.Evaluate.Analyse.Plots.BarsPerGroup
+        EasySpec.Evaluate.Analyse.Plots.CorrelatingPoints
+        EasySpec.Evaluate.Analyse.Plots.DistributionFromRawPlotter
+        EasySpec.Evaluate.Analyse.Plots.DistributionNrDifferentFunctions
+        EasySpec.Evaluate.Analyse.Plots.DistributionOccurrencesInAllEquations
+        EasySpec.Evaluate.Analyse.Plots.DistributionOccurrencesInSameEquation
+        EasySpec.Evaluate.Analyse.Plots.DistributionSizeOfProperty
+        EasySpec.Evaluate.Analyse.Plots.Files
+        EasySpec.Evaluate.Analyse.Plots.Plotter
+        EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBar
+        EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
+        EasySpec.Evaluate.Analyse.R
+        EasySpec.Evaluate.Analyse.Utils
+        EasySpec.Evaluate.Build
+        EasySpec.Evaluate.Evaluate
+        EasySpec.Evaluate.Evaluate.Evaluator
+        EasySpec.Evaluate.Evaluate.Evaluator.Combinators
+        EasySpec.Evaluate.Evaluate.Evaluator.Equations
+        EasySpec.Evaluate.Evaluate.Evaluator.MaximumRelatedFunctions
+        EasySpec.Evaluate.Evaluate.Evaluator.RelevantEquations
+        EasySpec.Evaluate.Evaluate.Evaluator.RelevantFunctions
+        EasySpec.Evaluate.Evaluate.Evaluator.Runtime
+        EasySpec.Evaluate.Evaluate.Evaluator.ScopeSize
+        EasySpec.Evaluate.Evaluate.Evaluator.Types
+        EasySpec.Evaluate.Evaluate.Evaluator.Utils
+        EasySpec.Evaluate.HaskellJSON
+        EasySpec.Evaluate.OptParse
+        EasySpec.Evaluate.OptParse.Types
+        EasySpec.Evaluate.Types
+    build-depends:
+        base >=4.9 && <=5,
+        easyspec >=0.0 && <0.1,
+        aeson >=1.0 && <1.1,
+        aeson-pretty >=0.8 && <0.9,
+        bytestring >=0.10 && <0.11,
+        cassava >=0.4 && <0.5,
+        Cabal >=1.24 && <1.25,
+        exceptions >=0.8 && <0.9,
+        filepath >=1.4 && <1.5,
+        file-embed >=0.0 && <0.1,
+        optparse-applicative >=0.13,
+        path >=0.5 && <0.6,
+        path-io >=1.2 && <1.3,
+        mtl >=2.2 && <2.3,
+        text >=1.2 && <1.3,
+        template-haskell >=2.11 && <2.12,
+        timeit >=1.0 && <1.1,
+        haskell-src-exts >=1.18 && <1.19,
+        shake >=0.15 && <0.16,
+        shake-path >=0.0 && <0.1,
+        vector >=0.11 && <0.12
+    default-language: Haskell2010
+    default-extensions: NoImplicitPrelude
+    hs-source-dirs: src/
+    other-modules:
+        Import
+    ghc-options: -Wall
+
+executable easyspec-evaluate
+    main-is: Main.hs
+    build-depends:
+        base >=4.9 && <=5,
+        easyspec-evaluate -any
+    default-language: Haskell2010
+    hs-source-dirs: app/
+    ghc-options: -threaded -rtsopts -with-rtsopts=-N
+
+test-suite easyspec-evaluate-test
+    type: exitcode-stdio-1.0
+    main-is: Spec.hs
+    build-depends:
+        base >=4.9 && <=5,
+        easyspec -any,
+        easyspec-evaluate -any,
+        QuickCheck >=2.9 && <2.10,
+        genvalidity-hspec >=0.3 && <0.4,
+        genvalidity-path >=0.1 && <0.2,
+        hspec -any,
+        mtl -any,
+        path -any,
+        path-io -any
+    default-language: Haskell2010
+    default-extensions: NoImplicitPrelude
+    hs-source-dirs: test/
+    other-modules:
+        TestImport
+        EasySpec.Evaluate.EvaluateSpec
+    ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall

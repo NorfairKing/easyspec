@@ -3,7 +3,7 @@
 module Fourteen where
 
 import Prelude
-       (Bool(..), (&&), (+), (-), (||), concat, drop, map, take, not)
+       (Bool(..), (&&), (+), (-), (||), concat, drop, map, not, take)
 
 myId :: a -> a
 myId a = a

@@ -2,6 +2,8 @@ module EasySpec.Evaluate.Evaluate.Evaluator.Types where
 
 import Import
 
+import Data.Function (on)
+
 import qualified EasySpec.Discover.Types as ES
 
 type EvaluatorName = String
@@ -15,6 +17,15 @@ data Evaluator = Evaluator
     , evaluatorIndication :: Indication
     , evaluatorRelevantFiles :: [Path Rel File]
     }
+
+instance Show Evaluator where
+    show = evaluatorName
+
+instance Eq Evaluator where
+    (==) = (==) `on` evaluatorName
+
+instance Ord Evaluator where
+    compare = compare `on` evaluatorName
 
 data EvaluationInput = EvaluationInput
     { eiScope :: [ES.EasyId]

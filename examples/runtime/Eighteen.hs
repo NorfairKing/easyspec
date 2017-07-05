@@ -3,7 +3,8 @@
 module Eighteen where
 
 import Prelude
-       (Bool(..), (&&), (+), (-), (||), concat, drop, map, take, not, const, Maybe(..), maybe)
+       (Bool(..), Maybe(..), (&&), (+), (-), (||), concat, const, drop,
+        map, maybe, not, take)
 
 myId :: a -> a
 myId a = a

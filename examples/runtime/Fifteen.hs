@@ -3,7 +3,8 @@
 module Fifteen where
 
 import Prelude
-       (Bool(..), (&&), (+), (-), (||), concat, drop, map, take, not, const)
+       (Bool(..), (&&), (+), (-), (||), concat, const, drop, map, not,
+        take)
 
 myId :: a -> a
 myId a = a

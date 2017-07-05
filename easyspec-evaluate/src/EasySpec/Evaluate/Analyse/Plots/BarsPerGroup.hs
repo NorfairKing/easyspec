@@ -15,7 +15,9 @@ import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.Plots.Plotter
 
 barsPerGroupEvaluatorsStrategyPlotter ::
-       EvaluatedCartPlotter (GroupName, SignatureInferenceStrategy, UnorderedDistinct Evaluator)
+       EvaluatedCartPlotter ( GroupName
+                            , SignatureInferenceStrategy
+                            , IndepDepPairEvaluator)
 barsPerGroupEvaluatorsStrategyPlotter =
     CartPlotter
     { cartPlotterName = "evaluator-bars"

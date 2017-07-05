@@ -2,8 +2,7 @@
 
 module Twelve where
 
-import Prelude
-       (Bool(..), (+), (-), (||), concat, drop, map, take)
+import Prelude (Bool(..), (+), (-), (||), concat, drop, map, take)
 
 myId :: a -> a
 myId a = a

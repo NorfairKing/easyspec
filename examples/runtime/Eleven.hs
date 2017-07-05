@@ -3,7 +3,7 @@
 module Eleven where
 
 import Prelude
-       (Bool(True,False), (+), (-), concat, drop, map, take)
+       (Bool(False, True), (+), (-), concat, drop, map, take)
 
 myId :: a -> a
 myId a = a
@@ -15,4 +15,3 @@ myPlusPlus [] bs = bs
 myReverse :: [a] -> [a]
 myReverse [] = []
 myReverse (a:as) = as `myPlusPlus` [a]
-

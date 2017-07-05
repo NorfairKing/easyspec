@@ -3,6 +3,7 @@
 module Four where
 
 import Prelude (map)
+
 myId :: a -> a
 myId a = a
 
@@ -13,4 +14,3 @@ myPlusPlus [] bs = bs
 myReverse :: [a] -> [a]
 myReverse [] = []
 myReverse (a:as) = as `myPlusPlus` [a]
-

@@ -2,7 +2,8 @@
 
 module Seven where
 
-import Prelude (concat, drop, map,  take)
+import Prelude (concat, drop, map, take)
+
 myId :: a -> a
 myId a = a
 
@@ -13,4 +14,3 @@ myPlusPlus [] bs = bs
 myReverse :: [a] -> [a]
 myReverse [] = []
 myReverse (a:as) = as `myPlusPlus` [a]
-

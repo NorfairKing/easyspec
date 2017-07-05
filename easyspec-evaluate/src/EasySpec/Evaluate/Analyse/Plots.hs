@@ -37,6 +37,7 @@ plotsRules = do
     rules' <-
         sequence
             [ evaluatedCartRule barPlotter
+            , evaluatedCartRule barsPerGroupEvaluatorsStrategyPlotter
             , evaluatedCartRule barsPerGroupEvaluatorsPlotter
             , evaluatedCartRule boxPlotterPerGroupExampleEvaluator
             , evaluatedCartRule boxPlotterPerEvaluator

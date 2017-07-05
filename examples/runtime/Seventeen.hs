@@ -1,6 +1,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module Three where
+module Seventeen where
+
+import Prelude
+       (Bool(..), (&&), (+), (-), (||), concat, drop, map, take, not, const, Maybe(..))
 
 myId :: a -> a
 myId a = a

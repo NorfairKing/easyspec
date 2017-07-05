@@ -1,8 +1,8 @@
 library(ggplot2)
 args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) != 9) {
-  stop("Usage: evaluators_bars_per_group.r common.r input.csv output.png granularity groupName evaluator1 indication1 evaluator2 indication2")
+if (length(args) != 10) {
+  stop("Usage: evaluator_bars_per_group_strategy.r common.r input.csv output.png granularity groupName strategy evaluator1 indication1 evaluator2 indication2")
 }
 
 common <- args[1]
@@ -10,14 +10,17 @@ inFile <- args[2]
 outPng <- args[3]
 # granularity <- args[4]
 groupName <- args[5]
-e1 <- args[6]
-i1 <- args[7]
-e2 <- args[8]
-i2 <- args[9]
+strategy <- args[6]
+e1 <- args[7]
+i1 <- args[8]
+e2 <- args[9]
+i2 <- args[10]
 
 source(common)
 
 res = read.csv(inFile, header=TRUE)
+
+res <- res[res$strategy == strategy,]
 
 res$origin <- paste(res$file, res$focus, res$strategy)
 

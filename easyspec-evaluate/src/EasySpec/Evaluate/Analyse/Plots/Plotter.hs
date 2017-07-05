@@ -255,6 +255,10 @@ instance EvaluatedData (UnorderedDistinct Evaluator) where
 instance EvaluatedData a => EvaluatedData (a, UnorderedDistinct Evaluator) where
     getDataFileFor (g, _) = getDataFileFor g
 
+instance EvaluatedData (a, b) =>
+         EvaluatedData (a, b, UnorderedDistinct Evaluator) where
+    getDataFileFor (a, b, _) = getDataFileFor (a, b)
+
 instance EvaluatedData GroupName where
     getDataFileFor = evaluatedFileForGroup
 
@@ -263,6 +267,9 @@ instance EvaluatedData Evaluator where
 
 instance EvaluatedData (GroupName, SignatureInferenceStrategy) where
     getDataFileFor (g, s) = evaluatedFileForGroupStrategy g s
+
+instance EvaluatedData (GroupName, Evaluator) where
+    getDataFileFor (g, e) = evaluatedFileForGroupEvaluator g e
 
 instance EvaluatedData GroupAndExample where
     getDataFileFor (GE g e) = evaluatedFileForGroupExample g e

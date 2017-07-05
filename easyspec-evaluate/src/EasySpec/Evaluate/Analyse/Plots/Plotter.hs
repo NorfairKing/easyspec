@@ -228,8 +228,8 @@ instance Cart IndepDepPairEvaluator where
                 UnorderedDistinct (Pair a b) <- unorderedPairs
                 pure $
                     if evaluatorIndication a == Input
-                        then Nothing
-                        else Just $ IndepDepPairEvaluator (Pair a b)
+                        then Just $ IndepDepPairEvaluator (Pair a b)
+                        else Nothing
     fileComps (IndepDepPairEvaluator p) = fileComps p
     ruleComps Proxy =
         ["independent", "dependent"] ++ ruleComps (Proxy @(Pair Evaluator))

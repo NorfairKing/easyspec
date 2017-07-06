@@ -1,4 +1,5 @@
 library(ggplot2)
+library(dplyr)
 args <- commandArgs(trailingOnly=TRUE)
 
 if (length(args) != 10) {
@@ -38,7 +39,11 @@ dat <- merge(res1, res2, by = "origin")
 dat <- dat[!is.na(dat$output.x),]
 dat <- dat[!is.na(dat$output.y),]
 
-if (length(dat$origin) != 0) {
+dat <- dat %>%
+	group_by(file.x, output.x, strategy.x) %>%
+	summarise(output.y=mean(output.y))
+
+if (length(dat$output.y) != 0) {
     png( outPng
     , height=600
     , width=1200
@@ -49,7 +54,9 @@ if (length(dat$origin) != 0) {
     geom_bar(stat="identity", position = "dodge") +
     scale_fill_brewer(palette = "Set1") +
     ggtitle(paste(e2, "in terms of", e1)) +
-    labs(x = e1) + labs(y = e2)
+    labs(x = e1) + labs(y = e2) +
+    geom_smooth(method='lm',formula=y~x) +
+    scale_y_log10()
 
 } else {
   invalidDataPng(outPng)

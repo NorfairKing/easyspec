@@ -11,8 +11,8 @@ invalidDataPdf <- function(outPdf) {
 startPdf <- function(outPdf) {
   pdf(
       outPdf
-    , height=6
-    , width=12
+    , height=4
+    , width=8
     , bg="white"
     )
 }

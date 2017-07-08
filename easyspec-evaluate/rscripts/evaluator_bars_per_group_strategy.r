@@ -46,13 +46,20 @@ dat <- dat %>%
 if (length(dat$output.y) != 0) {
   startPdf(outPdf)
 
-  ggplot(dat, aes(output.x, output.y, fill = strategy.x)) +
+  p <- ggplot(dat, aes(output.x, output.y, fill = strategy.x)) +
     geom_bar(stat="identity", position = "dodge") +
     scale_fill_brewer(palette = "Set1") +
-    ggtitle(paste(e2, "in terms of", e1)) +
     labs(x = e1) + labs(y = e2) +
-    geom_smooth(method='lm',formula=y~x) +
-    scale_y_log10()
+    geom_smooth(method='lm', formula=y~x, show.legend=FALSE, show_guide = FALSE) +
+    theme(legend.position="none")
+
+  if (strategy == "full-background") {
+    e2 <- paste("log(", e2, ")", sep="")
+    p <- p + scale_y_log10()
+  }
+
+  p <- p + ggtitle(paste(e2, "in terms of", e1, "for", strategy))
+  print(p)
 
 } else {
   invalidDataPdf(outPdf)

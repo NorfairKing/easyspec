@@ -1,12 +1,12 @@
 args <- commandArgs(trailingOnly=TRUE)
 
 if (length(args) != 9) {
-  stop("Usage: single_evaluator_bar.r common.r input.csv output.png granularity group example funcname evaluator indication")
+  stop("Usage: single_evaluator_bar.r common.r input.csv output.pdf granularity group example funcname evaluator indication")
 }
 
 common <- args[1]
 inFile <- args[2]
-outPng <- args[3]
+outPdf <- args[3]
 # granularity <- args[4]
 group <- args[5]
 sourcefile <- args[6]
@@ -28,8 +28,8 @@ res$output <- replace(res$output, is.na(res$output), 0)
 
 
 if(length(res$output) != 0) {
-  png(outPng, height=900, width=1200, bg="white")
-  par(mar=c(35,4.1,4.1,2.1))
+  startPdf(outPdf)
+  par(mar=c(3.5,0.41,0.41,0.21))
 
   # Extra large bottom margin
   barplot(
@@ -39,5 +39,5 @@ if(length(res$output) != 0) {
     , las = 2
     )
 } else {
-  invalidDataPng(outPng)
+  invalidDataPdf(outPdf)
 }

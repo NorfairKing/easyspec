@@ -1,12 +1,12 @@
 args <- commandArgs(trailingOnly=TRUE)
 
 if (length(args) != 6) {
-  stop("Usage: single_evaluator_boxplot_average.r common.r input.csv output.png granularity evaluator indication")
+  stop("Usage: single_evaluator_boxplot_average.r common.r input.csv output.pdf granularity evaluator indication")
 }
 
 common <- args[1]
 inFile <- args[2]
-outPng <- args[3]
+outPdf <- args[3]
 # granularity <- args[4]
 evaluator <- args[5]
 indication <- args[6]
@@ -19,10 +19,10 @@ res <- res[!is.na(res$output),]
 
 
 if (length(res$output) != 0) {
-  png(outPng, height=1200, width=1200, bg="white")
+  startPdf(outPdf)
   aggregate(output ~ strategy, res, mean)
-  par(mar=c(35,4.1,4.1,2.1))
+  par(mar=c(3.5,0.41,0.41,0.21))
   boxplot(output ~ strategy, res, main=paste("Global averages for", "Evaluator:", evaluator, paste("(", indication, ")", sep="")), las = 2)
 } else {
-  invalidDataPng(outPng)
+  invalidDataPdf(outPdf)
 }

@@ -1,12 +1,12 @@
 args <- commandArgs(trailingOnly=TRUE)
 
 if (length(args) < 4) {
-  stop("Usage: distribution-nr-different-functions-per-equation.r common.r input.csv output.png granularity")
+  stop("Usage: distribution-nr-different-functions-per-equation.r common.r input.csv output.pdf granularity")
 }
 
 common <- args[1]
 inFile <- args[2]
-outPng <- args[3]
+outPdf <- args[3]
 granularity <- args[4]
 
 source(common)
@@ -16,7 +16,7 @@ res = read.csv(inFile, header=TRUE)
 dat = as.numeric(as.character(res$nrDifferentFunctions))
 
 if (length(dat) != 0) {
-  png(outPng, height=900, width=1200, bg="white")
+  startPdf(outPdf)
   title = "Histogram of the number of different functions in an equation"
   if (granularity == "group-example-name-strategy") { title = paste(title, args[5], args[6], args[7]) }
   if (granularity == "group-strategy") { title = paste(title, args[5]) }
@@ -33,5 +33,5 @@ if (length(dat) != 0) {
        ylab="relative # of cases",
        freq=FALSE)
 } else {
-  invalidDataPng(outPng)
+  invalidDataPdf(outPdf)
 }

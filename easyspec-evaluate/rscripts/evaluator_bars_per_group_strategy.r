@@ -3,12 +3,12 @@ library(dplyr)
 args <- commandArgs(trailingOnly=TRUE)
 
 if (length(args) != 10) {
-  stop("Usage: evaluator_bars_per_group_strategy.r common.r input.csv output.png granularity groupName strategy evaluator1 indication1 evaluator2 indication2")
+  stop("Usage: evaluator_bars_per_group_strategy.r common.r input.csv output.pdf granularity groupName strategy evaluator1 indication1 evaluator2 indication2")
 }
 
 common <- args[1]
 inFile <- args[2]
-outPng <- args[3]
+outPdf <- args[3]
 # granularity <- args[4]
 groupName <- args[5]
 strategy <- args[6]
@@ -44,11 +44,7 @@ dat <- dat %>%
 	summarise(output.y=mean(output.y))
 
 if (length(dat$output.y) != 0) {
-    png( outPng
-    , height=600
-    , width=1200
-    , bg="white"
-    )
+  startPdf(outPdf)
 
   ggplot(dat, aes(output.x, output.y, fill = strategy.x)) +
     geom_bar(stat="identity", position = "dodge") +
@@ -59,6 +55,6 @@ if (length(dat$output.y) != 0) {
     scale_y_log10()
 
 } else {
-  invalidDataPng(outPng)
+  invalidDataPdf(outPdf)
 }
 

@@ -72,7 +72,7 @@ evaluatedCartRule ::
 evaluatedCartRule = cartRuleWith getDataFileFor
 
 plotFileFor :: (MonadIO m, Cart a) => CartPlotter a b -> a -> m (Path Abs File)
-plotFileFor cp = cartFile "png" plotsDir (cartPlotterRule cp) "plot"
+plotFileFor cp = cartFile "pdf" plotsDir (cartPlotterRule cp) "plot"
 
 cartFile ::
        (MonadIO m, Cart a)

@@ -293,22 +293,30 @@ class EvaluatedData a where
 instance EvaluatedData (OrderedDistinct Evaluator) where
     getDataFileFor _ = evaluatedFileForAllData
 
-instance EvaluatedData a => EvaluatedData (a, OrderedDistinct Evaluator) where
+instance EvaluatedData a => EvaluatedData (a, OrderedDistinct b) where
     getDataFileFor (a, _) = getDataFileFor a
 
 instance EvaluatedData (a, b) =>
-         EvaluatedData (a, b, OrderedDistinct Evaluator) where
+         EvaluatedData (a, b, OrderedDistinct c) where
     getDataFileFor (a, b, _) = getDataFileFor (a, b)
+
+instance EvaluatedData (a, b, c) =>
+         EvaluatedData (a, b, c, OrderedDistinct d) where
+    getDataFileFor (a, b, c, _) = getDataFileFor (a, b, c)
 
 instance EvaluatedData (UnorderedDistinct Evaluator) where
     getDataFileFor _ = evaluatedFileForAllData
 
-instance EvaluatedData a => EvaluatedData (a, UnorderedDistinct Evaluator) where
+instance EvaluatedData a => EvaluatedData (a, UnorderedDistinct b) where
     getDataFileFor (g, _) = getDataFileFor g
 
 instance EvaluatedData (a, b) =>
-         EvaluatedData (a, b, UnorderedDistinct Evaluator) where
+         EvaluatedData (a, b, UnorderedDistinct c) where
     getDataFileFor (a, b, _) = getDataFileFor (a, b)
+
+instance EvaluatedData (a, b, c) =>
+         EvaluatedData (a, b, c, UnorderedDistinct d) where
+    getDataFileFor (a, b, c, _) = getDataFileFor (a, b, c)
 
 instance EvaluatedData a => EvaluatedData (a, IndepDepPairEvaluator) where
     getDataFileFor (g, _) = getDataFileFor g

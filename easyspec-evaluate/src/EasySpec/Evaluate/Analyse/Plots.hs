@@ -39,6 +39,7 @@ plotsRules = do
             [ evaluatedCartRule barPlotter
             , evaluatedCartRule barsPerGroupEvaluatorsStrategyPlotter
             , evaluatedCartRule barsPerGroupEvaluatorsPlotter
+            , evaluatedCartRule barsPerGroupEvaluatorsStrategiesPlotter
             , evaluatedCartRule boxPlotterPerGroupExampleEvaluator
             , evaluatedCartRule boxPlotterPerEvaluator
             , evaluatedCartRule correlatingPointsPlotterAll

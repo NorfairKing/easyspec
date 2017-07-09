@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module EasySpec.Evaluate.Analyse.Plots.BarsPerGroup
-    ( barsPerGroupEvaluatorsStrategyPlotter
+    ( barsPerGroupEvaluatorsStrategiesPlotter
+    , barsPerGroupEvaluatorsStrategyPlotter
     , barsPerGroupEvaluatorsPlotter
     ) where
 
@@ -14,6 +15,19 @@ import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.Plots.Plotter
 import EasySpec.Evaluate.Analyse.R
+
+barsPerGroupEvaluatorsStrategiesPlotter ::
+       EvaluatedCartPlotter ( GroupName
+                            , IndepDepPairEvaluator
+                            , UnorderedDistinct SignatureInferenceStrategy)
+barsPerGroupEvaluatorsStrategiesPlotter =
+    CartPlotter
+    { cartPlotterName = "evaluator-bars"
+    , cartPlotterFunc =
+          standardisedEvaluatedPlotruleFor $ do
+              needRLibs ["dplyr", "ggplot2"]
+              scriptFile "evaluator_bars_per_group_strategies.r"
+    }
 
 barsPerGroupEvaluatorsStrategyPlotter ::
        EvaluatedCartPlotter ( GroupName

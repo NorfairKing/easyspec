@@ -16,7 +16,6 @@ res = read.csv(inFile, header=TRUE)
 dat = as.numeric(as.character(res$nrDifferentFunctions))
 
 if (length(dat) != 0) {
-  startPdf(outPdf)
   title = "Histogram of the number of different functions in an equation"
   if (granularity == "group-example-name-strategy") { title = paste(title, args[5], args[6], args[7]) }
   if (granularity == "group-strategy") { title = paste(title, args[5]) }
@@ -25,6 +24,8 @@ if (length(dat) != 0) {
        xlab="Different functions",
        ylab="# of cases",
        breaks=seq(min(dat)-0.5, max(dat)+0.5, by=1))
+
+  startPdf(outPdf)
 
   h$density = h$counts/sum(h$counts)
   plot(h,

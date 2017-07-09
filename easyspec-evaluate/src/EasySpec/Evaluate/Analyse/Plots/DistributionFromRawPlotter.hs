@@ -7,6 +7,7 @@
 
 module EasySpec.Evaluate.Analyse.Plots.DistributionFromRawPlotter
     ( dfrgRules
+    , dfrgCartPlotter
     , DistributionFromRawGatherer(..)
     ) where
 

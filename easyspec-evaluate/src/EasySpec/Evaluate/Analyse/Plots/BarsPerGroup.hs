@@ -19,7 +19,7 @@ import EasySpec.Evaluate.Analyse.R
 barsPerGroupEvaluatorsStrategiesPlotter ::
        EvaluatedCartPlotter ( GroupName
                             , IndepDepPairEvaluator
-                            , UnorderedDistinct SignatureInferenceStrategy)
+                            , OrderedDistinct SignatureInferenceStrategy)
 barsPerGroupEvaluatorsStrategiesPlotter =
     CartPlotter
     { cartPlotterName = "evaluator-bars"

@@ -29,22 +29,23 @@ plotsRules = do
     rules <-
         concat <$>
         sequence
-            [ dfrgRules dfrgSizeOfProperty
-            , dfrgRules dfrgNrDifferentFunctions
-            , dfrgRules dfrgOccurrencesInAllEquations
-            , dfrgRules dfrgOccurrencesInSameEquation
+            [ dfrgRules dfrgNrDifferentFunctions
+            -- , dfrgRules dfrgSizeOfProperty
+            -- , dfrgRules dfrgOccurrencesInAllEquations
+            -- , dfrgRules dfrgOccurrencesInSameEquation
             ]
     rules' <-
         sequence
-            [ evaluatedCartRule barPlotter
-            , evaluatedCartRule barsPerGroupEvaluatorsStrategyPlotter
-            , evaluatedCartRule barsPerGroupEvaluatorsPlotter
+            [ evaluatedCartRule barsPerGroupEvaluatorsStrategyPlotter
             , evaluatedCartRule barsPerGroupEvaluatorsStrategiesPlotter
-            , evaluatedCartRule boxPlotterPerGroupExampleEvaluator
-            , evaluatedCartRule boxPlotterPerEvaluator
-            , evaluatedCartRule correlatingPointsPlotterAll
-            , evaluatedCartRule correlatingPointsPlotterPerGroup
-            , evaluatedCartRule correlatingPointsPlotterPerGroupExample
-            , evaluatedCartRule correlatingPointsPlotterPerGroupStrategy
+            , evaluatedCartRule boxPlotterPerEvaluatorStrategies
+            -- , evaluatedCartRule barsPerGroupEvaluatorsPlotter
+            -- , evaluatedCartRule barPlotter
+            -- , evaluatedCartRule boxPlotterPerGroupExampleEvaluator
+            -- , evaluatedCartRule boxPlotterPerEvaluator
+            -- , evaluatedCartRule correlatingPointsPlotterAll
+            -- , evaluatedCartRule correlatingPointsPlotterPerGroup
+            -- , evaluatedCartRule correlatingPointsPlotterPerGroupExample
+            -- , evaluatedCartRule correlatingPointsPlotterPerGroupStrategy
             ]
     plotsRule ~> need (rules ++ rules')

@@ -46,7 +46,7 @@ if (length(dat$origin) != 0) {
   ggplot(dat, aes(output.x, output.y, fill = strategy.x)) +
     geom_bar(stat="identity", position = "dodge") +
     scale_fill_brewer(palette = "Set1") +
-    ggtitle(paste(e2, "in terms of", e1)) +
+    ggtitle(paste(e2, "in terms of", e1, paste("(", i2, ")", sep=""))) +
     labs(x = e1) + labs(y = e2)
 
 } else {

@@ -196,10 +196,9 @@ newtype UnorderedDistinct a =
     UnorderedDistinct (Pair a)
     deriving (Show, Eq, Generic)
 
-instance (Eq a, Cart a) => Cart (UnorderedDistinct a) where
+instance Cart a => Cart (UnorderedDistinct a) where
     getAllOptions =
-        (map UnorderedDistinct . filter (\(Pair a b) -> a /= b)) <$>
-        getAllOptions
+        (map (UnorderedDistinct . uncurry Pair) . unorderedCombinationsWithoutSelfCombinations) <$> getAllOptions
     fileComps (UnorderedDistinct p) = fileComps p
     ruleComps Proxy = ["unordered", "distinct"] ++ ruleComps (Proxy @(Pair a))
     dependencies (UnorderedDistinct p) = dependencies p
@@ -209,9 +208,8 @@ newtype OrderedDistinct a =
     OrderedDistinct (Pair a)
     deriving (Show, Eq, Generic)
 
-instance (Ord a, Cart a) => Cart (OrderedDistinct a) where
-    getAllOptions =
-        (map OrderedDistinct . filter (\(Pair a b) -> a < b)) <$> getAllOptions
+instance Cart a => Cart (OrderedDistinct a) where
+    getAllOptions = (map (OrderedDistinct . uncurry Pair) . orderedCombinationsWithoutSelfCombinations) <$> getAllOptions
     fileComps (OrderedDistinct p) = fileComps p
     ruleComps Proxy = ["ordered", "distinct"] ++ ruleComps (Proxy @(Pair a))
     dependencies (OrderedDistinct p) = dependencies p
@@ -296,8 +294,7 @@ instance EvaluatedData (OrderedDistinct Evaluator) where
 instance EvaluatedData a => EvaluatedData (a, OrderedDistinct b) where
     getDataFileFor (a, _) = getDataFileFor a
 
-instance EvaluatedData (a, b) =>
-         EvaluatedData (a, b, OrderedDistinct c) where
+instance EvaluatedData (a, b) => EvaluatedData (a, b, OrderedDistinct c) where
     getDataFileFor (a, b, _) = getDataFileFor (a, b)
 
 instance EvaluatedData (a, b, c) =>
@@ -310,8 +307,7 @@ instance EvaluatedData (UnorderedDistinct Evaluator) where
 instance EvaluatedData a => EvaluatedData (a, UnorderedDistinct b) where
     getDataFileFor (g, _) = getDataFileFor g
 
-instance EvaluatedData (a, b) =>
-         EvaluatedData (a, b, UnorderedDistinct c) where
+instance EvaluatedData (a, b) => EvaluatedData (a, b, UnorderedDistinct c) where
     getDataFileFor (a, b, _) = getDataFileFor (a, b)
 
 instance EvaluatedData (a, b, c) =>

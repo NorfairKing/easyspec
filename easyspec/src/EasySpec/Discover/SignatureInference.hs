@@ -8,6 +8,8 @@ module EasySpec.Discover.SignatureInference
 
 import Import
 
+import EasySpec.Discover.SignatureInference.ChunksPlus
+import EasySpec.Discover.SignatureInference.Chunks
 import EasySpec.Discover.SignatureInference.EmptyBackground
 import EasySpec.Discover.SignatureInference.FullBackground
 import EasySpec.Discover.SignatureInference.FullBreakthrough
@@ -36,9 +38,8 @@ inferenceStrategiesToEvaluate :: [SignatureInferenceStrategy]
 inferenceStrategiesToEvaluate =
     [ inferEmptyBackground
     , inferFullBackground
-    , inferFullBreakthrough 1
-    , inferSyntacticSimilarityType
-    , inferTypeReachability 7
+    , inferChunks
+    , inferChunksPlus
     ]
 
 basicInferenceStrategies :: [SignatureInferenceStrategy]
@@ -53,6 +54,7 @@ basicInferenceStrategies =
     , inferSyntacticSimilaritySymbols
     , inferSyntacticSimilarityType
     , inferTypeReachability 7
+    , inferFullBreakthrough 1
     ]
 
 evenMoreInferenceStrategies :: [SignatureInferenceStrategy]

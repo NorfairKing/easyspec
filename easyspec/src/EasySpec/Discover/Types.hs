@@ -75,7 +75,7 @@ instance Eq SignatureInferenceStrategy where
     s1 == s2 = sigInfStratName s1 == sigInfStratName s2
 
 newtype InferredSignature =
-    InferredSignature [([EasyEq] -> [EasyNamedExp], Int, [Int])]
+    InferredSignature [([EasyEq] -> Maybe [EasyNamedExp], Int, [Int])]
 
 newtype SignatureExpression =
     SignatureExpression EasyExp

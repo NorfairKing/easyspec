@@ -132,25 +132,28 @@ runQuickspecOn (InferredSignature iSig) = do
     -- => (key -> [r] -> i -> m r)
     go _ tups funcssFunc = do
         let bgEqs = map snd tups
-        let curSigExp = createQuickspecSig $ funcssFunc $ concat bgEqs
-        let bgExps = map fst tups
-        let sigExp = mconcatSigsExp $ curSigExp : bgExps
-        debug1 "Running quickspec with signature:"
-        debug1 "==[Start of Signature Expression]=="
-        debug1 $ prettyPrint sigExp
-        debug1 "==[End of Signature Expression]=="
-        let quickSpecExp = runQuickspecExp sigExp
-        resName <- nextSigExpName
-        let stmt = bindTo resName quickSpecExp
-        exec $ prettyPrintOneLine stmt
-        let resExp = Var mempty (UnQual mempty resName)
-        eqs <- ordNub <$> getEqs resExp
-        tell eqs
-        debug1 "Found these equations:"
-        debug1 "==[Start of Equations]=="
-        debug1 $ unlines $ map prettyEasyEq eqs
-        debug1 "==[End of Equations]=="
-        pure (resExp, eqs)
+        case funcssFunc $ concat bgEqs of
+            Nothing -> pure ()
+            Just funcs -> do
+                        let curSigExp = createQuickspecSig funcs
+                        let bgExps = map fst tups
+                        let sigExp = mconcatSigsExp $ curSigExp : bgExps
+                        debug1 "Running quickspec with signature:"
+                        debug1 "==[Start of Signature Expression]=="
+                        debug1 $ prettyPrint sigExp
+                        debug1 "==[End of Signature Expression]=="
+                        let quickSpecExp = runQuickspecExp sigExp
+                        resName <- nextSigExpName
+                        let stmt = bindTo resName quickSpecExp
+                        exec $ prettyPrintOneLine stmt
+                        let resExp = Var mempty (UnQual mempty resName)
+                        eqs <- ordNub <$> getEqs resExp
+                        tell eqs
+                        debug1 "Found these equations:"
+                        debug1 "==[Start of Equations]=="
+                        debug1 $ unlines $ map prettyEasyEq eqs
+                        debug1 "==[End of Equations]=="
+                        pure (resExp, eqs)
     getEqs resExp = do
         let showBackgroundExp = showPrettyBackgroundExp resExp
         let expStr = prettyPrintOneLine showBackgroundExp

@@ -39,11 +39,13 @@ dat <- merge(res1, res2, by = "origin")
 dat <- dat[!is.na(dat$output.x),]
 dat <- dat[!is.na(dat$output.y),]
 
+dat$strategy <- dat$strategy.x
+
 if (length(dat$origin) != 0) {
   startPdf(outPdf)
     
 
-  ggplot(dat, aes(output.x, output.y, fill = strategy.x)) +
+  ggplot(dat, aes(output.x, output.y, fill = strategy)) +
     geom_bar(stat="identity", position = "dodge") +
     scale_fill_brewer(palette = "Set1") +
     ggtitle(paste(e2, "in terms of", e1, paste("(", i2, ")", sep=""))) +

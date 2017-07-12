@@ -58,7 +58,10 @@ if (length(dat$output.y) != 0) {
     p <- p + scale_y_log10()
   }
 
-  p <- p + ggtitle(paste(e2, "in terms of", e1, "for", strategy))
+  p <- p +
+    xlab(e1) +
+    ylab(e2) +
+    theme(axis.title.y=element_text(angle = 0))
   print(p)
 
 } else {

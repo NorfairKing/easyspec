@@ -17,8 +17,8 @@ dat = as.numeric(as.character(res$nrDifferentFunctions))
 
 if (length(dat) != 0) {
   title = "Histogram of the number of different functions in an equation"
-  if (granularity == "group-example-name-strategy") { title = paste(title, args[5], args[6], args[7]) }
-  if (granularity == "group-strategy") { title = paste(title, args[5]) }
+  if (granularity == "group-example-name-strategy") { title = paste(title, args[6], args[7]) }
+  if (granularity == "group-strategy") { title = paste(title) }
   h = hist(dat,
        main=title,
        xlab="Different functions",

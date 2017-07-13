@@ -198,7 +198,9 @@ newtype UnorderedDistinct a =
 
 instance Cart a => Cart (UnorderedDistinct a) where
     getAllOptions =
-        (map (UnorderedDistinct . uncurry Pair) . unorderedCombinationsWithoutSelfCombinations) <$> getAllOptions
+        (map (UnorderedDistinct . uncurry Pair) .
+         unorderedCombinationsWithoutSelfCombinations) <$>
+        getAllOptions
     fileComps (UnorderedDistinct p) = fileComps p
     ruleComps Proxy = ["unordered", "distinct"] ++ ruleComps (Proxy @(Pair a))
     dependencies (UnorderedDistinct p) = dependencies p
@@ -209,7 +211,10 @@ newtype OrderedDistinct a =
     deriving (Show, Eq, Generic)
 
 instance Cart a => Cart (OrderedDistinct a) where
-    getAllOptions = (map (OrderedDistinct . uncurry Pair) . orderedCombinationsWithoutSelfCombinations) <$> getAllOptions
+    getAllOptions =
+        (map (OrderedDistinct . uncurry Pair) .
+         orderedCombinationsWithoutSelfCombinations) <$>
+        getAllOptions
     fileComps (OrderedDistinct p) = fileComps p
     ruleComps Proxy = ["ordered", "distinct"] ++ ruleComps (Proxy @(Pair a))
     dependencies (OrderedDistinct p) = dependencies p

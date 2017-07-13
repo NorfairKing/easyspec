@@ -17,9 +17,10 @@ inferChunks =
           \focus scope' ->
               let scope = scope' \\ focus
               in InferredSignature $
-                 (const $ makeNamedExps focus, 0, []) :
+                 (const $ Just $ makeNamedExps focus, 0, []) :
                  map
-                     (\(otherFunc, i) -> (const $ makeNamedExps focus, i, []))
+                     (\(otherFunc, i) ->
+                          (const $ Just $ makeNamedExps focus, i, []))
                      (zip scope [1 ..])
     }
   where

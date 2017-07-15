@@ -39,7 +39,7 @@ inferenceStrategiesToEvaluate =
     [ inferEmptyBackground
     , inferFullBackground
     , inferChunks
-    -- , inferChunksPlus
+    , inferChunksPlus
     ]
 
 basicInferenceStrategies :: [SignatureInferenceStrategy]

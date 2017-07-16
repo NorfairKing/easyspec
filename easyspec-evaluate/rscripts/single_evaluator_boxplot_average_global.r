@@ -15,14 +15,15 @@ source(common)
 
 res = read.csv(inFile, header=TRUE)
 res <- res[res$evaluator == evaluator,]
-res <- res[!is.na(res$output),]
 
+res <- res[!is.na(res$output),]
 
 if (length(res$output) != 0) {
   startPdf(outPdf)
   aggregate(output ~ strategy, res, mean)
-  par(mar=c(3.5,0.41,0.41,0.21))
-  boxplot(output ~ strategy, res, main=paste("Global averages for", "Evaluator:", evaluator, paste("(", indication, ")", sep="")), las = 2)
+  par(mar=c(4,10,4,3))
+  boxplot(output ~ strategy, res, main=paste("Boxplot for", evaluator, paste("(", indication, ")", sep="")), horizontal=TRUE, las=2)
 } else {
   invalidDataPdf(outPdf)
 }
+

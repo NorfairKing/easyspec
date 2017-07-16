@@ -97,14 +97,14 @@ prettyEasyId Id {..} =
     unwords [H.prettyPrint idName, "::", H.prettyPrint idType]
 
 data NamedExp m = NamedExp
-    { neName :: String
+    { neName :: QName m
     , neExp :: Exp m
     } deriving (Show, Eq, Ord)
 
 type EasyNamedExp = NamedExp ()
 
 prettyEasyNameExp :: EasyNamedExp -> String
-prettyEasyNameExp NamedExp {..} = unwords [neName, "=", prettyPrint neExp]
+prettyEasyNameExp NamedExp {..} = unwords [prettyPrint neName, "=", prettyPrint neExp]
 
 type EasyName = H.Name ()
 

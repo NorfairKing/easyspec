@@ -106,7 +106,7 @@ convertToUsableNamedExp i = do
     t' <- replaceVarsWithQuickspecVars t
     pure
         NamedExp
-        {neName = prettyPrintOneLine (idName i), neExp = ExpTypeSig mempty e t'}
+        {neName = idName i, neExp = ExpTypeSig mempty e t'}
 
 addTypeClassTrickery :: EasyId -> (EasyExp, EasyType)
 addTypeClassTrickery eid = go (expr, idType eid)

@@ -55,6 +55,8 @@ basicInferenceStrategies =
     , inferSyntacticSimilarityType
     , inferTypeReachability 7
     , inferFullBreakthrough 1
+    , inferChunks
+    , inferChunksPlus
     ]
 
 evenMoreInferenceStrategies :: [SignatureInferenceStrategy]

@@ -16,12 +16,12 @@ inferChunks =
     , inferSignature =
           \focus scope' ->
               let scope = scope' \\ focus
-              in InferredSignature $
-                 (const $ Just $ makeNamedExps focus, 0, []) :
-                 map
-                     (\(otherFunc, i) ->
-                          (const $ Just $ makeNamedExps focus, i, []))
-                     (zip scope [1 ..])
+                  terminal = (const $ Just $ makeNamedExps focus, 0, [])
+                  tups = zip [1 ..] $ (,) <$> focus <*> scope
+                  level1s =
+                      flip map tups $ \(i, (ff, otherFunc)) ->
+                          (const $ Just $ makeNamedExps [ff, otherFunc], i, [])
+              in InferredSignature $ terminal : level1s
     }
   where
     makeNamedExps funcs = rights $ map convertToUsableNamedExp funcs

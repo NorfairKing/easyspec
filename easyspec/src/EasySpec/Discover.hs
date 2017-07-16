@@ -133,12 +133,6 @@ discoverRelevantEquations ds = do
             Nothing -> allEqs
             Just focus -> filter (mentionsEq focus) allEqs
 
-mentionsEq :: EasyQName -> EasyEq -> Bool
-mentionsEq n (EasyEq e1 e2) = mentions n e1 || mentions n e2
-
-occurrencesEq :: EasyQName -> EasyEq -> Int
-occurrencesEq n (EasyEq e1 e2) = occurrences n e1 + occurrences n e2
-
 discoverEquations ::
        (MonadIO m, MonadMask m, MonadReader Settings m)
     => DiscoverSettings

@@ -125,7 +125,7 @@ runQuickspecOn (InferredSignature iSig) = do
         res <- liftGHC $ execStmt s execOptions
         case res of
             ExecComplete eres _ -> do
-                debug1 "Done:"
+                debug1 "Done with"
                 case eres of
                     Left e -> liftIO $ print e
                     Right ns -> debug1 $ show $ map Name.getOccString ns
@@ -146,7 +146,12 @@ runQuickspecOn (InferredSignature iSig) = do
         let tups = catMaybes mtups
         let ioTups = map snd tups
         case funcssFunc ioTups of
-            Nothing -> pure Nothing
+            Nothing -> do
+                debug1 $
+                    "NOT running quickspec with in a node with dependencies:" <>
+                    show (
+                        map (prettyPrint . fst) tups)
+                pure Nothing
             Just funcs -> do
                 let curSigExp = createQuickspecSig funcs
                 let bgExps = map fst tups

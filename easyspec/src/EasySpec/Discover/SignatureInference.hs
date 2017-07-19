@@ -40,7 +40,14 @@ inferenceStrategiesToEvaluate =
     , inferFullBackground
     , inferChunks
     , inferChunksPlus
+    , inferSyntacticSimilarityName
+    , inferSyntacticSimilaritySymbols
+    , inferSyntacticSimilarityType
     ]
+
+interestingStrategies :: [SignatureInferenceStrategy]
+interestingStrategies =
+    [inferEmptyBackground, inferFullBackground, inferChunks, inferChunksPlus]
 
 basicInferenceStrategies :: [SignatureInferenceStrategy]
 basicInferenceStrategies =

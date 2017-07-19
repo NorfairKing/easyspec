@@ -104,7 +104,8 @@ data NamedExp m = NamedExp
 type EasyNamedExp = NamedExp ()
 
 prettyEasyNameExp :: EasyNamedExp -> String
-prettyEasyNameExp NamedExp {..} = unwords [prettyPrint neName, "=", prettyPrint neExp]
+prettyEasyNameExp NamedExp {..} =
+    unwords [prettyPrint neName, "=", prettyPrint neExp]
 
 type EasyName = H.Name ()
 

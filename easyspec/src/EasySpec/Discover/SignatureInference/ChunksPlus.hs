@@ -57,4 +57,3 @@ inferChunksPlus =
     }
   where
     makeNamedExps funcs = rights $ map convertToUsableNamedExp funcs
-

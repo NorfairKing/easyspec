@@ -104,9 +104,7 @@ convertToUsableNamedExp :: EasyId -> Either String EasyNamedExp
 convertToUsableNamedExp i = do
     let (e, t) = addTypeClassTrickery i
     t' <- replaceVarsWithQuickspecVars t
-    pure
-        NamedExp
-        {neName = idName i, neExp = ExpTypeSig mempty e t'}
+    pure NamedExp {neName = idName i, neExp = ExpTypeSig mempty e t'}
 
 addTypeClassTrickery :: EasyId -> (EasyExp, EasyType)
 addTypeClassTrickery eid = go (expr, idType eid)

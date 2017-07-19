@@ -149,8 +149,7 @@ runQuickspecOn (InferredSignature iSig) = do
             Nothing -> do
                 debug1 $
                     "NOT running quickspec with in a node with dependencies:" <>
-                    show (
-                        map (prettyPrint . fst) tups)
+                    show (map (prettyPrint . fst) tups)
                 pure Nothing
             Just funcs -> do
                 let curSigExp = createQuickspecSig funcs

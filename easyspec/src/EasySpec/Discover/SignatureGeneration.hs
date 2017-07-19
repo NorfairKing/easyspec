@@ -119,6 +119,5 @@ signatureComponent (NamedExp funNameStr funExp) =
                        (ModuleName mempty "QuickSpec.Term")
                        (Ident mempty "constant")))
              (Lit mempty $
-              String mempty
-              (prettyPrint funNameStr) (prettyPrint funNameStr)))
+              String mempty (prettyPrint funNameStr) (prettyPrint funNameStr)))
         funExp

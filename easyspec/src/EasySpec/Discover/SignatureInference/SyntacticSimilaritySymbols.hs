@@ -11,11 +11,12 @@ import EasySpec.Discover.CodeUtils
 import EasySpec.Discover.SignatureInference.SimilarityUtils
 import EasySpec.Discover.Types
 
-inferSyntacticSimilaritySymbols :: SignatureInferenceStrategy
-inferSyntacticSimilaritySymbols =
+inferSyntacticSimilaritySymbols :: Int -> SignatureInferenceStrategy
+inferSyntacticSimilaritySymbols i =
     differenceInferAlg
-        "syntactical-similarity-symbols"
+        ("syntactical-similarity-symbols-" ++ show i)
         [$(mkRelFile __FILE__)]
+        i
         diffIdImpl
 
 diffIdImpl :: EasyId -> EasyId -> Double

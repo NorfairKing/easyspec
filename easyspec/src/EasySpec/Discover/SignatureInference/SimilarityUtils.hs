@@ -17,24 +17,38 @@ similarityInferAlg ::
        (Eq a, Ord a, Foldable f)
     => String
     -> [Path Rel File]
+    -> Int
     -> (EasyId -> f a)
     -> SignatureInferenceStrategy
-similarityInferAlg name fs distil =
-    differenceInferAlg name ($(mkRelFile __FILE__) : fs) $ \e1 e2 ->
-        dictDiff (dictOf e1) (dictOf e2)
-  where
-    dictOf = letterDict . distil
+similarityInferAlg name fs i distil =
+    differenceInferAlg name ($(mkRelFile __FILE__) : fs) i $ simDiff distil
 
 -- Make a signature inference strategy, by describing the difference between two 'EasyId's.
 differenceInferAlg ::
        (Ord n, Show n, Num n)
     => String
     -> [Path Rel File]
+    -> Int
     -> (EasyId -> EasyId -> n)
     -> SignatureInferenceStrategy
-differenceInferAlg name fs diff =
-    splitInferAlg name ($(mkRelFile __FILE__) : fs) $ \focus scope ->
-        take 5 $ sortOn (\f -> sum $ map (diff f) focus) scope
+differenceInferAlg name fs i diff =
+    splitInferAlg name ($(mkRelFile __FILE__) : fs) $ diffChoice i diff
+
+diffChoice ::
+       (Ord n, Show n, Num n)
+    => Int
+    -> (EasyId -> EasyId -> n)
+    -> [EasyId]
+    -> [EasyId]
+    -> [EasyId]
+diffChoice i diff focus scope =
+    take i $ sortOn (\f -> sum $ map (diff f) focus) scope
+
+simDiff ::
+       (Eq a, Ord a, Foldable f) => (EasyId -> f a) -> EasyId -> EasyId -> Int
+simDiff distil e1 e2 = dictDiff (dictOf e1) (dictOf e2)
+  where
+    dictOf = letterDict . distil
 
 letterDict :: (Eq a, Ord a, Foldable f) => f a -> Map a Int
 letterDict = foldl' go M.empty

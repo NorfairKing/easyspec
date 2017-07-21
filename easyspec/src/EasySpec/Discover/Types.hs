@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DeriveDataTypeable #-}
@@ -75,9 +76,41 @@ instance Eq SignatureInferenceStrategy where
     s1 == s2 = sigInfStratName s1 == sigInfStratName s2
 
 newtype InferredSignature =
-    InferredSignature [( [([EasyNamedExp], [EasyEq])] -> Maybe [EasyNamedExp]
-                       , Int
-                       , [Int])]
+    InferredSignature (InferM ())
+
+data InferM a where
+    InferPure :: a -> InferM a
+    InferFmap :: (a -> b) -> InferM a -> InferM b
+    InferApp :: InferM (a -> b) -> InferM a -> InferM b
+    InferBind :: InferM a -> (a -> InferM b) -> InferM b
+    -- And this is the special one:
+    InferFrom :: [EasyNamedExp] -> [OptiToken] -> InferM (OptiToken, [EasyEq])
+
+inferFromWith :: [EasyNamedExp] -> [OptiToken] -> InferM (OptiToken, [EasyEq])
+inferFromWith = InferFrom
+
+inferFrom :: [EasyNamedExp] -> InferM (OptiToken, [EasyEq])
+inferFrom = (`InferFrom` [])
+
+inferFrom_ :: [EasyNamedExp] -> InferM OptiToken
+inferFrom_ = InferFmap fst . (`InferFrom` [])
+
+inferFrom__ :: [EasyNamedExp] -> InferM ()
+inferFrom__ = void . (`InferFrom` [])
+
+newtype OptiToken =
+    OptiToken Int
+
+instance Functor InferM where
+    fmap = InferFmap
+
+instance Applicative InferM where
+    pure = InferPure
+    (<*>) = InferApp
+
+instance Monad InferM where
+    return = pure
+    (>>=) = InferBind
 
 newtype SignatureExpression =
     SignatureExpression EasyExp

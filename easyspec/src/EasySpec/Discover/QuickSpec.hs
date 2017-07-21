@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module EasySpec.Discover.QuickSpec where
@@ -83,43 +84,32 @@ runEasySpec ds iSig = do
             void $ execStmt declaretc execOptions
             runReaderT (runQuickspecOn iSig) sets
 
--- Do work in a dependency DAG.
-dagWork ::
-       forall m key r i. (Eq key, Monad m)
-    => (key -> [r] -> i -> m r)
-    -> [(key, [key])]
-    -> [(key, i)]
-    -> m [(key, r)]
-dagWork worker deps ins = execStateT (mapM_ go ins) []
-  where
-    go :: (key, i) -> StateT [(key, r)] m ()
-    go (k, i) = do
-        let ds = fromMaybe [] $ lookup k deps
-        prevRess <- catMaybes <$> mapM (gets . lookup) ds
-        r <- lift $ worker k prevRess i
-        modify (\s -> (k, r) : s)
-
 runQuickspecOn ::
        forall m. GhcMonad m
     => InferredSignature
     -> ReaderT Settings m [EasyEq]
-runQuickspecOn (InferredSignature iSig) = do
-    let (graph, vertexMapping) = graphFromEdges' iSig
-    let rtops = reverse $ topSort graph
-    let ins =
-            map
-                (\n ->
-                     let (funcss, _, _) = vertexMapping n
-                     in (n, funcss))
-                rtops
-    let deps = map (\(_, n, ds) -> (n, ds)) iSig
-    execWriterT $ flip evalStateT (0 :: Int) $ dagWork go deps ins
+runQuickspecOn = do
+    execWriterT . flip evalStateT 0 . interpretInferredSignature
   where
+    interpretInferredSignature ::
+           InferredSignature
+        -> StateT Int (WriterT [EasyEq] (ReaderT Settings m)) ()
+    interpretInferredSignature (InferredSignature iSig) = interp iSig
+    interp :: InferM a -> StateT Int (WriterT [EasyEq] (ReaderT Settings m)) a
+    interp iSig =
+        case iSig of
+            InferPure a -> pure a
+            InferFmap f a -> f <$> interp a
+            InferApp af aa -> interp af <*> interp aa
+            InferBind af fb -> do
+                a <- interp af
+                interp $ fb a
+            InferFrom nexs toks -> go nexs toks
     liftGHC = lift . lift . lift
-    nextSigExpName = do
+    nextOptiToken = do
         num <- get
         modify (+ 1)
-        pure $ Ident mempty $ "s" ++ show num
+        pure $ OptiToken num
     exec s = do
         debug1 s
         res <- liftGHC $ execStmt s execOptions
@@ -132,45 +122,35 @@ runQuickspecOn (InferredSignature iSig) = do
             ExecBreak ns _ -> do
                 debug1 "Broke:"
                 debug1 $ show $ map Name.getOccString ns
-    -- => (key -> [r] -> i -> m r)
-    -- where
-    --  r = Maybe (EasyExp, ([EasyNamedExp], [EasyEq]))
-    --  i = [([EasyNamedExp], [EasyEq])] -> Maybe [EasyNamedExp]
-    go :: Int
-       -> [Maybe (EasyExp, ([EasyNamedExp], [EasyEq]))]
-       -> ([([EasyNamedExp], [EasyEq])] -> Maybe [EasyNamedExp])
-       -> StateT Int (WriterT [EasyEq] (ReaderT Settings m)) (Maybe ( EasyExp
-                                                                    , ( [EasyNamedExp]
-                                                                      , [EasyEq])))
-    go _ mtups funcssFunc = do
-        let tups = catMaybes mtups
-        let ioTups = map snd tups
-        case funcssFunc ioTups of
-            Nothing -> do
-                debug1 $
-                    "NOT running quickspec with in a node with dependencies:" <>
-                    show (map (prettyPrint . fst) tups)
-                pure Nothing
-            Just funcs -> do
-                let curSigExp = createQuickspecSig funcs
-                let bgExps = map fst tups
-                let sigExp = mconcatSigsExp $ curSigExp : bgExps
-                debug1 "Running quickspec with signature:"
-                debug1 "==[Start of Signature Expression]=="
-                debug1 $ prettyPrint sigExp
-                debug1 "==[End of Signature Expression]=="
-                let quickSpecExp = runQuickspecExp sigExp
-                resName <- nextSigExpName
-                let stmt = bindTo resName quickSpecExp
-                exec $ prettyPrintOneLine stmt
-                let resExp = Var mempty (UnQual mempty resName)
-                eqs <- ordNub <$> getEqs resExp
-                tell eqs
-                debug1 "Found these equations:"
-                debug1 "==[Start of Equations]=="
-                debug1 $ unlines $ map prettyEasyEq eqs
-                debug1 "==[End of Equations]=="
-                pure $ Just (resExp, (funcs, eqs))
+    tokenName :: OptiToken -> EasyName
+    tokenName (OptiToken num) = Ident mempty $ "s" ++ show num
+    tokenExp :: OptiToken -> EasyExp
+    tokenExp = Var mempty . UnQual mempty . tokenName
+    go :: [EasyNamedExp]
+       -> [OptiToken]
+       -> StateT Int (WriterT [EasyEq] (ReaderT Settings m)) ( OptiToken
+                                                             , [EasyEq])
+    go funcs tokens = do
+        let curSigExp = createQuickspecSig funcs
+        let bgExps = map tokenExp tokens
+        let sigExp = mconcatSigsExp $ curSigExp : bgExps
+        debug1 "Running quickspec with signature:"
+        debug1 "==[Start of Signature Expression]=="
+        debug1 $ prettyPrint sigExp
+        debug1 "==[End of Signature Expression]=="
+        let quickSpecExp = runQuickspecExp sigExp
+        resToken <- nextOptiToken
+        let resName = tokenName resToken
+        let stmt = bindTo resName quickSpecExp
+        exec $ prettyPrintOneLine stmt
+        let resExp = tokenExp resToken
+        eqs <- ordNub <$> getEqs resExp
+        tell eqs
+        debug1 "Found these equations:"
+        debug1 "==[Start of Equations]=="
+        debug1 $ unlines $ map prettyEasyEq eqs
+        debug1 "==[End of Equations]=="
+        pure (resToken, eqs)
     getEqs resExp = do
         let showBackgroundExp = showPrettyBackgroundExp resExp
         let expStr = prettyPrintOneLine showBackgroundExp

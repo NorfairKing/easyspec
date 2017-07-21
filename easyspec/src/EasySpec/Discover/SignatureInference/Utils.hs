@@ -41,7 +41,7 @@ unionInferAlg si1 si2 =
           \ei1 ei2 ->
               let InferredSignature s1 = inferSignature si1 ei1 ei2
                   InferredSignature s2 = inferSignature si2 ei1 ei2
-              in InferredSignature $ s1 ++ s2
+              in InferredSignature $ s1 >> s2
     }
 
 splitInferAlg ::
@@ -55,42 +55,15 @@ splitInferAlg name fs func =
     , sigInfRelevantSources = $(mkRelFile __FILE__) : fs
     , inferSignature =
           \focus scope ->
-              let bgSigFuncs = func focus scope
-                  makeNamedExps funcs =
-                      rights $ map convertToUsableNamedExp funcs
-                  fgNExps = makeNamedExps focus
-                  bgNExps = makeNamedExps bgSigFuncs \\ fgNExps
-              in InferredSignature
-                     [ (const $ Just fgNExps, 1, [0])
-                     , (const $ Just bgNExps, 0, [])
-                     ]
+              InferredSignature $ do
+                  let bgSigFuncs = func focus scope
+                      makeNamedExps funcs =
+                          rights $ map convertToUsableNamedExp funcs
+                      fgNExps = makeNamedExps focus
+                      bgNExps = makeNamedExps bgSigFuncs \\ fgNExps
+                  inferFrom__ fgNExps
+                  inferFrom__ bgNExps
     }
-
-breakThroughSplitInferAlg ::
-       String
-    -> [Path Rel File]
-    -> ([EasyId] -> [EasyId] -> [EasyId])
-    -> Int
-    -> SignatureInferenceStrategy
-breakThroughSplitInferAlg name fs func maxDistinctOtherFuncs =
-    SignatureInferenceStrategy
-    { sigInfStratName = name
-    , sigInfRelevantSources = $(mkRelFile __FILE__) : fs
-    , inferSignature =
-          \focus scope ->
-              let scope' = scope \\ focus :: [EasyId]
-              in InferredSignature $
-                 ((const $ Just $ makeNamedExps focus, 0, []) :) $
-                 flip map (zip [1 ..] $ func' focus scope') $ \(ix, funcs) ->
-                     (const $ Just funcs, ix, [])
-    }
-  where
-    makeNamedExps funcs = rights $ map convertToUsableNamedExp funcs
-    func' :: [EasyId] -> [EasyId] -> [[EasyNamedExp]]
-    func' focus scope = do
-        grp <- groupsOf maxDistinctOtherFuncs (makeNamedExps $ func focus scope)
-        ff <- makeNamedExps focus
-        pure $ ff : grp
 
 -- groupsOf 1 ls == map (:[]) ls
 groupsOf :: (Ord a, Ord a) => Int -> [a] -> [[a]]

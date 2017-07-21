@@ -14,14 +14,12 @@ inferChunksFrom scopeMod =
     { sigInfStratName = undefined
     , sigInfRelevantSources = [$(mkRelFile __FILE__)]
     , inferSignature =
-          \focus scope' ->
+          \focus scope' -> InferredSignature $ do
               let scope = scopeMod focus scope'
-                  terminal = (const $ Just $ makeNamedExps focus, 0, [])
-                  tups = zip [1 ..] $ (,) <$> focus <*> scope
-                  level1s =
-                      flip map tups $ \(i, (ff, otherFunc)) ->
-                          (const $ Just $ makeNamedExps [ff, otherFunc], i, [])
-              in InferredSignature $ terminal : level1s
+              level1t <- inferFrom_ $ makeNamedExps focus
+              let tups = (,) <$> focus <*> scope
+              forM_ tups $ \(ff, otherFunc) ->
+                inferFromWith (makeNamedExps [ff, otherFunc]) [level1t]
     }
   where
     makeNamedExps funcs = rights $ map convertToUsableNamedExp funcs

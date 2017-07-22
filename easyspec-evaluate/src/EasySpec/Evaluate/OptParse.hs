@@ -113,7 +113,8 @@ parseCommandBuild = info parser modifier
   where
     parser =
         CommandBuild <$>
-        (many $ strArgument (mconcat [metavar "TARGET", help "the target to build."]))
+        (many $
+         strArgument (mconcat [metavar "TARGET", help "the target to build."]))
     modifier = fullDesc <> progDesc "Build a target in the evaluation system."
 
 parseCommandBuildEverything :: ParserInfo Command

@@ -11,7 +11,7 @@ import EasySpec.Discover.Types
 
 inferChunks :: SignatureInferenceStrategy
 inferChunks =
-    (inferChunksFrom (\_ scope ->  scope))
+    (inferChunksFrom (\_ scope -> scope))
     { sigInfStratName = "chunks"
     , sigInfRelevantSources = [$(mkRelFile __FILE__)]
     }

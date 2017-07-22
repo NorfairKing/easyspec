@@ -14,7 +14,8 @@ inferSyntacticSimilarityType :: Int -> SignatureInferenceStrategy
 inferSyntacticSimilarityType i =
     similarityInferAlg
         ("syntactical-similarity-type-" ++ show i)
-        [$(mkRelFile __FILE__)] i
+        [$(mkRelFile __FILE__)]
+        i
         idSubTypes
 
 idSubTypes :: EasyId -> [EasyType]

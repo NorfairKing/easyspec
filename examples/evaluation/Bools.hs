@@ -3,7 +3,7 @@
 module Bools where
 
 import Prelude
-       (Bool(..), (&&),  (||), all, and, any, filter, map, not, or,
+       (Bool(..), (&&), (||), all, and, any, filter, map, not, or,
         zipWith)
 
 xor :: Bool -> Bool -> Bool

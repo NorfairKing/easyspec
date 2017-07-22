@@ -16,7 +16,8 @@ inferSyntacticSimilarityEditDistanceName :: Int -> SignatureInferenceStrategy
 inferSyntacticSimilarityEditDistanceName i =
     differenceInferAlg
         ("syntactical-similarity-edit-distance-name" ++ show i)
-        [$(mkRelFile __FILE__)] i $ \i1 i2 ->
+        [$(mkRelFile __FILE__)]
+        i $ \i1 i2 ->
         let (Sum c, _) = leastChanges strParams (idVec i1) (idVec i2)
         in c
   where

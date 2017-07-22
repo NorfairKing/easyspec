@@ -1,7 +1,8 @@
 args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) != 9) {
-  stop("Usage: single_evaluator_boxplot_strategies.r common.r input.csv output.pdf granularity group evaluator indication strategy1 strategy2")
+if (length(args) != 11) {
+  print(args)
+  stop("Usage: single_evaluator_boxplot_strategies.r common.r input.csv output.pdf granularity group evaluator unit quantity indication strategy1 strategy2")
 }
 
 common <- args[1]
@@ -10,9 +11,11 @@ outPdf <- args[3]
 # granularity <- args[4]
 group <- args[5]
 evaluator <- args[6]
-indication <- args[7]
-s1 <- args[8]
-s2 <- args[9]
+unit <- args[7]
+quantity <- args[8]
+indication <- args[9]
+s1 <- args[10]
+s2 <- args[11]
 
 source(common)
 

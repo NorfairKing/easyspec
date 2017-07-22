@@ -41,6 +41,6 @@ data Indication
     deriving (Show, Eq)
 
 prettyIndication :: Indication -> String
-prettyIndication GreaterIsBetter = "Greater is better."
-prettyIndication SmallerIsBetter = "Smaller is better."
+prettyIndication GreaterIsBetter = "More is better."
+prettyIndication SmallerIsBetter = "Less is better."
 prettyIndication Input = "This is a part of the input."

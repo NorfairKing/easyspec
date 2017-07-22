@@ -13,5 +13,6 @@ inferSyntacticSimilarityName :: Int -> SignatureInferenceStrategy
 inferSyntacticSimilarityName i =
     similarityInferAlg
         ("syntactical-similarity-name-" ++ show i)
-        [$(mkRelFile __FILE__)] i
+        [$(mkRelFile __FILE__)]
+        i
         (prettyPrintOneLine . idName)

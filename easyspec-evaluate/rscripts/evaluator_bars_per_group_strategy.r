@@ -2,8 +2,9 @@ library(ggplot2)
 library(dplyr)
 args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) != 10) {
-  stop("Usage: evaluator_bars_per_group_strategy.r common.r input.csv output.pdf granularity groupName strategy evaluator1 indication1 evaluator2 indication2")
+if (length(args) != 14) {
+  print(args)
+  stop("Usage: evaluator_bars_per_group_strategy.r common.r input.csv output.pdf granularity groupName strategy evaluator1 unit1 quantity1 indication1 evaluator2 unit2 quantity2 indication2")
 }
 
 common <- args[1]
@@ -13,9 +14,13 @@ outPdf <- args[3]
 groupName <- args[5]
 strategy <- args[6]
 e1 <- args[7]
-i1 <- args[8]
-e2 <- args[9]
-i2 <- args[10]
+u1 <- args[8]
+q1 <- args[9]
+i1 <- args[10]
+e2 <- args[11]
+u2 <- args[12]
+q2 <- args[13]
+i2 <- args[14]
 
 source(common)
 

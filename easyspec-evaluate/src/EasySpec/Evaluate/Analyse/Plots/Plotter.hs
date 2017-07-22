@@ -174,7 +174,12 @@ instance Cart Evaluator where
     fileComps e = [evaluatorName e]
     ruleComps Proxy = ["evaluator"]
     dependencies = dependOnEvaluator
-    plotArgs ev = [evaluatorName ev, prettyIndication $ evaluatorIndication ev]
+    plotArgs ev =
+        [ evaluatorName ev
+        , evaluatorUnit ev
+        , evaluatorQuantity ev
+        , prettyIndication $ evaluatorIndication ev
+        ]
 
 data Pair a =
     Pair a

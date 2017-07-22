@@ -19,7 +19,7 @@ relevantFunctionsEvaluator =
     , evaluatorGather = Just . genericLength . go
     , evaluatorPretty = \ei -> unwords [show . length . go $ ei, "functions"]
     , evaluatorUnit = "#"
-    , evaluatorQuantity = "function"
+    , evaluatorQuantity = "functions"
     , evaluatorIndication = GreaterIsBetter
     , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }

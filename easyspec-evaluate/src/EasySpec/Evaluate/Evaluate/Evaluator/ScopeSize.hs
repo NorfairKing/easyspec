@@ -16,7 +16,7 @@ scopeSizeEvaluator =
     , evaluatorGather = Just . genericLength . eiScope
     , evaluatorPretty = show . length . eiScope
     , evaluatorUnit = "#"
-    , evaluatorQuantity = "function"
+    , evaluatorQuantity = "functions"
     , evaluatorIndication = Input
     , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }

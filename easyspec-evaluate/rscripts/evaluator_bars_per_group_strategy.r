@@ -64,8 +64,8 @@ if (length(dat$output.y) != 0) {
   }
 
   p <- p +
-    xlab(e1) +
-    ylab(e2) +
+    xlab(paste(e1, paste("(", q1, ")", sep=""))) +
+    ylab(paste(e2, paste("(", q2, ")", sep=""))) +
     theme(axis.title.y=element_text(angle = 0))
   print(p)
 

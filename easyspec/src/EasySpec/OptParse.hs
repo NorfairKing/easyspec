@@ -17,6 +17,7 @@ import Language.Haskell.Exts as H
 
 import EasySpec.Discover.SignatureInference
 import EasySpec.Discover.Types
+import EasySpec.Discover.Utils
 import EasySpec.OptParse.Types
 
 getInstructions :: IO Instructions
@@ -79,12 +80,25 @@ combineToInstructions cmd Flags {..} Configuration = (,) <$> disp <*> sets
                                             , "It was parsed as the following instead:"
                                             , show e
                                             ]
+                    let is = InputSpec dir file
+                    let unqualification =
+                            case argDiscUnqualified of
+                                UnqAll -> UnqualifyAll
+                                UnqNothing -> UnqualifyNothing
+                                UnqLocal ->
+                                    UnqualifyLocal $
+                                    case f of
+                                        Just (Qual _ mn _) -> mn
+                                        Nothing ->
+                                            ModuleName () $
+                                            filePathToModuleName $
+                                            inputSpecFile is
                     pure
                         DiscoverSettings
-                        { setDiscInputSpec = InputSpec dir file
+                        { setDiscInputSpec = is
                         , setDiscFun = f
                         , setDiscInfStrat = infStrat
-                        , setDiscQualified = argDiscQualified
+                        , setDiscQualified = unqualification
                         }
     sets = pure Settings {setsDebugLevel = fromMaybe 0 flagsDebugLevel}
 
@@ -160,8 +174,10 @@ parseCommandDiscover = info parser modifier
                               ]
                         ]
                   ]) <*>
-         (flag' True (long "qualified") <|> flag' False (long "unqualified") <|>
-          pure True))
+         (flag' UnqNothing (long "qualified") <|>
+          flag' UnqLocal (long "unqualify-local") <|>
+          flag' UnqAll (long "unqualify-all") <|>
+          pure UnqAll))
     modifier = fullDesc <> progDesc "Command example."
 
 parseFlags :: Parser Flags

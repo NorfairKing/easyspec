@@ -28,13 +28,13 @@ prepareFlags :: DynFlags -> DynFlags
 prepareFlags dflags = foldl xopt_set dflags [Cpp, ImplicitPrelude, MagicHash]
 
 getTargetModName :: Path Rel File -> GHC.ModuleName
-getTargetModName =
-    mkModuleName . dropExtension . filePathToModuleName . toFilePath
+getTargetModName = mkModuleName . filePathToModuleName
+
+filePathToModuleName :: Path Rel File -> String
+filePathToModuleName = map go . dropExtensions . toFilePath
   where
-    filePathToModuleName = map go
-      where
-        go '/' = '.'
-        go c = c
+    go '/' = '.'
+    go c = c
 
 showGHC :: (GhcMonad m, Outputable a) => a -> m String
 showGHC a = do

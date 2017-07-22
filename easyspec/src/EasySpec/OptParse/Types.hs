@@ -17,8 +17,14 @@ data DiscoverArgs = DiscoverArgs
     , argDiscFun :: Maybe String
     , argDiscBaseDir :: Maybe FilePath
     , argDiscInfStratName :: Maybe String
-    , argDiscQualified :: Bool
+    , argDiscUnqualified :: Unq
     } deriving (Show, Eq)
+
+data Unq
+    = UnqNothing
+    | UnqLocal
+    | UnqAll
+    deriving (Show, Eq)
 
 newtype Flags = Flags
     { flagsDebugLevel :: Maybe Int
@@ -35,8 +41,14 @@ data DiscoverSettings = DiscoverSettings
     { setDiscInputSpec :: InputSpec
     , setDiscFun :: Maybe EasyQName
     , setDiscInfStrat :: SignatureInferenceStrategy
-    , setDiscQualified :: Bool
+    , setDiscQualified :: Unqualification
     }
+
+data Unqualification
+    = UnqualifyNothing
+    | UnqualifyLocal EasyModuleName
+    | UnqualifyAll
+    deriving (Show, Eq)
 
 newtype Settings = Settings
     { setsDebugLevel :: Int

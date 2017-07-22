@@ -142,6 +142,8 @@ prettyEasyNameExp NamedExp {..} =
 
 type EasyName = H.Name ()
 
+type EasyModuleName = H.ModuleName ()
+
 type EasyQName = H.QName ()
 
 type EasyType = H.Type ()

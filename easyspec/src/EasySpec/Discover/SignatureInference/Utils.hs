@@ -61,8 +61,8 @@ splitInferAlg name fs func =
                           rights $ map convertToUsableNamedExp funcs
                       fgNExps = makeNamedExps focus
                       bgNExps = makeNamedExps bgSigFuncs \\ fgNExps
-                  inferFrom__ fgNExps
-                  inferFrom__ bgNExps
+                  fgt <- inferFrom_ fgNExps
+                  void $ inferFromWith bgNExps [fgt]
     }
 
 -- groupsOf 1 ls == map (:[]) ls

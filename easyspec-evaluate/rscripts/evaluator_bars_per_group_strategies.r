@@ -17,10 +17,10 @@ q1 <- args[8]
 i1 <- args[9]
 e2 <- args[10]
 u2 <- args[11]
-q2 <- args[11]
-i2 <- args[12]
-s1 <- args[13]
-s2 <- args[14]
+q2 <- args[12]
+i2 <- args[13]
+s1 <- args[14]
+s2 <- args[15]
 
 source(common)
 

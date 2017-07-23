@@ -107,6 +107,19 @@ createQuickspecSig nexps =
                         mempty
                         (ModuleName mempty "Prelude")
                         (Ident mempty "True")))
+        , FieldUpdate -- TODO Just for speedup, remove later
+              mempty
+              (Qual
+                   mempty
+                   (ModuleName mempty "QuickSpec.Signature")
+                   (Ident mempty "maxTermSize"))
+              (App mempty
+                   (Con mempty
+                        (Qual
+                             mempty
+                             (ModuleName mempty "Data.Maybe")
+                             (Ident mempty "Just")))
+                   (Lit mempty (Int mempty 5 "5")))
         ]
 
 signatureComponent :: (Eq m, Monoid m) => NamedExp m -> Exp m

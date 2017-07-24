@@ -53,8 +53,9 @@ if (length(dat$origin) != 0) {
   ggplot(dat, aes(output.x, output.y, fill = strategy)) +
     geom_bar(stat="identity", position = "dodge") +
     scale_fill_brewer(palette = "Set1") +
-    ggtitle(paste(e2, "in terms of", e1, paste("(", i2, ")", sep=""))) +
-    labs(x = e1) + labs(y = e2)
+    labs(x = paste(e1, "(", u1, q1, ")")) + labs(y = paste(e2, "(", u2, q2, ")")) + 
+    theme(axis.title.y=element_text(angle = 0)) +
+    theme(legend.position="bottom")
 
 } else {
   invalidDataPdf(outPdf)

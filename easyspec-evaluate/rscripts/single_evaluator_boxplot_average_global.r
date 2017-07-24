@@ -24,8 +24,8 @@ res <- res[!is.na(res$output),]
 if (length(res$output) != 0) {
   startPdf(outPdf)
   aggregate(output ~ strategy, res, mean)
-  par(mar=c(4,10,4,3))
-  boxplot(output ~ strategy, res, main=paste("Boxplot for", evaluator, paste("(", indication, ")", sep="")), horizontal=TRUE, las=2)
+  par(mar=c(5,14,2,1))
+  boxplot(output ~ strategy, res, main=paste("Boxplot for", evaluator, paste("(", indication, ")", sep="")), horizontal=TRUE, las=2, xlab=paste(evaluator, "(", unit, quantity, ")"))
 } else {
   invalidDataPdf(outPdf)
 }

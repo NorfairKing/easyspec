@@ -31,16 +31,14 @@ runBuild targets = do
                       ]
                 ]
         Just _ ->
-            withArgs ["--color"] $
+            withArgs ("--color" : targets) $
             shakeArgs
                 shakeOptions
                 { shakeVerbosity = Loud
                 , shakeThreads = 0
                 , shakeReport = ["report.trace", "report.html"]
                 , shakeTimings = True
-                } $ do
-                shakeBuild
-                want targets
+                } $ shakeBuild
 
 runBuildEverything :: IO ()
 runBuildEverything = runBuild [analyseRule]

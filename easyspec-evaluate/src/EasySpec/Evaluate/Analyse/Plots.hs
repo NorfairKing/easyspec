@@ -40,7 +40,7 @@ plotsRules = do
             , evaluatedCartRule barsPerGroupEvaluatorsStrategyPlotter
             , evaluatedCartRule boxPlotterPerEvaluatorStrategies
             , evaluatedCartRule boxPlotterPerEvaluator
-            -- , evaluatedCartRule barsPerGroupEvaluatorsPlotter
+            , evaluatedCartRule barsPerGroupEvaluatorsPlotter
             -- , evaluatedCartRule barPlotter
             -- , evaluatedCartRule boxPlotterPerGroupExampleEvaluator
             -- , evaluatedCartRule correlatingPointsPlotterAll

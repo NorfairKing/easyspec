@@ -46,9 +46,6 @@ inferenceStrategiesToEvaluate =
     , inferSyntacticSimilarityName 5
     , inferSyntacticSimilaritySymbols 5
     , inferSyntacticSimilarityType 5
-    , inferChunksSimilarityName 5
-    , inferChunksSimilaritySymbols 5
-    , inferChunksSimilarityType 5
     ]
 
 interestingStrategies :: [SignatureInferenceStrategy]

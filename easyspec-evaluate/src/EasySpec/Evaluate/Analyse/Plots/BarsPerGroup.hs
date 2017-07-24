@@ -43,7 +43,7 @@ barsPerGroupEvaluatorsStrategyPlotter =
     }
 
 barsPerGroupEvaluatorsPlotter ::
-       EvaluatedCartPlotter (GroupName, UnorderedDistinct Evaluator)
+       EvaluatedCartPlotter (GroupName, IndepDepPairEvaluator)
 barsPerGroupEvaluatorsPlotter =
     CartPlotter
     { cartPlotterName = "evaluators-bars"

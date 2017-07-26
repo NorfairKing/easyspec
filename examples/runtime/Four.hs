@@ -3,6 +3,9 @@
 module Four where
 
 import Prelude (map)
+
+{-# ANN module "HLint: ignore Use foldr" #-}
+
 myId :: a -> a
 myId a = a
 
@@ -13,4 +16,3 @@ myPlusPlus [] bs = bs
 myReverse :: [a] -> [a]
 myReverse [] = []
 myReverse (a:as) = as `myPlusPlus` [a]
-

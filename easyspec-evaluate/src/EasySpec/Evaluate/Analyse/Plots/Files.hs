@@ -23,9 +23,9 @@ plotsDir = (</> $(mkRelDir "plots")) <$> tmpDir
 scriptFile :: MonadIO m => String -> m (Path Abs File)
 scriptFile fname = liftIO $ resolveFile' $ "rscripts/" ++ fname
 
-pngPlotFileWithComponents ::
+pdfPlotFileWithComponents ::
        MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
-pngPlotFileWithComponents = fileInDirWithExtensionAndComponents plotsDir "png"
+pdfPlotFileWithComponents = fileInDirWithExtensionAndComponents plotsDir "pdf"
 
 exampleModule :: Example -> String
 exampleModule = map go . dropExtensions . toFilePath . ES.inputSpecFile

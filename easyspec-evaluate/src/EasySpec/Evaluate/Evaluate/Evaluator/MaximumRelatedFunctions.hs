@@ -22,7 +22,7 @@ maximumRelatedFunctionsEvaluator =
     , evaluatorGather = Just . go
     , evaluatorPretty = \ei -> unwords [show . go @Int $ ei, "functions"]
     , evaluatorUnit = "#"
-    , evaluatorQuantity = "function"
+    , evaluatorQuantity = "functions"
     , evaluatorIndication = GreaterIsBetter
     , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }

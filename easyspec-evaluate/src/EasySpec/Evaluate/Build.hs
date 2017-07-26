@@ -14,8 +14,8 @@ import EasySpec.Evaluate.Analyse
 
 import Development.Shake
 
-runBuild :: String -> IO ()
-runBuild target = do
+runBuild :: [String] -> IO ()
+runBuild targets = do
     here <- getCurrentDir
     fs <- snd <$> listDir here
     let groundFileName = $(mkRelFile "easyspec-evaluate.cabal")
@@ -31,7 +31,7 @@ runBuild target = do
                       ]
                 ]
         Just _ ->
-            withArgs ["--color", target] $
+            withArgs ("--color" : targets) $
             shakeArgs
                 shakeOptions
                 { shakeVerbosity = Loud
@@ -42,7 +42,7 @@ runBuild target = do
                 shakeBuild
 
 runBuildEverything :: IO ()
-runBuildEverything = runBuild analyseRule
+runBuildEverything = runBuild [analyseRule]
 
 shakeBuild :: Rules ()
 shakeBuild = analyseRules

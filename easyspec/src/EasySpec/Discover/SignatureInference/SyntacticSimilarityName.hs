@@ -9,9 +9,10 @@ import EasySpec.Discover.CodeUtils
 import EasySpec.Discover.SignatureInference.SimilarityUtils
 import EasySpec.Discover.Types
 
-inferSyntacticSimilarityName :: SignatureInferenceStrategy
-inferSyntacticSimilarityName =
+inferSyntacticSimilarityName :: Int -> SignatureInferenceStrategy
+inferSyntacticSimilarityName i =
     similarityInferAlg
-        "syntactical-similarity-name"
+        ("syntactical-similarity-name-" ++ show i)
         [$(mkRelFile __FILE__)]
+        i
         (prettyPrintOneLine . idName)

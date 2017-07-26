@@ -1,5 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -12,8 +14,10 @@ module EasySpec.Evaluate.Analyse.Plots.Plotter
     , cartFile
     , granularityStr
     , rawCartRule
+    , Pair(..)
     , OrderedDistinct(..)
     , UnorderedDistinct(..)
+    , IndepDepPairEvaluator(..)
     , standardisedEvaluatedPlotruleFor
     , GroupAndExample(..)
     , GroupAndExampleAndName(..)
@@ -39,6 +43,8 @@ import EasySpec.Evaluate.Analyse.Utils
 import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Types
+
+{-# ANN module "HLint: ignore Reduce duplication" #-}
 
 -- Group of examples
 --  \- Exmaple
@@ -68,7 +74,7 @@ evaluatedCartRule ::
 evaluatedCartRule = cartRuleWith getDataFileFor
 
 plotFileFor :: (MonadIO m, Cart a) => CartPlotter a b -> a -> m (Path Abs File)
-plotFileFor cp = cartFile "png" plotsDir (cartPlotterRule cp) "plot"
+plotFileFor cp = cartFile "pdf" plotsDir (cartPlotterRule cp) "plot"
 
 cartFile ::
        (MonadIO m, Cart a)
@@ -170,39 +176,75 @@ instance Cart Evaluator where
     fileComps e = [evaluatorName e]
     ruleComps Proxy = ["evaluator"]
     dependencies = dependOnEvaluator
-    plotArgs ev = [evaluatorName ev, prettyIndication $ evaluatorIndication ev]
+    plotArgs ev =
+        [ evaluatorName ev
+        , evaluatorUnit ev
+        , evaluatorQuantity ev
+        , prettyIndication $ evaluatorIndication ev
+        ]
 
-data OrderedDistinct a =
-    OrderedDistinct a
-                    a
+data Pair a =
+    Pair a
+         a
+    deriving (Show, Eq, Generic)
 
-instance Cart a => Cart (OrderedDistinct a) where
-    getAllOptions =
-        (map (uncurry OrderedDistinct) .
-         orderedCombinationsWithoutSelfCombinations) <$>
-        getAllOptions
-    fileComps (OrderedDistinct a b) = fileComps a ++ fileComps b
-    ruleComps Proxy = ["ordered", "distinct"] ++ ruleComps (Proxy @a)
-    dependencies (OrderedDistinct a b) = do
+instance Cart a => Cart (Pair a) where
+    getAllOptions = do
+        as <- getAllOptions
+        pure $ Pair <$> as <*> as
+    fileComps (Pair a b) = fileComps a ++ fileComps b
+    ruleComps Proxy = "pair" : ruleComps (Proxy @a)
+    dependencies (Pair a b) = do
         dependencies a
         dependencies b
-    plotArgs (OrderedDistinct a b) = plotArgs a ++ plotArgs b
+    plotArgs (Pair a b) = plotArgs a ++ plotArgs b
 
-data UnorderedDistinct a =
-    UnorderedDistinct a
-                      a
+newtype UnorderedDistinct a =
+    UnorderedDistinct (Pair a)
+    deriving (Show, Eq, Generic)
 
 instance Cart a => Cart (UnorderedDistinct a) where
     getAllOptions =
-        (map (uncurry UnorderedDistinct) .
+        (map (UnorderedDistinct . uncurry Pair) .
          unorderedCombinationsWithoutSelfCombinations) <$>
         getAllOptions
-    fileComps (UnorderedDistinct a b) = fileComps a ++ fileComps b
-    ruleComps Proxy = ["unordered", "distinct"] ++ ruleComps (Proxy @a)
-    dependencies (UnorderedDistinct a b) = do
-        dependencies a
-        dependencies b
-    plotArgs (UnorderedDistinct a b) = plotArgs a ++ plotArgs b
+    fileComps (UnorderedDistinct p) = fileComps p
+    ruleComps Proxy = ["unordered", "distinct"] ++ ruleComps (Proxy @(Pair a))
+    dependencies (UnorderedDistinct p) = dependencies p
+    plotArgs (UnorderedDistinct p) = plotArgs p
+
+newtype OrderedDistinct a =
+    OrderedDistinct (Pair a)
+    deriving (Show, Eq, Generic)
+
+instance Cart a => Cart (OrderedDistinct a) where
+    getAllOptions =
+        (map (OrderedDistinct . uncurry Pair) .
+         orderedCombinationsWithoutSelfCombinations) <$>
+        getAllOptions
+    fileComps (OrderedDistinct p) = fileComps p
+    ruleComps Proxy = ["ordered", "distinct"] ++ ruleComps (Proxy @(Pair a))
+    dependencies (OrderedDistinct p) = dependencies p
+    plotArgs (OrderedDistinct p) = plotArgs p
+
+newtype IndepDepPairEvaluator =
+    IndepDepPairEvaluator (Pair Evaluator)
+
+instance Cart IndepDepPairEvaluator where
+    getAllOptions = do
+        unorderedPairs <- getAllOptions
+        pure $
+            catMaybes $ do
+                UnorderedDistinct (Pair a b) <- unorderedPairs
+                pure $
+                    if evaluatorIndication a == Input
+                        then Just $ IndepDepPairEvaluator (Pair a b)
+                        else Nothing
+    fileComps (IndepDepPairEvaluator p) = fileComps p
+    ruleComps Proxy =
+        ["independent", "dependent"] ++ ruleComps (Proxy @(Pair Evaluator))
+    dependencies (IndepDepPairEvaluator p) = dependencies p
+    plotArgs (IndepDepPairEvaluator p) = plotArgs p
 
 instance Cart SignatureInferenceStrategy where
     getAllOptions = pure signatureInferenceStrategies
@@ -236,27 +278,59 @@ instance (Cart a, Cart b, Cart c) => Cart (a, b, c) where
         dependencies c
     plotArgs (a, b, c) = plotArgs a ++ plotArgs b ++ plotArgs c
 
+instance (Cart a, Cart b, Cart c, Cart d) => Cart (a, b, c, d) where
+    getAllOptions = do
+        as <- getAllOptions
+        bs <- getAllOptions
+        cs <- getAllOptions
+        ds <- getAllOptions
+        pure $ (,,,) <$> as <*> bs <*> cs <*> ds
+    fileComps (a, b, c, d) =
+        fileComps a ++ fileComps b ++ fileComps c ++ fileComps d
+    ruleComps Proxy =
+        ruleComps (Proxy @a) ++
+        ruleComps (Proxy @b) ++ ruleComps (Proxy @c) ++ ruleComps (Proxy @d)
+    dependencies (a, b, c, d) = do
+        dependencies a
+        dependencies b
+        dependencies c
+        dependencies d
+    plotArgs (a, b, c, d) = plotArgs a ++ plotArgs b ++ plotArgs c ++ plotArgs d
+
 class EvaluatedData a where
     getDataFileFor :: a -> Action (Path Abs File)
 
 instance EvaluatedData (OrderedDistinct Evaluator) where
     getDataFileFor _ = evaluatedFileForAllData
 
-instance EvaluatedData a => EvaluatedData (a, OrderedDistinct Evaluator) where
+instance EvaluatedData a => EvaluatedData (a, OrderedDistinct b) where
     getDataFileFor (a, _) = getDataFileFor a
 
-instance EvaluatedData (a, b) =>
-         EvaluatedData (a, b, OrderedDistinct Evaluator) where
+instance EvaluatedData (a, b) => EvaluatedData (a, b, OrderedDistinct c) where
     getDataFileFor (a, b, _) = getDataFileFor (a, b)
+
+instance EvaluatedData (a, b, c) =>
+         EvaluatedData (a, b, c, OrderedDistinct d) where
+    getDataFileFor (a, b, c, _) = getDataFileFor (a, b, c)
 
 instance EvaluatedData (UnorderedDistinct Evaluator) where
     getDataFileFor _ = evaluatedFileForAllData
 
-instance EvaluatedData a => EvaluatedData (a, UnorderedDistinct Evaluator) where
+instance EvaluatedData a => EvaluatedData (a, UnorderedDistinct b) where
+    getDataFileFor (g, _) = getDataFileFor g
+
+instance EvaluatedData (a, b) => EvaluatedData (a, b, UnorderedDistinct c) where
+    getDataFileFor (a, b, _) = getDataFileFor (a, b)
+
+instance EvaluatedData (a, b, c) =>
+         EvaluatedData (a, b, c, UnorderedDistinct d) where
+    getDataFileFor (a, b, c, _) = getDataFileFor (a, b, c)
+
+instance EvaluatedData a => EvaluatedData (a, IndepDepPairEvaluator) where
     getDataFileFor (g, _) = getDataFileFor g
 
 instance EvaluatedData (a, b) =>
-         EvaluatedData (a, b, UnorderedDistinct Evaluator) where
+         EvaluatedData (a, b, IndepDepPairEvaluator) where
     getDataFileFor (a, b, _) = getDataFileFor (a, b)
 
 instance EvaluatedData GroupName where

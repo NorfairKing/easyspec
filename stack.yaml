@@ -9,7 +9,7 @@ packages:
 extra-deps:
 - optparse-applicative-0.13.2.0
 - validity-containers-0.1.0.2
-- quickspec-0.9.6
+# - quickspec-0.9.6
 - validity-0.3.2.0
 - validity-path-0.1.0.0
 - genvalidity-0.3.1.0
@@ -20,4 +20,4 @@ extra-deps:
 - minisat-0.1.2
 - shake-path-0.0.0.0
 - edit-distance-vector-1.0.0.4
-resolver: lts-8.6
+resolver: lts-8.21

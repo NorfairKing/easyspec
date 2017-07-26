@@ -2,15 +2,20 @@ module EasySpec.Discover.SignatureInference
     ( defaultInferenceStrategy
     , inferenceStrategies
     , inferenceStrategiesToEvaluate
+    , interestingStrategies
     , evenMoreInferenceStrategies
     , inferFullBackground
     ) where
 
 import Import
 
+import EasySpec.Discover.SignatureInference.Chunks
+import EasySpec.Discover.SignatureInference.ChunksPlus
+import EasySpec.Discover.SignatureInference.ChunksSimilarityName
+import EasySpec.Discover.SignatureInference.ChunksSimilaritySymbols
+import EasySpec.Discover.SignatureInference.ChunksSimilarityType
 import EasySpec.Discover.SignatureInference.EmptyBackground
 import EasySpec.Discover.SignatureInference.FullBackground
-import EasySpec.Discover.SignatureInference.FullBreakthrough
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityEditDistanceName
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityName
 import EasySpec.Discover.SignatureInference.SyntacticSimilaritySymbols
@@ -20,26 +25,33 @@ import EasySpec.Discover.SignatureInference.Utils
 import EasySpec.Discover.Types
 
 defaultInferenceStrategy :: SignatureInferenceStrategy
-defaultInferenceStrategy = inferFullBreakthrough 1
+defaultInferenceStrategy = inferChunks
 
 inferenceStrategies :: [SignatureInferenceStrategy]
 inferenceStrategies =
     basicInferenceStrategies ++
-    [ inferSyntacticSimilarityName `unionInferAlg`
-      inferSyntacticSimilaritySymbols
-    , inferSyntacticSimilarityName `unionInferAlg` inferSyntacticSimilarityType
-    , inferSyntacticSimilaritySymbols `unionInferAlg`
-      inferSyntacticSimilarityType
+    [ inferSyntacticSimilarityName 5 `unionInferAlg`
+      inferSyntacticSimilaritySymbols 5
+    , inferSyntacticSimilarityName 5 `unionInferAlg`
+      inferSyntacticSimilarityType 5
+    , inferSyntacticSimilaritySymbols 5 `unionInferAlg`
+      inferSyntacticSimilarityType 5
     ]
 
 inferenceStrategiesToEvaluate :: [SignatureInferenceStrategy]
 inferenceStrategiesToEvaluate =
     [ inferEmptyBackground
     , inferFullBackground
-    , inferFullBreakthrough 1
-    , inferSyntacticSimilarityType
-    , inferTypeReachability 7
+    , inferChunks
+    , inferChunksPlus
+    , inferSyntacticSimilarityName 5
+    , inferSyntacticSimilaritySymbols 5
+    , inferSyntacticSimilarityType 5
     ]
+
+interestingStrategies :: [SignatureInferenceStrategy]
+interestingStrategies =
+    [inferEmptyBackground, inferFullBackground, inferChunks, inferChunksPlus]
 
 basicInferenceStrategies :: [SignatureInferenceStrategy]
 basicInferenceStrategies =
@@ -47,12 +59,16 @@ basicInferenceStrategies =
     defaultInferenceStrategy :
     [ inferEmptyBackground
     , inferFullBackground
-    , inferSyntacticSimilarityName
-    , inferFullBreakthrough 1
-    , inferSyntacticSimilarityEditDistanceName
-    , inferSyntacticSimilaritySymbols
-    , inferSyntacticSimilarityType
+    , inferSyntacticSimilarityName 5
+    , inferSyntacticSimilarityEditDistanceName 5
+    , inferSyntacticSimilaritySymbols 5
+    , inferSyntacticSimilarityType 5
     , inferTypeReachability 7
+    , inferChunks
+    , inferChunksPlus
+    , inferChunksSimilarityName 5
+    , inferChunksSimilaritySymbols 5
+    , inferChunksSimilarityType 5
     ]
 
 evenMoreInferenceStrategies :: [SignatureInferenceStrategy]

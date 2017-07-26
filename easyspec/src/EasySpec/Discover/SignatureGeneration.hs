@@ -5,6 +5,7 @@ module EasySpec.Discover.SignatureGeneration where
 
 import Import hiding (Alt)
 
+import Language.Haskell.Exts.Pretty
 import Language.Haskell.Exts.Syntax
 
 import EasySpec.Discover.TH
@@ -117,5 +118,6 @@ signatureComponent (NamedExp funNameStr funExp) =
                        mempty
                        (ModuleName mempty "QuickSpec.Term")
                        (Ident mempty "constant")))
-             (Lit mempty $ String mempty funNameStr funNameStr))
+             (Lit mempty $
+              String mempty (prettyPrint funNameStr) (prettyPrint funNameStr)))
         funExp

@@ -10,11 +10,12 @@ import Language.Haskell.Exts.Syntax
 import EasySpec.Discover.SignatureInference.SimilarityUtils
 import EasySpec.Discover.Types
 
-inferSyntacticSimilarityType :: SignatureInferenceStrategy
-inferSyntacticSimilarityType =
+inferSyntacticSimilarityType :: Int -> SignatureInferenceStrategy
+inferSyntacticSimilarityType i =
     similarityInferAlg
-        "syntactical-similarity-type"
+        ("syntactical-similarity-type-" ++ show i)
         [$(mkRelFile __FILE__)]
+        i
         idSubTypes
 
 idSubTypes :: EasyId -> [EasyType]

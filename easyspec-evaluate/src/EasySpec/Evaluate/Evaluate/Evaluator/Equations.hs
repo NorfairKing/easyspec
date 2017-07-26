@@ -17,7 +17,7 @@ equationsEvaluator =
     , evaluatorPretty =
           \ei -> unwords [show . length . eiDiscoveredEqs $ ei, "equations"]
     , evaluatorUnit = "#"
-    , evaluatorQuantity = "equation"
+    , evaluatorQuantity = "equations"
     , evaluatorIndication = GreaterIsBetter
     , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }

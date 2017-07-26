@@ -2,6 +2,8 @@ module EasySpec.Evaluate.Evaluate.Evaluator.Types where
 
 import Import
 
+import Data.Function (on)
+
 import qualified EasySpec.Discover.Types as ES
 
 type EvaluatorName = String
@@ -15,6 +17,15 @@ data Evaluator = Evaluator
     , evaluatorIndication :: Indication
     , evaluatorRelevantFiles :: [Path Rel File]
     }
+
+instance Show Evaluator where
+    show = evaluatorName
+
+instance Eq Evaluator where
+    (==) = (==) `on` evaluatorName
+
+instance Ord Evaluator where
+    compare = compare `on` evaluatorName
 
 data EvaluationInput = EvaluationInput
     { eiScope :: [ES.EasyId]
@@ -30,6 +41,6 @@ data Indication
     deriving (Show, Eq)
 
 prettyIndication :: Indication -> String
-prettyIndication GreaterIsBetter = "Greater is better."
-prettyIndication SmallerIsBetter = "Smaller is better."
+prettyIndication GreaterIsBetter = "More is better."
+prettyIndication SmallerIsBetter = "Less is better."
 prettyIndication Input = "This is a part of the input."

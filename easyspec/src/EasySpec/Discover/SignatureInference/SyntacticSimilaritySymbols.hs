@@ -11,11 +11,12 @@ import EasySpec.Discover.CodeUtils
 import EasySpec.Discover.SignatureInference.SimilarityUtils
 import EasySpec.Discover.Types
 
-inferSyntacticSimilaritySymbols :: SignatureInferenceStrategy
-inferSyntacticSimilaritySymbols =
+inferSyntacticSimilaritySymbols :: Int -> SignatureInferenceStrategy
+inferSyntacticSimilaritySymbols i =
     differenceInferAlg
-        "syntactical-similarity-symbols"
+        ("syntactical-similarity-symbols-" ++ show i)
         [$(mkRelFile __FILE__)]
+        i
         diffIdImpl
 
 diffIdImpl :: EasyId -> EasyId -> Double
@@ -30,7 +31,8 @@ diffImpl ei1 ei2 =
     dictDiff (letterDict $ namesOf ei1) (letterDict $ namesOf ei2)
 
 namesOf :: EasyImpl -> [String]
-namesOf (Impl d) = map nameStr $ concatMap getDeclSymbols d
+namesOf (Impl d) =
+    map nameStr $ concatMap getQNameSymbols $ concatMap getDeclSymbols d
   where
     nameStr :: Name () -> String
     nameStr (Ident _ s) = s

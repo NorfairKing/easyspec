@@ -49,11 +49,10 @@ discover ids = do
                 _ -> ids
     res <- discoverRelevantEquations ds
     liftIO $
-        putStr $
-        presentEquations $ bool id (map unqualify) (setDiscQualified ds) res
+        putStr $ presentEquations $ map (unqualify $ setDiscQualified ds) res
 
-unqualify :: EasyEq -> EasyEq
-unqualify (EasyEq e1 e2) = EasyEq (unqualifyExp e1) (unqualifyExp e2)
+unqualify :: Unqualification -> EasyEq -> EasyEq
+unqualify unq (EasyEq e1 e2) = EasyEq (unqualifyExp e1) (unqualifyExp e2)
   where
     unqualifyExp :: EasyExp -> EasyExp
     unqualifyExp =
@@ -63,7 +62,7 @@ unqualify (EasyEq e1 e2) = EasyEq (unqualifyExp e1) (unqualifyExp e2)
             IPVar
             (\l qn -> Con l $ q qn)
             Lit
-            InfixApp
+            (\l el1 qop el2 -> InfixApp l el1 (qo qop) el2)
             App
             NegApp
             Lambda
@@ -114,8 +113,18 @@ unqualify (EasyEq e1 e2) = EasyEq (unqualifyExp e1) (unqualifyExp e2)
             LCase
             ExprHole
       where
-        q :: QName l -> QName l
-        q (Qual l _ n) = UnQual l n
+        qo :: QOp () -> QOp ()
+        qo (QVarOp l qn) = QVarOp l $ q qn
+        qo (QConOp l qn) = QConOp l $ q qn
+        q :: QName () -> QName ()
+        q c@(Qual l mn n) =
+            case unq of
+                UnqualifyNothing -> c
+                UnqualifyLocal mn' ->
+                    if mn == mn'
+                        then UnQual l n
+                        else c
+                UnqualifyAll -> UnQual l n
         q c = c
 
 presentEquations :: [EasyEq] -> String
@@ -132,12 +141,6 @@ discoverRelevantEquations ds = do
         case setDiscFun ds of
             Nothing -> allEqs
             Just focus -> filter (mentionsEq focus) allEqs
-
-mentionsEq :: EasyQName -> EasyEq -> Bool
-mentionsEq n (EasyEq e1 e2) = mentions n e1 || mentions n e2
-
-occurrencesEq :: EasyQName -> EasyEq -> Int
-occurrencesEq n (EasyEq e1 e2) = occurrences n e1 + occurrences n e2
 
 discoverEquations ::
        (MonadIO m, MonadMask m, MonadReader Settings m)

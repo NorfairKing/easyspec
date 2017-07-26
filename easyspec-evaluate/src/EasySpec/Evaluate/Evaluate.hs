@@ -16,6 +16,7 @@ import Language.Haskell.Exts.Pretty (prettyPrint)
 import qualified EasySpec.Discover as ES
 import qualified EasySpec.Discover.Types as ES
 import qualified EasySpec.OptParse as ES
+import qualified EasySpec.OptParse.Types as ES
 
 import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Evaluate.Evaluator
@@ -56,7 +57,7 @@ getEvaluationInputPoint is funcname strat = do
             { ES.setDiscInputSpec = is
             , ES.setDiscFun = Just funcname
             , ES.setDiscInfStrat = strat
-            , ES.setDiscQualified = True
+            , ES.setDiscQualified = ES.UnqualifyNothing
             }
     ids <- runReaderT (ES.getEasyIds is) evaluationSettings
     (runtime, eqs) <-

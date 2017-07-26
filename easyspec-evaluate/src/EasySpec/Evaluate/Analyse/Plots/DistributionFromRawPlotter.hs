@@ -7,6 +7,7 @@
 
 module EasySpec.Evaluate.Analyse.Plots.DistributionFromRawPlotter
     ( dfrgRules
+    , dfrgCartPlotter
     , DistributionFromRawGatherer(..)
     ) where
 
@@ -32,10 +33,10 @@ dfrgRules dfrg =
     sequence
         [ rawCartRule $
           dfrgCartPlotter @(GroupName, SignatureInferenceStrategy) dfrg
-        , rawCartRule $
-          dfrgCartPlotter
-              @(GroupAndExampleAndName, SignatureInferenceStrategy)
-              dfrg
+        -- , rawCartRule $
+        --   dfrgCartPlotter
+        --       @(GroupAndExampleAndName, SignatureInferenceStrategy)
+        --       dfrg
         ]
 
 dfrgCartPlotter ::

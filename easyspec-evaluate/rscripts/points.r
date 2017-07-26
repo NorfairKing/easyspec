@@ -1,12 +1,12 @@
 args <- commandArgs(trailingOnly=TRUE)
 
 if (length(args) != 8) {
-  stop("Usage: points.r common.r input.csv output.png evaluator1 evaluator2 name indication1 indication2")
+  stop("Usage: points.r common.r input.csv output.pdf evaluator1 evaluator2 name indication1 indication2")
 }
 
 common <- args[1]
 inFile <- args[2]
-outPng <- args[3]
+outPdf <- args[3]
 e1 <- args[4]
 e2 <- args[5]
 name <- args[6]
@@ -28,13 +28,9 @@ if (length(res$output) != 0) {
   dat <- dat[!is.na(dat$output.x),]
   dat <- dat[!is.na(dat$output.y),]
 
-  png( outPng
-    , height=600
-    , width=1200
-    , bg="white"
-    )
+  startPdf(outPdf)
 
-  par(xpd=TRUE, mar=c(4,4,4,35))
+  par(xpd=TRUE, mar=c(0.4,0.4,0.4,3.5))
 
   plot(dat$output.x
     , dat$output.y
@@ -63,5 +59,5 @@ if (length(res$output) != 0) {
     , lty = 1
     )
 } else { 
-  invalidDataPng(outPng)
+  invalidDataPdf(outPdf)
 }

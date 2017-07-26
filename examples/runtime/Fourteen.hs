@@ -3,7 +3,9 @@
 module Fourteen where
 
 import Prelude
-       (Bool(..), (&&), (+), (-), (||), concat, drop, map, take, not)
+       (Bool(..), (&&), (+), (-), (||), concat, drop, map, not, take)
+
+{-# ANN module "HLint: ignore Use foldr" #-}
 
 myId :: a -> a
 myId a = a

@@ -119,7 +119,7 @@ rLibsRules :: Rules ()
 rLibsRules = mapM_ rlib rLibs
 
 rLibs :: [String]
-rLibs = ["ggplot2"]
+rLibs = ["ggplot2", "dplyr"]
 
 rlib :: String -> Rules ()
 rlib name = do

@@ -19,9 +19,14 @@ library
         EasySpec.Discover.QuickSpec
         EasySpec.Discover.SignatureGeneration
         EasySpec.Discover.SignatureInference
+        EasySpec.Discover.SignatureInference.Chunks
+        EasySpec.Discover.SignatureInference.ChunksPlus
+        EasySpec.Discover.SignatureInference.ChunksSimilarityName
+        EasySpec.Discover.SignatureInference.ChunksSimilaritySymbols
+        EasySpec.Discover.SignatureInference.ChunksSimilarityType
+        EasySpec.Discover.SignatureInference.ChunksUtils
         EasySpec.Discover.SignatureInference.EmptyBackground
         EasySpec.Discover.SignatureInference.FullBackground
-        EasySpec.Discover.SignatureInference.FullBreakthrough
         EasySpec.Discover.SignatureInference.Monomorphisation
         EasySpec.Discover.SignatureInference.SimilarityUtils
         EasySpec.Discover.SignatureInference.SyntacticSimilarityEditDistanceName

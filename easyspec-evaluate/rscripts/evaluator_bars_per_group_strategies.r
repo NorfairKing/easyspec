@@ -1,9 +1,9 @@
 library(ggplot2)
 args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) != 13) {
+if (length(args) != 15) {
   print(args)
-  stop("Usage: evaluators_bars_per_group.r common.r input.csv output.pdf granularity groupName evaluator1 unit1 quantity1 indication1 evaluator2 unit2 quantity2 indication2")
+  stop("Usage: evaluator_bars_per_group_strategies.r common.r input.csv output.pdf granularity groupName evaluator1 unit1 quantity1 indication1 evaluator2 unit2 quantity2 indication2 strategy1 strategy2")
 }
 
 common <- args[1]
@@ -19,12 +19,16 @@ e2 <- args[10]
 u2 <- args[11]
 q2 <- args[12]
 i2 <- args[13]
+s1 <- args[14]
+s2 <- args[15]
 
 source(common)
 
 res = read.csv(inFile, header=TRUE)
 
 res$origin <- paste(res$file, res$focus, res$strategy)
+
+res <- res[(res$strategy == s1 | res$strategy == s2),]
 
 # Select the right data
 res1 <- res[res$evaluator == e1,]
@@ -40,14 +44,18 @@ dat <- merge(res1, res2, by = "origin")
 dat <- dat[!is.na(dat$output.x),]
 dat <- dat[!is.na(dat$output.y),]
 
+dat$strategy <- dat$strategy.x
+
 if (length(dat$origin) != 0) {
   startPdf(outPdf)
     
 
-  ggplot(dat, aes(output.x, output.y, fill = strategy.x)) +
+  ggplot(dat, aes(output.x, output.y, fill = strategy)) +
     geom_bar(stat="identity", position = "dodge") +
     scale_fill_brewer(palette = "Set1") +
-    labs(x = e1) + labs(y = e2)
+    labs(x = paste(e1, "(", u1, q1, ")")) + labs(y = paste(e2, "(", u2, q2, ")")) + 
+    theme(axis.title.y=element_text(angle = 0)) +
+    theme(legend.position="bottom")
 
 } else {
   invalidDataPdf(outPdf)

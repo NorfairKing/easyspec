@@ -11,7 +11,7 @@ type Instructions = (Dispatch, Settings)
 data Command
     = CommandEvaluate (Maybe FilePath)
                       (Maybe FilePath)
-    | CommandBuild String
+    | CommandBuild [String]
     | CommandBuildEverything
     deriving (Show, Eq)
 
@@ -25,7 +25,7 @@ data Configuration =
 
 data Dispatch
     = DispatchEvaluate [ES.InputSpec]
-    | DispatchBuild String
+    | DispatchBuild [String]
     | DispatchBuildEverything
     deriving (Show, Eq)
 

@@ -2,8 +2,9 @@
 
 module Twelve where
 
-import Prelude
-       (Bool(..), (+), (-), (||), concat, drop, map, take)
+import Prelude (Bool(..), (+), (-), (||), concat, drop, map, take)
+
+{-# ANN module "HLint: ignore Use foldr" #-}
 
 myId :: a -> a
 myId a = a

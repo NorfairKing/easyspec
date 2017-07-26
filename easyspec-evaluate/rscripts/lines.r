@@ -1,12 +1,12 @@
 args <- commandArgs(trailingOnly=TRUE)
 
 if (length(args) != 5) {
-  stop("Usage: lines.r common.r input.csv output.png evaluator indication")
+  stop("Usage: lines.r common.r input.csv output.pdf evaluator indication")
 }
 
 common <- args[1]
 inFile <- args[2]
-outPng <- args[3]
+outPdf <- args[3]
 evaluator <- args[4]
 indication <- args[5]
 
@@ -24,13 +24,10 @@ res <- res[res$evaluator == evaluator,]
 res$origin <- paste(res$path, res$focus)
 
 if (length(res$output) != 0) { 
-  png( outPng
-    , height=400
-    , width=1200
-    , bg="white"
-    )
+  startPdf(outPdf)
+
   # To draw legend outside of graph
-  par(xpd = TRUE, mar=c(4,4,4,15))
+  par(xpd = TRUE, mar=c(0.4,0.4,0.4,0.15))
 
   basevals <- res[res$strategy == baseline,]
 
@@ -67,5 +64,5 @@ if (length(res$output) != 0) {
     , lty = 1
     )
 } else {
-  invalidDataPng(outPng)
+  invalidDataPdf(outPdf)
 }

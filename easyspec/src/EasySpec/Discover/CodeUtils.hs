@@ -7,6 +7,8 @@ import Import hiding (Alt)
 import Language.Haskell.Exts.Pretty
 import Language.Haskell.Exts.Syntax
 
+import EasySpec.Discover.Types
+
 {-# ANN module "HLint: ignore Use const" #-}
 
 {-# ANN module "HLint: ignore Use record patterns" #-}
@@ -36,20 +38,20 @@ getTyVars =
         (\_ _ -> [])
         (\_ _ _ -> [])
 
-getPatSymbols :: Pat l -> [Name l]
+getPatSymbols :: Pat l -> [QName l]
 getPatSymbols =
     foldPat
         (\_ _ -> []) -- Don't count variables
                      -- TODO maybe we should count variables?
         (\_ _ _ -> [])
-        (\_ n _ -> [n])
-        (\_ b1 qn b2 -> b1 ++ getQNameSymbols qn ++ b2)
-        (\_ qn bs -> getQNameSymbols qn ++ concat bs)
+        (\_ _ _ -> []) -- Don't count n + k patterns
+        (\_ b1 qn b2 -> b1 ++ [qn] ++ b2)
+        (\_ qn bs -> qn : concat bs)
         (\_ _ bs -> concat bs)
         (\_ bs -> concat bs)
         (\_ b -> b)
-        (\_ qn pfs -> getQNameSymbols qn ++ concatMap pfpv pfs)
-        (\_ n b -> n : b)
+        (\_ qn pfs -> qn : concatMap pfpv pfs)
+        (\_ _ b -> b) -- Don't count renamings (@)
         (\_ -> [])
         (\_ b -> b)
         (\_ b _ -> b) -- Don't go into types
@@ -63,12 +65,12 @@ getPatSymbols =
         (\_ _ _ -> [])
         (\_ b -> b)
   where
-    pfpv :: PatField l -> [Name l]
-    pfpv (PFieldPat _ qn p) = getQNameSymbols qn ++ getPatSymbols p
-    pfpv (PFieldPun _ qn) = getQNameSymbols qn
+    pfpv :: PatField l -> [QName l]
+    pfpv (PFieldPat _ qn p) = qn : getPatSymbols p
+    pfpv (PFieldPun _ qn) = [qn]
     pfpv (PFieldWildcard _) = []
 
-getRPatSymbols :: RPat l -> [Name l]
+getRPatSymbols :: RPat l -> [QName l]
 getRPatSymbols = undefined
 
 getQNameSymbols :: QName l -> [Name l]
@@ -77,16 +79,16 @@ getQNameSymbols (UnQual _ n) = [n]
 getQNameSymbols (Special l sc) -- This is kind-of cheating but I'll allow it here.
  = [Ident l $ prettyPrintOneLine sc]
 
-getQOpSymbols :: QOp l -> [Name l]
+getQOpSymbols :: QOp l -> [QName l]
 getQOpSymbols (QVarOp _ _) = [] -- Don't count variables, TODO see above TODO
-getQOpSymbols (QConOp _ qn) = getQNameSymbols qn
+getQOpSymbols (QConOp _ qn) = [qn]
 
-getBindsSymbols :: Binds l -> [Name l]
+getBindsSymbols :: Binds l -> [QName l]
 getBindsSymbols (BDecls _ ds) = concatMap getDeclSymbols ds
 getBindsSymbols (IPBinds _ ipbs) =
     concat [getExpSymbols e | IPBind _ _ e <- ipbs]
 
-getDeclSymbols :: Decl l -> [Name l]
+getDeclSymbols :: Decl l -> [QName l]
 getDeclSymbols d =
     case d of
         FunBind _ ms -> concatMap getMatchSymbols ms
@@ -96,49 +98,49 @@ getDeclSymbols d =
         PatSyn _ p1 p2 _ -> getPatSymbols p1 ++ getPatSymbols p2 -- what about patSynDirection?
         _ -> []
 
-getMatchSymbols :: Match l -> [Name l]
-getMatchSymbols (Match _ n ps rhs mbs) =
-    n :
+getMatchSymbols :: Match l -> [QName l]
+getMatchSymbols (Match _ _ ps rhs mbs) -- TODO do something with the LHS?
+ =
     concatMap getPatSymbols ps ++
     getRhsSymbols rhs ++ fromMaybe [] (getBindsSymbols <$> mbs)
-getMatchSymbols (InfixMatch _ p1 n ps rhs mbs) =
-    n :
+getMatchSymbols (InfixMatch _ p1 _ ps rhs mbs) -- TODO do something with the LHS?
+ =
     getPatSymbols p1 ++
     concatMap getPatSymbols ps ++
     getRhsSymbols rhs ++ fromMaybe [] (getBindsSymbols <$> mbs)
 
-getRhsSymbols :: Rhs l -> [Name l]
+getRhsSymbols :: Rhs l -> [QName l]
 getRhsSymbols (UnGuardedRhs _ e) = getExpSymbols e
 getRhsSymbols (GuardedRhss _ grhss) = concatMap getGuardedRhsSymbols grhss
 
-getGuardedRhsSymbols :: GuardedRhs l -> [Name l]
+getGuardedRhsSymbols :: GuardedRhs l -> [QName l]
 getGuardedRhsSymbols (GuardedRhs _ stmts e) =
     concatMap getStmtSymbols stmts ++ getExpSymbols e
 
-getAltSymbols :: Alt l -> [Name l]
+getAltSymbols :: Alt l -> [QName l]
 getAltSymbols (Alt _ p rhs mbs) =
     getPatSymbols p ++
     getRhsSymbols rhs ++ fromMaybe [] (getBindsSymbols <$> mbs)
 
-getStmtSymbols :: Stmt l -> [Name l]
+getStmtSymbols :: Stmt l -> [QName l]
 getStmtSymbols (Generator _ p e) = getPatSymbols p ++ getExpSymbols e
 getStmtSymbols (Qualifier _ e) = getExpSymbols e
 getStmtSymbols (LetStmt _ bs) = getBindsSymbols bs
 getStmtSymbols (RecStmt _ stmts) = concatMap getStmtSymbols stmts
 
-getFieldUpdateSymbols :: FieldUpdate l -> [Name l]
+getFieldUpdateSymbols :: FieldUpdate l -> [QName l]
 getFieldUpdateSymbols = undefined
 
-getQualStmtSymbols :: QualStmt l -> [Name l]
+getQualStmtSymbols :: QualStmt l -> [QName l]
 getQualStmtSymbols = undefined
 
-getExpSymbols :: Exp l -> [Name l]
+getExpSymbols :: Exp l -> [QName l]
 getExpSymbols =
     foldExp
         (\_ _ -> []) -- Don't count variables, TODO see above TODO
         (\_ _ -> [])
         (\_ _ -> []) -- Don't count variables see above
-        (\_ qn -> getQNameSymbols qn)
+        (\_ qn -> [qn])
         (\_ _ -> [])
         (\_ b1 qo b2 -> b1 ++ getQOpSymbols qo ++ b2)
         (\_ -> (++))
@@ -157,7 +159,7 @@ getExpSymbols =
         (\_ b -> b)
         (\_ b qo -> b ++ getQOpSymbols qo)
         (\_ qo b -> getQOpSymbols qo ++ b)
-        (\_ qn fus -> getQNameSymbols qn ++ concatMap getFieldUpdateSymbols fus)
+        (\_ qn fus -> qn : concatMap getFieldUpdateSymbols fus)
         (\_ b fus -> b ++ concatMap getFieldUpdateSymbols fus)
         (\_ b -> b)
         (\_ -> (++))
@@ -166,8 +168,8 @@ getExpSymbols =
         (\_ -> (++))
         (\_ b1 b2 b3 -> b1 ++ b2 ++ b3)
         (\_ b qstms -> b ++ concatMap getQualStmtSymbols qstms)
-        (\_ b qstmss -> b ++ concat (concatMap (map getQualStmtSymbols) qstmss))
-        (\_ b qstmss -> b ++ concat (concatMap (map getQualStmtSymbols) qstmss))
+        (\_ b qstmss -> b ++ concatMap (concatMap getQualStmtSymbols) qstmss)
+        (\_ b qstmss -> b ++ concatMap (concatMap getQualStmtSymbols) qstmss)
         (\_ b _ -> b) -- Don't count type symbols
         (\_ _ -> [])
         (\_ _ -> [])
@@ -285,8 +287,14 @@ foldType ffa ff ft fl fpa fa fv fc fp fi fk fpr fe fspl fbng fwc fqq = go
     go (TyWildCard l mn) = fwc l mn
     go (TyQuasiQuote l s1 s2) = fqq l s1 s2
 
+mentionsEq :: EasyQName -> EasyEq -> Bool
+mentionsEq n (EasyEq e1 e2) = mentions n e1 || mentions n e2
+
 mentions :: Eq l => QName l -> Exp l -> Bool
 mentions n e = occurrences n e > 0
+
+occurrencesEq :: EasyQName -> EasyEq -> Int
+occurrencesEq n (EasyEq e1 e2) = occurrences n e1 + occurrences n e2
 
 occurrences :: Eq l => QName l -> Exp l -> Int
 occurrences n =

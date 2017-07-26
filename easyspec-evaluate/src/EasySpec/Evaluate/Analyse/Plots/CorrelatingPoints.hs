@@ -40,7 +40,7 @@ plotsRulesForPointsPlotWithEvaluatorsPerExample ::
     -> Action (Path Abs File)
     -> (GroupAndExample, OrderedDistinct Evaluator)
     -> Rules ()
-plotsRulesForPointsPlotWithEvaluatorsPerExample plotF genDataF (GE _ is, OrderedDistinct e1 e2) =
+plotsRulesForPointsPlotWithEvaluatorsPerExample plotF genDataF (GE _ is, OrderedDistinct (Pair e1 e2)) =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
@@ -71,7 +71,7 @@ plotsRulesForPointsPlotsWithGroupsOfExamples ::
     -> Action (Path Abs File)
     -> (GroupName, OrderedDistinct Evaluator)
     -> Rules ()
-plotsRulesForPointsPlotsWithGroupsOfExamples plotF genDataF (groupName, OrderedDistinct e1 e2) =
+plotsRulesForPointsPlotsWithGroupsOfExamples plotF genDataF (groupName, OrderedDistinct (Pair e1 e2)) =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
@@ -104,7 +104,7 @@ plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy ::
     -> Action (Path Abs File)
     -> (GroupName, SignatureInferenceStrategy, OrderedDistinct Evaluator)
     -> Rules ()
-plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy plotF genDataF (groupName, s, OrderedDistinct e1 e2) =
+plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy plotF genDataF (groupName, s, OrderedDistinct (Pair e1 e2)) =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2
@@ -135,7 +135,7 @@ plotsRulesForPointsPlotWithEvaluators ::
     -> Action (Path Abs File)
     -> OrderedDistinct Evaluator
     -> Rules ()
-plotsRulesForPointsPlotWithEvaluators plotF genDataF (OrderedDistinct e1 e2) =
+plotsRulesForPointsPlotWithEvaluators plotF genDataF (OrderedDistinct (Pair e1 e2)) =
     plotF $%> do
         dependOnEvaluator e1
         dependOnEvaluator e2

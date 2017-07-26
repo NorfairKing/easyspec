@@ -8,7 +8,6 @@ module EasySpec.Evaluate.Evaluate.Evaluator
     , runtimeEvaluator
     , relevantEquationsEvaluator
     , relevantFunctionsEvaluator
-    , maximumRelatedFunctionsEvaluator
     ) where
 
 import Import
@@ -18,7 +17,6 @@ import Development.Shake.Path
 
 import EasySpec.Evaluate.Evaluate.Evaluator.Combinators
 import EasySpec.Evaluate.Evaluate.Evaluator.Equations
-import EasySpec.Evaluate.Evaluate.Evaluator.MaximumRelatedFunctions
 import EasySpec.Evaluate.Evaluate.Evaluator.RelevantEquations
 import EasySpec.Evaluate.Evaluate.Evaluator.RelevantFunctions
 import EasySpec.Evaluate.Evaluate.Evaluator.Runtime
@@ -48,5 +46,5 @@ baseEvaluators =
     , runtimeEvaluator
     , relevantEquationsEvaluator
     , relevantFunctionsEvaluator
-    , maximumRelatedFunctionsEvaluator
+    -- , maximumRelatedFunctionsEvaluator
     ]

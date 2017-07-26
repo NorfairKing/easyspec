@@ -2,8 +2,9 @@
 
 module Ten where
 
-import Prelude
-       (Bool(True), (+), (-), concat, drop, map, take)
+import Prelude (Bool(True), (+), (-), concat, drop, map, take)
+
+{-# ANN module "HLint: ignore Use foldr" #-}
 
 myId :: a -> a
 myId a = a
@@ -15,4 +16,3 @@ myPlusPlus [] bs = bs
 myReverse :: [a] -> [a]
 myReverse [] = []
 myReverse (a:as) = as `myPlusPlus` [a]
-

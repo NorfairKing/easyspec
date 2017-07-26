@@ -46,7 +46,7 @@ getPatSymbols =
         (\_ _ _ -> [])
         (\_ _ _ -> []) -- Don't count n + k patterns
         (\_ b1 qn b2 -> b1 ++ [qn] ++ b2)
-        (\_ qn bs -> [qn] ++ concat bs)
+        (\_ qn bs -> qn : concat bs)
         (\_ _ bs -> concat bs)
         (\_ bs -> concat bs)
         (\_ b -> b)
@@ -66,7 +66,7 @@ getPatSymbols =
         (\_ b -> b)
   where
     pfpv :: PatField l -> [QName l]
-    pfpv (PFieldPat _ qn p) = [qn] ++ getPatSymbols p
+    pfpv (PFieldPat _ qn p) = qn : getPatSymbols p
     pfpv (PFieldPun _ qn) = [qn]
     pfpv (PFieldWildcard _) = []
 
@@ -99,11 +99,11 @@ getDeclSymbols d =
         _ -> []
 
 getMatchSymbols :: Match l -> [QName l]
-getMatchSymbols (Match _ n ps rhs mbs) -- TODO do something with the LHS?
+getMatchSymbols (Match _ _ ps rhs mbs) -- TODO do something with the LHS?
  =
     concatMap getPatSymbols ps ++
     getRhsSymbols rhs ++ fromMaybe [] (getBindsSymbols <$> mbs)
-getMatchSymbols (InfixMatch _ p1 n ps rhs mbs) -- TODO do something with the LHS?
+getMatchSymbols (InfixMatch _ p1 _ ps rhs mbs) -- TODO do something with the LHS?
  =
     getPatSymbols p1 ++
     concatMap getPatSymbols ps ++
@@ -159,7 +159,7 @@ getExpSymbols =
         (\_ b -> b)
         (\_ b qo -> b ++ getQOpSymbols qo)
         (\_ qo b -> getQOpSymbols qo ++ b)
-        (\_ qn fus -> [qn] ++ concatMap getFieldUpdateSymbols fus)
+        (\_ qn fus -> qn : concatMap getFieldUpdateSymbols fus)
         (\_ b fus -> b ++ concatMap getFieldUpdateSymbols fus)
         (\_ b -> b)
         (\_ -> (++))

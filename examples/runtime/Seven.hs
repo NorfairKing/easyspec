@@ -4,6 +4,8 @@ module Seven where
 
 import Prelude (concat, drop, map, take)
 
+{-# ANN module "HLint: ignore Use foldr" #-}
+
 myId :: a -> a
 myId a = a
 

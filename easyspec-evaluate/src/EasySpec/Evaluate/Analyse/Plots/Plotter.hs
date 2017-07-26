@@ -44,6 +44,8 @@ import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Types
 
+{-# ANN module "HLint: ignore Reduce duplication" #-}
+
 -- Group of examples
 --  \- Exmaple
 --    \- Name
@@ -191,7 +193,7 @@ instance Cart a => Cart (Pair a) where
         as <- getAllOptions
         pure $ Pair <$> as <*> as
     fileComps (Pair a b) = fileComps a ++ fileComps b
-    ruleComps Proxy = ["pair"] ++ ruleComps (Proxy @a)
+    ruleComps Proxy = "pair" : ruleComps (Proxy @a)
     dependencies (Pair a b) = do
         dependencies a
         dependencies b

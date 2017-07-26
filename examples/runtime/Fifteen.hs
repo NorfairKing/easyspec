@@ -6,6 +6,8 @@ import Prelude
        (Bool(..), (&&), (+), (-), (||), concat, const, drop, map, not,
         take)
 
+{-# ANN module "HLint: ignore Use foldr" #-}
+
 myId :: a -> a
 myId a = a
 

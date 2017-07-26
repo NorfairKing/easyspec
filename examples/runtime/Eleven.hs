@@ -5,6 +5,8 @@ module Eleven where
 import Prelude
        (Bool(False, True), (+), (-), concat, drop, map, take)
 
+{-# ANN module "HLint: ignore Use foldr" #-}
+
 myId :: a -> a
 myId a = a
 

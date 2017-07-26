@@ -9,7 +9,6 @@ import Import
 
 import EasySpec.Discover.CodeUtils
 
-import EasySpec.Discover.SignatureInference.Chunks
 import EasySpec.Discover.SignatureInference.Utils
 import EasySpec.Discover.Types
 
@@ -52,12 +51,11 @@ inferChunksPlus =
                                   flip any eqs $ \eq ->
                                       mentionsEq (neName nex) eq
                       when (all foundSomething dependencies) $ do
-                          let nexs =
+                          let ns =
                                   nub $
-                                  concat $
-                                  map (\(_, nexs, _) -> nexs) dependencies
+                                  concatMap (\(_, nexs, _) -> nexs) dependencies
                               tokens = map (\(_, _, (t, _)) -> t) dependencies
-                          void $ inferFromWith nexs tokens
+                          void $ inferFromWith ns tokens
     }
   where
     makeNamedExps funcs = rights $ map convertToUsableNamedExp funcs

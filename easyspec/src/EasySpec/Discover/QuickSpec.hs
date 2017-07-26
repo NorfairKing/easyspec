@@ -88,8 +88,7 @@ runQuickspecOn ::
        forall m. GhcMonad m
     => InferredSignature
     -> ReaderT Settings m [EasyEq]
-runQuickspecOn = do
-    execWriterT . flip evalStateT 0 . interpretInferredSignature
+runQuickspecOn = execWriterT . flip evalStateT 0 . interpretInferredSignature
   where
     interpretInferredSignature ::
            InferredSignature

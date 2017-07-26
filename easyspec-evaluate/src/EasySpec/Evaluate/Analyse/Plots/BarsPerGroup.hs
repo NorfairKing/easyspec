@@ -10,8 +10,6 @@ import Import
 
 import EasySpec.Evaluate.Types
 
-import EasySpec.Evaluate.Evaluate.Evaluator.Types
-
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.Plots.Plotter
 import EasySpec.Evaluate.Analyse.R

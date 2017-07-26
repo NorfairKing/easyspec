@@ -38,7 +38,8 @@ runBuild targets = do
                 , shakeThreads = 0
                 , shakeReport = ["report.trace", "report.html"]
                 , shakeTimings = True
-                } $ shakeBuild
+                }
+                shakeBuild
 
 runBuildEverything :: IO ()
 runBuildEverything = runBuild [analyseRule]

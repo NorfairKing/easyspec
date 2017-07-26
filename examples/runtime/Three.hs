@@ -2,6 +2,8 @@
 
 module Three where
 
+{-# ANN module "HLint: ignore Use foldr" #-}
+
 myId :: a -> a
 myId a = a
 

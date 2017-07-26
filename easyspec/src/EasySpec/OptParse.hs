@@ -89,7 +89,7 @@ combineToInstructions cmd Flags {..} Configuration = (,) <$> disp <*> sets
                                     UnqualifyLocal $
                                     case f of
                                         Just (Qual _ mn _) -> mn
-                                        Nothing ->
+                                        _ ->
                                             ModuleName () $
                                             filePathToModuleName $
                                             inputSpecFile is

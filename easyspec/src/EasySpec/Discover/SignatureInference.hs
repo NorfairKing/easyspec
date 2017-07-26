@@ -2,6 +2,7 @@ module EasySpec.Discover.SignatureInference
     ( defaultInferenceStrategy
     , inferenceStrategies
     , inferenceStrategiesToEvaluate
+    , interestingStrategies
     , evenMoreInferenceStrategies
     , inferFullBackground
     ) where

@@ -5,11 +5,9 @@ module EasySpec.Discover.SignatureInference.ChunksSimilarityType where
 
 import Import
 
-import EasySpec.Discover.CodeUtils
 import EasySpec.Discover.SignatureInference.ChunksUtils
 import EasySpec.Discover.SignatureInference.SimilarityUtils
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityType
-import EasySpec.Discover.SignatureInference.Utils
 import EasySpec.Discover.Types
 
 inferChunksSimilarityType :: Int -> SignatureInferenceStrategy

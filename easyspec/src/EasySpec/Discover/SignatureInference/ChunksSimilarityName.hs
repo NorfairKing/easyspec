@@ -8,7 +8,6 @@ import Import
 import EasySpec.Discover.CodeUtils
 import EasySpec.Discover.SignatureInference.ChunksUtils
 import EasySpec.Discover.SignatureInference.SimilarityUtils
-import EasySpec.Discover.SignatureInference.Utils
 import EasySpec.Discover.Types
 
 inferChunksSimilarityName :: Int -> SignatureInferenceStrategy

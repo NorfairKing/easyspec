@@ -1,6 +1,3 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
-
 module EasySpec.Discover.SignatureInference.ChunksUtils where
 
 import Import
@@ -13,7 +10,6 @@ inferChunksFrom ::
 inferChunksFrom scopeMod =
     SignatureInferenceStrategy
     { sigInfStratName = undefined
-    , sigInfRelevantSources = [$(mkRelFile __FILE__)]
     , inferSignature =
           \focus scope' ->
               InferredSignature $ do

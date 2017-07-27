@@ -227,7 +227,6 @@ evaluatedDataRulesForGroupExampleNameStrategyEvaluator groupName example name st
     csvF $%> do
         jsonF <- rawDataFileFor groupName example name strategy
         needP [jsonF]
-        dependOnEvaluator evaluator
         ip <- readJSON jsonF
         putLoud $
             unwords

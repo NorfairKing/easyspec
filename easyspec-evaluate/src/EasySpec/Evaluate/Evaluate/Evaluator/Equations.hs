@@ -1,5 +1,3 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module EasySpec.Evaluate.Evaluate.Evaluator.Equations
     ( equationsEvaluator
@@ -19,5 +17,4 @@ equationsEvaluator =
     , evaluatorUnit = "#"
     , evaluatorQuantity = "equations"
     , evaluatorIndication = GreaterIsBetter
-    , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }

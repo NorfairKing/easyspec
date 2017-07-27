@@ -44,8 +44,6 @@ import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Types
 
-{-# ANN module "HLint: ignore Reduce duplication" #-}
-
 -- Group of examples
 --  \- Exmaple
 --    \- Name
@@ -109,7 +107,6 @@ standardisedEvaluatedPlotruleFor ::
     -> Rules ()
 standardisedEvaluatedPlotruleFor genScriptF plotF genDataF option =
     plotF $%> do
-        dependencies option
         dataF <- genDataF
         needP [dataF]
         scriptF <- genScriptF
@@ -151,8 +148,6 @@ class Cart a where
     getAllOptions :: Rules [a]
     fileComps :: a -> [String]
     ruleComps :: Proxy a -> [String]
-    dependencies :: a -> Action ()
-    dependencies _ = pure ()
     plotArgs :: a -> [String] -- Warning: changing this instance function breaks cross-script modularity
     plotArgs = fileComps
 
@@ -175,7 +170,6 @@ instance Cart Evaluator where
     getAllOptions = pure evaluators
     fileComps e = [evaluatorName e]
     ruleComps Proxy = ["evaluator"]
-    dependencies = dependOnEvaluator
     plotArgs ev =
         [ evaluatorName ev
         , evaluatorUnit ev
@@ -194,9 +188,6 @@ instance Cart a => Cart (Pair a) where
         pure $ Pair <$> as <*> as
     fileComps (Pair a b) = fileComps a ++ fileComps b
     ruleComps Proxy = "pair" : ruleComps (Proxy @a)
-    dependencies (Pair a b) = do
-        dependencies a
-        dependencies b
     plotArgs (Pair a b) = plotArgs a ++ plotArgs b
 
 newtype UnorderedDistinct a =
@@ -210,7 +201,6 @@ instance Cart a => Cart (UnorderedDistinct a) where
         getAllOptions
     fileComps (UnorderedDistinct p) = fileComps p
     ruleComps Proxy = ["unordered", "distinct"] ++ ruleComps (Proxy @(Pair a))
-    dependencies (UnorderedDistinct p) = dependencies p
     plotArgs (UnorderedDistinct p) = plotArgs p
 
 newtype OrderedDistinct a =
@@ -224,7 +214,6 @@ instance Cart a => Cart (OrderedDistinct a) where
         getAllOptions
     fileComps (OrderedDistinct p) = fileComps p
     ruleComps Proxy = ["ordered", "distinct"] ++ ruleComps (Proxy @(Pair a))
-    dependencies (OrderedDistinct p) = dependencies p
     plotArgs (OrderedDistinct p) = plotArgs p
 
 newtype IndepDepPairEvaluator =
@@ -243,7 +232,6 @@ instance Cart IndepDepPairEvaluator where
     fileComps (IndepDepPairEvaluator p) = fileComps p
     ruleComps Proxy =
         ["independent", "dependent"] ++ ruleComps (Proxy @(Pair Evaluator))
-    dependencies (IndepDepPairEvaluator p) = dependencies p
     plotArgs (IndepDepPairEvaluator p) = plotArgs p
 
 instance Cart SignatureInferenceStrategy where
@@ -258,9 +246,6 @@ instance (Cart a, Cart b) => Cart (a, b) where
         pure $ (,) <$> as <*> bs
     fileComps (a, b) = fileComps a ++ fileComps b
     ruleComps Proxy = ruleComps (Proxy @a) ++ ruleComps (Proxy @b)
-    dependencies (a, b) = do
-        dependencies a
-        dependencies b
     plotArgs (a, b) = plotArgs a ++ plotArgs b
 
 instance (Cart a, Cart b, Cart c) => Cart (a, b, c) where
@@ -272,10 +257,6 @@ instance (Cart a, Cart b, Cart c) => Cart (a, b, c) where
     fileComps (a, b, c) = fileComps a ++ fileComps b ++ fileComps c
     ruleComps Proxy =
         ruleComps (Proxy @a) ++ ruleComps (Proxy @b) ++ ruleComps (Proxy @c)
-    dependencies (a, b, c) = do
-        dependencies a
-        dependencies b
-        dependencies c
     plotArgs (a, b, c) = plotArgs a ++ plotArgs b ++ plotArgs c
 
 instance (Cart a, Cart b, Cart c, Cart d) => Cart (a, b, c, d) where
@@ -290,11 +271,6 @@ instance (Cart a, Cart b, Cart c, Cart d) => Cart (a, b, c, d) where
     ruleComps Proxy =
         ruleComps (Proxy @a) ++
         ruleComps (Proxy @b) ++ ruleComps (Proxy @c) ++ ruleComps (Proxy @d)
-    dependencies (a, b, c, d) = do
-        dependencies a
-        dependencies b
-        dependencies c
-        dependencies d
     plotArgs (a, b, c, d) = plotArgs a ++ plotArgs b ++ plotArgs c ++ plotArgs d
 
 class EvaluatedData a where

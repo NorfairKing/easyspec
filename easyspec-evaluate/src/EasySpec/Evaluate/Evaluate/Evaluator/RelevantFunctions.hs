@@ -1,5 +1,3 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module EasySpec.Evaluate.Evaluate.Evaluator.RelevantFunctions
     ( relevantFunctionsEvaluator
@@ -21,7 +19,6 @@ relevantFunctionsEvaluator =
     , evaluatorUnit = "#"
     , evaluatorQuantity = "functions"
     , evaluatorIndication = GreaterIsBetter
-    , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }
   where
     go ei

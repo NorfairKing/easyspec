@@ -1,5 +1,3 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module EasySpec.Discover.SignatureInference.Chunks where
 
@@ -12,5 +10,4 @@ inferChunks :: SignatureInferenceStrategy
 inferChunks =
     (inferChunksFrom (\_ scope -> scope))
     { sigInfStratName = "chunks"
-    , sigInfRelevantSources = [$(mkRelFile __FILE__)]
     }

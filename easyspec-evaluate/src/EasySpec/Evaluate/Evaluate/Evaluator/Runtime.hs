@@ -1,5 +1,3 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module EasySpec.Evaluate.Evaluate.Evaluator.Runtime
     ( runtimeEvaluator
@@ -21,5 +19,4 @@ runtimeEvaluator =
     , evaluatorUnit = "time"
     , evaluatorQuantity = "seconds"
     , evaluatorIndication = SmallerIsBetter
-    , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }

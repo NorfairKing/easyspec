@@ -1,5 +1,3 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module EasySpec.Evaluate.Evaluate.Evaluator.ScopeSize
     ( scopeSizeEvaluator
@@ -18,5 +16,4 @@ scopeSizeEvaluator =
     , evaluatorUnit = "#"
     , evaluatorQuantity = "functions"
     , evaluatorIndication = Input
-    , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }

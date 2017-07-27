@@ -1,6 +1,3 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
-
 module EasySpec.Discover.SignatureInference.ChunksPlus
     ( inferChunksPlus
     ) where
@@ -16,7 +13,6 @@ inferChunksPlus :: SignatureInferenceStrategy
 inferChunksPlus =
     SignatureInferenceStrategy
     { sigInfStratName = "chunks-plus"
-    , sigInfRelevantSources = [$(mkRelFile __FILE__)]
     , inferSignature =
           \focus scope' ->
               InferredSignature $ do

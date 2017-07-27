@@ -1,8 +1,5 @@
-{-# LANGUAGE CPP #-}
-
 module EasySpec.Evaluate.Evaluate.Evaluator
     ( evaluators
-    , dependOnEvaluator
     , scopeSizeEvaluator
     , equationsEvaluator
     , runtimeEvaluator
@@ -22,11 +19,6 @@ import EasySpec.Evaluate.Evaluate.Evaluator.RelevantFunctions
 import EasySpec.Evaluate.Evaluate.Evaluator.Runtime
 import EasySpec.Evaluate.Evaluate.Evaluator.ScopeSize
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
-
-dependOnEvaluator :: Evaluator -> Action ()
-dependOnEvaluator ev = do
-    here <- liftIO getCurrentDir
-    needP $ map (here </>) $ evaluatorRelevantFiles ev
 
 evaluators :: [Evaluator]
 evaluators =

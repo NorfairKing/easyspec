@@ -15,7 +15,6 @@ data Evaluator = Evaluator
     , evaluatorUnit :: String
     , evaluatorQuantity :: String
     , evaluatorIndication :: Indication
-    , evaluatorRelevantFiles :: [Path Rel File]
     }
 
 instance Show Evaluator where

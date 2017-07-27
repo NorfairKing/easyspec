@@ -18,7 +18,6 @@ import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Types
 
-import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
 import EasySpec.Evaluate.Analyse.Plots.Files
@@ -42,8 +41,6 @@ plotsRulesForPointsPlotWithEvaluatorsPerExample ::
     -> Rules ()
 plotsRulesForPointsPlotWithEvaluatorsPerExample plotF genDataF (GE _ is, OrderedDistinct (Pair e1 e2)) =
     plotF $%> do
-        dependOnEvaluator e1
-        dependOnEvaluator e2
         dataF <- genDataF
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
@@ -73,8 +70,6 @@ plotsRulesForPointsPlotsWithGroupsOfExamples ::
     -> Rules ()
 plotsRulesForPointsPlotsWithGroupsOfExamples plotF genDataF (groupName, OrderedDistinct (Pair e1 e2)) =
     plotF $%> do
-        dependOnEvaluator e1
-        dependOnEvaluator e2
         dataF <- genDataF
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
@@ -106,8 +101,6 @@ plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy ::
     -> Rules ()
 plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy plotF genDataF (groupName, s, OrderedDistinct (Pair e1 e2)) =
     plotF $%> do
-        dependOnEvaluator e1
-        dependOnEvaluator e2
         dataF <- genDataF
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
@@ -137,8 +130,6 @@ plotsRulesForPointsPlotWithEvaluators ::
     -> Rules ()
 plotsRulesForPointsPlotWithEvaluators plotF genDataF (OrderedDistinct (Pair e1 e2)) =
     plotF $%> do
-        dependOnEvaluator e1
-        dependOnEvaluator e2
         dataF <- genDataF
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript

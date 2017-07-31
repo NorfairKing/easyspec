@@ -1,4 +1,3 @@
-
 module EasySpec.Discover.SignatureInference.ChunksSimilaritySymbols where
 
 import Import
@@ -11,5 +10,4 @@ import EasySpec.Discover.Types
 inferChunksSimilaritySymbols :: Int -> SignatureInferenceStrategy
 inferChunksSimilaritySymbols i =
     (inferChunksFrom $ diffChoice i diffIdImpl)
-    { sigInfStratName = "chunks-similarity-symbols-" ++ show i
-    }
+    {sigInfStratName = "chunks-similarity-symbols-" ++ show i}

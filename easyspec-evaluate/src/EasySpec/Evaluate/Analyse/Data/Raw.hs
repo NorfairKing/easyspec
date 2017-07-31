@@ -43,7 +43,6 @@ rawDataRulesForGroupFileNameAndStrat ::
 rawDataRulesForGroupFileNameAndStrat ghciResource groupName is name infStrat = do
     jsonF <- rawDataFileFor groupName is name infStrat
     jsonF $%> do
-        sourceDir <- getEasyspecSourceDir
         let absFile = ES.inputSpecAbsFile is
         needP [absFile]
         ip <-

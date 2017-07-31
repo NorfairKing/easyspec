@@ -44,6 +44,8 @@ import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Types
 
+{-# ANN module "HLint: ignore Reduce duplication" #-}
+
 -- Group of examples
 --  \- Exmaple
 --    \- Name

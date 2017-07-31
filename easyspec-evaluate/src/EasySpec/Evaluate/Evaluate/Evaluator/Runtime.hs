@@ -1,4 +1,3 @@
-
 module EasySpec.Evaluate.Evaluate.Evaluator.Runtime
     ( runtimeEvaluator
     ) where

@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module EasySpec.Discover.SignatureInference.SyntacticSimilaritySymbols where
 
@@ -15,7 +14,6 @@ inferSyntacticSimilaritySymbols :: Int -> SignatureInferenceStrategy
 inferSyntacticSimilaritySymbols i =
     differenceInferAlg
         ("syntactical-similarity-symbols-" ++ show i)
-        [$(mkRelFile __FILE__)]
         i
         diffIdImpl
 

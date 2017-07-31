@@ -9,9 +9,6 @@ module EasySpec.Evaluate.Evaluate.Evaluator
 
 import Import
 
-import Development.Shake
-import Development.Shake.Path
-
 import EasySpec.Evaluate.Evaluate.Evaluator.Combinators
 import EasySpec.Evaluate.Evaluate.Evaluator.Equations
 import EasySpec.Evaluate.Evaluate.Evaluator.RelevantEquations

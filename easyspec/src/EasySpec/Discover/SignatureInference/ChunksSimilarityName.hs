@@ -1,4 +1,3 @@
-
 module EasySpec.Discover.SignatureInference.ChunksSimilarityName where
 
 import Import
@@ -12,5 +11,4 @@ inferChunksSimilarityName :: Int -> SignatureInferenceStrategy
 inferChunksSimilarityName i =
     let diff = simDiff $ prettyPrintOneLine . idName
     in (inferChunksFrom $ diffChoice i diff)
-       { sigInfStratName = "chunks-similarity-name-" ++ show i
-       }
+       {sigInfStratName = "chunks-similarity-name-" ++ show i}

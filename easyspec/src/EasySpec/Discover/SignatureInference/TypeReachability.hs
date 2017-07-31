@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module EasySpec.Discover.SignatureInference.TypeReachability where
 
@@ -15,7 +14,7 @@ import EasySpec.Discover.Utils
 
 inferTypeReachability :: Int -> SignatureInferenceStrategy
 inferTypeReachability i =
-    splitInferAlg ("type-reachability-" ++ show i) [$(mkRelFile __FILE__)] $
+    splitInferAlg ("type-reachability-" ++ show i) $
     depthNReachableViaComposition i
 
 depthNReachableViaComposition :: Int -> [EasyId] -> [EasyId] -> [EasyId]

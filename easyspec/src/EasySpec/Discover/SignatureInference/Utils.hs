@@ -40,10 +40,9 @@ unionInferAlg si1 si2 =
 
 splitInferAlg ::
        String
-    -> [Path Rel File]
     -> ([EasyId] -> [EasyId] -> [EasyId]) -- ^ Something that chooses the background ids.
     -> SignatureInferenceStrategy
-splitInferAlg name fs func =
+splitInferAlg name func =
     SignatureInferenceStrategy
     { sigInfStratName = name
     , inferSignature =

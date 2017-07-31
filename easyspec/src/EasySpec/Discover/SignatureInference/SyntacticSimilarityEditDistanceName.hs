@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module EasySpec.Discover.SignatureInference.SyntacticSimilarityEditDistanceName where
 
@@ -14,10 +13,7 @@ import EasySpec.Discover.Types
 
 inferSyntacticSimilarityEditDistanceName :: Int -> SignatureInferenceStrategy
 inferSyntacticSimilarityEditDistanceName i =
-    differenceInferAlg
-        ("syntactical-similarity-edit-distance-name" ++ show i)
-        [$(mkRelFile __FILE__)]
-        i $ \i1 i2 ->
+    differenceInferAlg ("syntactical-similarity-edit-distance-name" ++ show i) i $ \i1 i2 ->
         let (Sum c, _) = leastChanges strParams (idVec i1) (idVec i2)
         in c
   where

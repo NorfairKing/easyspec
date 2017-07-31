@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module EasySpec.Discover.SignatureInference.FullBackground where
 
@@ -9,5 +8,4 @@ import EasySpec.Discover.SignatureInference.Utils
 import EasySpec.Discover.Types
 
 inferFullBackground :: SignatureInferenceStrategy
-inferFullBackground =
-    splitInferAlg "full-background" [$(mkRelFile __FILE__)] (flip (\\))
+inferFullBackground = splitInferAlg "full-background" (flip (\\))

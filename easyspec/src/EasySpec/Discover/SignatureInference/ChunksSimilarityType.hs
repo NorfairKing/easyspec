@@ -9,5 +9,7 @@ import EasySpec.Discover.Types
 
 inferChunksSimilarityType :: Int -> SignatureInferenceStrategy
 inferChunksSimilarityType i =
-    (inferChunksFrom $ diffChoice i $ simDiff idSubTypes)
-    {sigInfStratName = "chunks-similarity-type-" ++ show i}
+    SignatureInferenceStrategy
+    { sigInfStratName = "chunks-similarity-type-" ++ show i
+    , inferSignature = inferChunksFrom $ diffChoice i simDiffType
+    }

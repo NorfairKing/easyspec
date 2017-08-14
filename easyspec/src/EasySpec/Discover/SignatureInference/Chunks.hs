@@ -1,7 +1,10 @@
 module EasySpec.Discover.SignatureInference.Chunks where
 
 import EasySpec.Discover.SignatureInference.ChunksUtils
+import EasySpec.Discover.SignatureInference.ShrinkThenDrill
 import EasySpec.Discover.Types
 
 inferChunks :: SignatureInferenceStrategy
-inferChunks = (inferChunksFrom (\_ scope -> scope)) {sigInfStratName = "chunks"}
+inferChunks =
+    SignatureInferenceStrategy
+    {sigInfStratName = "chunks", inferSignature = inferChunksFrom noShrink}

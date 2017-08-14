@@ -21,6 +21,8 @@ library
         EasySpec.Discover.SignatureInference
         EasySpec.Discover.SignatureInference.Chunks
         EasySpec.Discover.SignatureInference.ChunksPlus
+        EasySpec.Discover.SignatureInference.ChunksPlusSimilarity
+        EasySpec.Discover.SignatureInference.ChunksPlusUtils
         EasySpec.Discover.SignatureInference.ChunksSimilarityName
         EasySpec.Discover.SignatureInference.ChunksSimilaritySymbols
         EasySpec.Discover.SignatureInference.ChunksSimilarityType
@@ -28,6 +30,7 @@ library
         EasySpec.Discover.SignatureInference.EmptyBackground
         EasySpec.Discover.SignatureInference.FullBackground
         EasySpec.Discover.SignatureInference.Monomorphisation
+        EasySpec.Discover.SignatureInference.ShrinkThenDrill
         EasySpec.Discover.SignatureInference.SimilarityUtils
         EasySpec.Discover.SignatureInference.SyntacticSimilarityEditDistanceName
         EasySpec.Discover.SignatureInference.SyntacticSimilarityName

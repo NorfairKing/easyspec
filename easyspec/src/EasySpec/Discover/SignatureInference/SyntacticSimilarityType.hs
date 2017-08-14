@@ -13,6 +13,9 @@ inferSyntacticSimilarityType :: Int -> SignatureInferenceStrategy
 inferSyntacticSimilarityType i =
     similarityInferAlg ("syntactical-similarity-type-" ++ show i) i idSubTypes
 
+simDiffType :: EasyId -> EasyId -> Int
+simDiffType = simDiff idSubTypes
+
 idSubTypes :: EasyId -> [EasyType]
 idSubTypes = getSubTypes . idType
 

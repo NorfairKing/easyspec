@@ -35,5 +35,4 @@ baseEvaluators =
     , runtimeEvaluator
     , relevantEquationsEvaluator
     , relevantFunctionsEvaluator
-    -- , maximumRelatedFunctionsEvaluator
     ]

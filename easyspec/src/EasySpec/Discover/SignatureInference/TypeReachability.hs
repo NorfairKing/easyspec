@@ -6,16 +6,32 @@ import Import
 
 import Language.Haskell.Exts.Syntax
 
+import EasySpec.Discover.SignatureInference.ChunksPlusUtils
+import EasySpec.Discover.SignatureInference.ChunksUtils
 import EasySpec.Discover.SignatureInference.Utils
 import EasySpec.Discover.Types
 import EasySpec.Discover.Utils
 
 {-# ANN module "HLint: ignore Use ||" #-}
 
+inferChunksPlusTypeReachability :: Int -> SignatureInferenceStrategy
+inferChunksPlusTypeReachability t =
+    SignatureInferenceStrategy
+    { sigInfStratName = "chunks-plus-type-reachability-" ++ show t
+    , inferSignature = inferChunksPlusFrom $ depthNReachableViaComposition t
+    }
+
+inferChunksTypeReachability :: Int -> SignatureInferenceStrategy
+inferChunksTypeReachability t =
+    SignatureInferenceStrategy
+    { sigInfStratName = "chunks-type-reachability-" ++ show t
+    , inferSignature = inferChunksFrom $ depthNReachableViaComposition t
+    }
+
 inferTypeReachability :: Int -> SignatureInferenceStrategy
-inferTypeReachability i =
-    splitInferAlg ("type-reachability-" ++ show i) $
-    depthNReachableViaComposition i
+inferTypeReachability t =
+    splitInferAlg ("type-reachability-" ++ show t) $
+    depthNReachableViaComposition t
 
 depthNReachableViaComposition :: Int -> [EasyId] -> [EasyId] -> [EasyId]
 depthNReachableViaComposition = depthNReachable reachableViaComposition

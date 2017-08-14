@@ -11,6 +11,7 @@ import Import
 
 import EasySpec.Discover.SignatureInference.Chunks
 import EasySpec.Discover.SignatureInference.ChunksPlus
+import EasySpec.Discover.SignatureInference.ChunksPlusSimilarity
 import EasySpec.Discover.SignatureInference.ChunksSimilarityName
 import EasySpec.Discover.SignatureInference.ChunksSimilaritySymbols
 import EasySpec.Discover.SignatureInference.ChunksSimilarityType
@@ -42,11 +43,20 @@ inferenceStrategiesToEvaluate :: [SignatureInferenceStrategy]
 inferenceStrategiesToEvaluate =
     [ inferEmptyBackground
     , inferFullBackground
-    , inferChunks
-    , inferChunksPlus
     , inferSyntacticSimilarityName 5
     , inferSyntacticSimilaritySymbols 5
     , inferSyntacticSimilarityType 5
+    , inferTypeReachability 7
+    , inferChunks
+    , inferChunksPlus
+    , inferChunksSimilarityName 5
+    , inferChunksSimilaritySymbols 5
+    , inferChunksSimilarityType 5
+    , inferChunksTypeReachability 7
+    , inferChunksPlusSimilarityName 5
+    , inferChunksPlusSimilaritySymbols 5
+    , inferChunksPlusSimilarityType 5
+    , inferChunksPlusTypeReachability 7
     ]
 
 interestingStrategies :: [SignatureInferenceStrategy]
@@ -69,6 +79,11 @@ basicInferenceStrategies =
     , inferChunksSimilarityName 5
     , inferChunksSimilaritySymbols 5
     , inferChunksSimilarityType 5
+    , inferChunksTypeReachability 7
+    , inferChunksPlusSimilarityName 5
+    , inferChunksPlusSimilaritySymbols 5
+    , inferChunksPlusSimilarityType 5
+    , inferChunksPlusTypeReachability 7
     ]
 
 evenMoreInferenceStrategies :: [SignatureInferenceStrategy]

@@ -17,6 +17,7 @@ import EasySpec.Discover.SignatureInference.ChunksSimilaritySymbols
 import EasySpec.Discover.SignatureInference.ChunksSimilarityType
 import EasySpec.Discover.SignatureInference.EmptyBackground
 import EasySpec.Discover.SignatureInference.FullBackground
+import EasySpec.Discover.SignatureInference.IterativeChunks
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityEditDistanceName
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityName
 import EasySpec.Discover.SignatureInference.SyntacticSimilaritySymbols
@@ -57,6 +58,7 @@ inferenceStrategiesToEvaluate =
     , inferChunksPlusSimilaritySymbols 5
     , inferChunksPlusSimilarityType 5
     , inferChunksPlusTypeReachability 7
+    , inferIterativeChunks 5
     ]
 
 interestingStrategies :: [SignatureInferenceStrategy]
@@ -84,6 +86,7 @@ basicInferenceStrategies =
     , inferChunksPlusSimilaritySymbols 5
     , inferChunksPlusSimilarityType 5
     , inferChunksPlusTypeReachability 7
+    , inferIterativeChunks 5
     ]
 
 evenMoreInferenceStrategies :: [SignatureInferenceStrategy]

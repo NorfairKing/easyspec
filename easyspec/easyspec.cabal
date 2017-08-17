@@ -29,6 +29,7 @@ library
         EasySpec.Discover.SignatureInference.ChunksUtils
         EasySpec.Discover.SignatureInference.EmptyBackground
         EasySpec.Discover.SignatureInference.FullBackground
+        EasySpec.Discover.SignatureInference.IterativeChunks
         EasySpec.Discover.SignatureInference.Monomorphisation
         EasySpec.Discover.SignatureInference.ShrinkThenDrill
         EasySpec.Discover.SignatureInference.SimilarityUtils

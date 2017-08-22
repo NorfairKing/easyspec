@@ -58,7 +58,7 @@ inferenceStrategiesToEvaluate =
     , inferChunksPlusSimilaritySymbols 5
     , inferChunksPlusSimilarityType 5
     , inferChunksPlusTypeReachability 7
-    , inferIterativeChunks 5
+    , inferIterativeChunks 4 2
     ]
 
 interestingStrategies :: [SignatureInferenceStrategy]
@@ -86,7 +86,7 @@ basicInferenceStrategies =
     , inferChunksPlusSimilaritySymbols 5
     , inferChunksPlusSimilarityType 5
     , inferChunksPlusTypeReachability 7
-    , inferIterativeChunks 5
+    , inferIterativeChunks 4 2
     ]
 
 evenMoreInferenceStrategies :: [SignatureInferenceStrategy]

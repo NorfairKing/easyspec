@@ -267,6 +267,22 @@ evaluatedFileForGroupEvaluatorStrategies (GroupName g) e ss =
         ["on-demand-per-group-evaluator-strategies", g, evaluatorName e]
         [intercalate "-" $ map strategyName ss]
 
+evaluatedFileForGroupIndepDepPairEvaluatorStrategies ::
+       MonadIO m
+    => GroupName
+    -> Evaluator
+    -> Evaluator
+    -> [SignatureInferenceStrategy]
+    -> m (Path Abs File)
+evaluatedFileForGroupIndepDepPairEvaluatorStrategies (GroupName g) e1 e2 ss =
+    evaluatedCSVFileWithComponents
+        [ "on-demand-per-group-independent-dependent-pair-evaluators-strategies"
+        , g
+        , evaluatorName e1
+        , evaluatorName e2
+        ]
+        [intercalate "-" $ map strategyName ss]
+
 evaluatedCSVFileWithComponents ::
        MonadIO m => [String] -> [String] -> m (Path Abs File)
 evaluatedCSVFileWithComponents dirComps fileComps =

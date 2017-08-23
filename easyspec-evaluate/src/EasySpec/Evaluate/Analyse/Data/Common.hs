@@ -18,7 +18,7 @@ evaluationGroup :: GroupName
 evaluationGroup = "evaluation"
 
 runtimeGroup :: GroupName
-runtimeGroup = "groupname"
+runtimeGroup = "runtime"
 
 toyGroup :: GroupName
 toyGroup = "toy"

@@ -370,3 +370,13 @@ instance OnDemandData (GroupName, Evaluator, [SignatureInferenceStrategy]) where
         datFs <- mapM (\s -> evaluatedFileForGroupStrategyEvaluator gn s ev) ss
         combineEvaluatedFiles combF datFs
         pure combF
+
+instance OnDemandData ( GroupName
+                      , IndepDepPairEvaluator
+                      , [SignatureInferenceStrategy]) where
+    onDemandDataFileRule (gn, IndepDepPairEvaluator (Pair e1 e2), ss) = do
+        combF <-
+            evaluatedFileForGroupIndepDepPairEvaluatorStrategies gn e1 e2 ss
+        datFs <- mapM (evaluatedFileForGroupStrategy gn) ss
+        combineEvaluatedFiles combF datFs
+        pure combF

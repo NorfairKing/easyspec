@@ -2,6 +2,7 @@
 
 module EasySpec.Evaluate.Analyse.Plots.BarsPerGroup
     ( barsPerGroupEvaluatorsStrategiesPlotter
+    , barsPerGroupEvaluatorsStrategiesPlotterOnDemand
     , barsPerGroupEvaluatorsStrategyPlotter
     , barsPerGroupEvaluatorsPlotter
     ) where
@@ -25,6 +26,19 @@ barsPerGroupEvaluatorsStrategiesPlotter =
           standardisedEvaluatedPlotruleFor $ do
               needRLibs ["dplyr", "ggplot2"]
               scriptFile "evaluator_bars_per_group_strategies.r"
+    }
+
+barsPerGroupEvaluatorsStrategiesPlotterOnDemand ::
+       EvaluatedCartPlotter ( GroupName
+                            , IndepDepPairEvaluator
+                            , [SignatureInferenceStrategy])
+barsPerGroupEvaluatorsStrategiesPlotterOnDemand =
+    CartPlotter
+    { cartPlotterName = "evaluator-bars-on-demand"
+    , cartPlotterFunc =
+          standardisedEvaluatedPlotruleFor $ do
+              needRLibs ["dplyr", "ggplot2"]
+              scriptFile "evaluator_bars_per_group_strategies_on_demand.r"
     }
 
 barsPerGroupEvaluatorsStrategyPlotter ::

@@ -14,6 +14,7 @@ import EasySpec.Discover.SignatureInference.FullBackground
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityName
 import EasySpec.Discover.SignatureInference.SyntacticSimilaritySymbols
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityType
+import EasySpec.Evaluate.Analyse.Plots.BarsPerGroup
 
 import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Plots.Plotter
@@ -31,6 +32,16 @@ onDemandPlotRules = do
                   boxPlotterPerGroupEvaluatorOnDemand
                   ( evaluationGroup
                   , relevantEquationsEvaluator
+                  , [ inferFullBackground
+                    , inferSyntacticSimilarityName 5
+                    , inferSyntacticSimilaritySymbols 5
+                    , inferSyntacticSimilarityType 5
+                    ])
+            , onDemandEvaluatedCartRule
+                  barsPerGroupEvaluatorsStrategiesPlotterOnDemand
+                  ( runtimeGroup
+                  , IndepDepPairEvaluator
+                        (Pair scopeSizeEvaluator runtimeEvaluator)
                   , [ inferFullBackground
                     , inferSyntacticSimilarityName 5
                     , inferSyntacticSimilaritySymbols 5

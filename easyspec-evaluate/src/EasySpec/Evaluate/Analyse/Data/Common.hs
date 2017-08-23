@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module EasySpec.Evaluate.Analyse.Data.Common where
 
@@ -13,26 +14,37 @@ import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 import EasySpec.Evaluate.Types
 
-groups :: [String]
+evaluationGroup :: GroupName
+evaluationGroup = "evaluation"
+
+runtimeGroup :: GroupName
+runtimeGroup = "groupname"
+
+toyGroup :: GroupName
+toyGroup = "toy"
+
+groups :: [GroupName]
 groups = nub . sort . map fst $ exampleGroups
 
-exampleGroups :: [(String, [ES.InputSpec])]
+exampleGroups :: [(GroupName, [ES.InputSpec])]
 exampleGroups = $(buildExamples)
 
-groupExamples :: String -> [ES.InputSpec]
+groupExamples :: GroupName -> [ES.InputSpec]
 groupExamples name = fromMaybe [] $ lookup name exampleGroups
 
-groupsAndExamples :: [(String, ES.InputSpec)]
+groupsAndExamples :: [(GroupName, ES.InputSpec)]
 groupsAndExamples = concatMap (\(gn, iss) -> (,) gn <$> iss) exampleGroups
 
-groupExamplesAndNames :: MonadIO m => String -> m [(ES.InputSpec, ES.EasyQName)]
+groupExamplesAndNames ::
+       MonadIO m => GroupName -> m [(ES.InputSpec, ES.EasyQName)]
 groupExamplesAndNames name =
     fmap concat $
     forM (groupExamples name) $ \example -> do
         names <- liftIO $ namesInSource example
         pure $ (,) example <$> names
 
-groupsExamplesAndNames :: MonadIO m => m [(String, ES.InputSpec, ES.EasyQName)]
+groupsExamplesAndNames ::
+       MonadIO m => m [(GroupName, ES.InputSpec, ES.EasyQName)]
 groupsExamplesAndNames =
     fmap concat $
     forM exampleGroups $ \(group, es) ->
@@ -42,7 +54,7 @@ groupsExamplesAndNames =
             pure $ (,,) group example <$> names
 
 groupExamplesNamesAndEvaluators ::
-       MonadIO m => m [(String, ES.InputSpec, ES.EasyQName, Evaluator)]
+       MonadIO m => m [(GroupName, ES.InputSpec, ES.EasyQName, Evaluator)]
 groupExamplesNamesAndEvaluators = do
     trips <- groupsExamplesAndNames
     pure $ concatMap (\(a, b, c) -> (,,,) a b c <$> evaluators) trips

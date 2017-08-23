@@ -4,6 +4,7 @@
 
 module EasySpec.Evaluate.Analyse.Data.Evaluated
     ( evaluatedDataRules
+    , combineEvaluatedFiles
     ) where
 
 import Import

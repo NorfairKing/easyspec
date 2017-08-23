@@ -1,5 +1,6 @@
 module EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
     ( boxPlotterPerGroupExampleEvaluator
+    , boxPlotterPerGroupEvaluatorOnDemand
     , boxPlotterPerEvaluatorStrategies
     , boxPlotterPerEvaluator
     ) where
@@ -20,6 +21,16 @@ boxPlotterPerGroupExampleEvaluator =
     , cartPlotterFunc =
           standardisedEvaluatedPlotruleFor $
           scriptFile "single_evaluator_boxplot_average.r"
+    }
+
+boxPlotterPerGroupEvaluatorOnDemand ::
+       EvaluatedCartPlotter (GroupName, Evaluator, [SignatureInferenceStrategy])
+boxPlotterPerGroupEvaluatorOnDemand =
+    CartPlotter
+    { cartPlotterName = "evaluator-box-on-demand"
+    , cartPlotterFunc =
+          standardisedEvaluatedPlotruleFor $
+          scriptFile "single_evaluator_boxplot_on_demand.r"
     }
 
 boxPlotterPerEvaluatorStrategies ::

@@ -68,7 +68,7 @@ plotsRulesForPointsPlotsWithGroupsOfExamples ::
     -> Action (Path Abs File)
     -> (GroupName, OrderedDistinct Evaluator)
     -> Rules ()
-plotsRulesForPointsPlotsWithGroupsOfExamples plotF genDataF (groupName, OrderedDistinct (Pair e1 e2)) =
+plotsRulesForPointsPlotsWithGroupsOfExamples plotF genDataF (GroupName groupName, OrderedDistinct (Pair e1 e2)) =
     plotF $%> do
         dataF <- genDataF
         needP [dataF]
@@ -99,7 +99,7 @@ plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy ::
     -> Action (Path Abs File)
     -> (GroupName, SignatureInferenceStrategy, OrderedDistinct Evaluator)
     -> Rules ()
-plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy plotF genDataF (groupName, s, OrderedDistinct (Pair e1 e2)) =
+plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy plotF genDataF (GroupName groupName, s, OrderedDistinct (Pair e1 e2)) =
     plotF $%> do
         dataF <- genDataF
         needP [dataF]

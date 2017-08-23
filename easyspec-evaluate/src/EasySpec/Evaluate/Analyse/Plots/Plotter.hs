@@ -10,6 +10,7 @@ module EasySpec.Evaluate.Analyse.Plots.Plotter
     , EvaluatedCartPlotter
     , RawCartPlotter
     , evaluatedCartRule
+    , onDemandEvaluatedCartRule
     , plotFileFor
     , cartFile
     , granularityStr
@@ -36,6 +37,7 @@ import Development.Shake.Path
 import EasySpec.Evaluate.Analyse.Common
 import EasySpec.Evaluate.Analyse.Data.Common
 import EasySpec.Evaluate.Analyse.Data.Content
+import EasySpec.Evaluate.Analyse.Data.Evaluated
 import EasySpec.Evaluate.Analyse.Data.Files
 import EasySpec.Evaluate.Analyse.Plots.Files
 import EasySpec.Evaluate.Analyse.R
@@ -72,6 +74,16 @@ cartPlotterRule cp = intercalate "-" $ cartPlotterName cp : ruleComps (Proxy @a)
 evaluatedCartRule ::
        (Cart a, EvaluatedData a) => EvaluatedCartPlotter a -> Rules String
 evaluatedCartRule = cartRuleWith getDataFileFor
+
+onDemandEvaluatedCartRule ::
+       (Cart a, OnDemandData a) => EvaluatedCartPlotter a -> a -> Rules String
+onDemandEvaluatedCartRule cp option = do
+    plotF <- plotFileFor cp option
+    dataFile <- onDemandDataFileRule option
+    cartPlotterFunc cp plotF (pure dataFile) option
+    let rule = cartPlotterRule cp
+    rule ~> needP [plotF]
+    pure rule
 
 plotFileFor :: (MonadIO m, Cart a) => CartPlotter a b -> a -> m (Path Abs File)
 plotFileFor cp = cartFile "pdf" plotsDir (cartPlotterRule cp) "plot"
@@ -155,17 +167,17 @@ class Cart a where
 
 instance Cart GroupName where
     getAllOptions = pure groups
-    fileComps g = [g]
+    fileComps (GroupName g) = [g]
     ruleComps Proxy = ["group"]
 
 instance Cart GroupAndExample where
     getAllOptions = pure $ map (uncurry GE) groupsAndExamples
-    fileComps (GE g e) = [g, exampleModule e]
+    fileComps (GE (GroupName g) e) = [g, exampleModule e]
     ruleComps Proxy = ["group", "example"]
 
 instance Cart GroupAndExampleAndName where
     getAllOptions = map (uncurry3 GEN) <$> groupsExamplesAndNames
-    fileComps (GEN g e n) = [g, exampleModule e, prettyPrint n]
+    fileComps (GEN (GroupName g) e n) = [g, exampleModule e, prettyPrint n]
     ruleComps Proxy = ["group", "example", "name"]
 
 instance Cart Evaluator where
@@ -208,6 +220,13 @@ instance Cart a => Cart (UnorderedDistinct a) where
 newtype OrderedDistinct a =
     OrderedDistinct (Pair a)
     deriving (Show, Eq, Generic)
+
+instance Cart a => Cart [a] -- Only for on demand plots
+                                                        where
+    getAllOptions = pure []
+    fileComps = concatMap fileComps
+    ruleComps Proxy = "list" : ruleComps (Proxy @a)
+    plotArgs = concatMap plotArgs
 
 instance Cart a => Cart (OrderedDistinct a) where
     getAllOptions =
@@ -341,3 +360,13 @@ instance RawData (GroupName, SignatureInferenceStrategy) where
 
 instance RawData (GroupAndExampleAndName, SignatureInferenceStrategy) where
     getRawDataFor (GEN g e n, s) = (: []) <$> rawDataFrom g e n s
+
+class OnDemandData a where
+    onDemandDataFileRule :: a -> Rules (Path Abs File)
+
+instance OnDemandData (GroupName, Evaluator, [SignatureInferenceStrategy]) where
+    onDemandDataFileRule (gn, ev, ss) = do
+        combF <- evaluatedFileForGroupEvaluatorStrategies gn ev ss
+        datFs <- mapM (\s -> evaluatedFileForGroupStrategyEvaluator gn s ev) ss
+        combineEvaluatedFiles combF datFs
+        pure combF

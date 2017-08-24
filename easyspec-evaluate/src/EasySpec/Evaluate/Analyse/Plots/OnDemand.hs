@@ -9,11 +9,15 @@ module EasySpec.Evaluate.Analyse.Plots.OnDemand
 import Import
 
 import Development.Shake
+import Development.Shake.Path
 
+import EasySpec.Discover.SignatureInference.Chunks
+import EasySpec.Discover.SignatureInference.ChunksPlus
 import EasySpec.Discover.SignatureInference.FullBackground
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityName
 import EasySpec.Discover.SignatureInference.SyntacticSimilaritySymbols
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityType
+import EasySpec.Discover.SignatureInference.TypeReachability
 import EasySpec.Evaluate.Analyse.Plots.BarsPerGroup
 
 import EasySpec.Evaluate.Analyse.Data.Common
@@ -26,7 +30,7 @@ onDemandPlotRule = "on-demand"
 
 onDemandPlotRules :: Rules String
 onDemandPlotRules = do
-    rules <-
+    files <-
         sequence
             [ onDemandEvaluatedCartRule
                   boxPlotterPerGroupEvaluatorOnDemand
@@ -47,6 +51,27 @@ onDemandPlotRules = do
                     , inferSyntacticSimilaritySymbols 5
                     , inferSyntacticSimilarityType 5
                     ])
+            , onDemandEvaluatedCartRule
+                  boxPlotterPerGroupEvaluatorOnDemand
+                  ( evaluationGroup
+                  , relevantEquationsEvaluator
+                  , [ inferFullBackground
+                    , inferSyntacticSimilarityName 5
+                    , inferSyntacticSimilaritySymbols 5
+                    , inferSyntacticSimilarityType 5
+                    , inferTypeReachability 7
+                    ])
+            , onDemandEvaluatedCartRule
+                  boxPlotterPerGroupEvaluatorOnDemand
+                  ( evaluationGroup
+                  , relevantEquationsEvaluator
+                  , [inferFullBackground, inferChunks, inferChunksPlus])
+            , onDemandEvaluatedCartRule
+                  barsPerGroupEvaluatorsStrategiesPlotterOnDemand
+                  ( runtimeGroup
+                  , IndepDepPairEvaluator
+                        (Pair scopeSizeEvaluator runtimeEvaluator)
+                  , [inferFullBackground, inferChunks, inferChunksPlus])
             ]
-    onDemandPlotRule ~> need rules
+    onDemandPlotRule ~> needP files
     pure onDemandPlotRule

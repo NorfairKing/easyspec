@@ -76,14 +76,12 @@ evaluatedCartRule ::
 evaluatedCartRule = cartRuleWith getDataFileFor
 
 onDemandEvaluatedCartRule ::
-       (Cart a, OnDemandData a) => EvaluatedCartPlotter a -> a -> Rules String
+       (Cart a, OnDemandData a) => EvaluatedCartPlotter a -> a -> Rules (Path Abs File)
 onDemandEvaluatedCartRule cp option = do
     plotF <- plotFileFor cp option
     dataFile <- onDemandDataFileRule option
     cartPlotterFunc cp plotF (pure dataFile) option
-    let rule = cartPlotterRule cp
-    rule ~> needP [plotF]
-    pure rule
+    pure plotF
 
 plotFileFor :: (MonadIO m, Cart a) => CartPlotter a b -> a -> m (Path Abs File)
 plotFileFor cp = cartFile "pdf" plotsDir (cartPlotterRule cp) "plot"

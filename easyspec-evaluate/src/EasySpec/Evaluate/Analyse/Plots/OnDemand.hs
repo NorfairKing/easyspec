@@ -13,6 +13,7 @@ import Development.Shake.Path
 
 import EasySpec.Discover.SignatureInference.Chunks
 import EasySpec.Discover.SignatureInference.ChunksPlus
+import EasySpec.Discover.SignatureInference.ChunksReachability
 import EasySpec.Discover.SignatureInference.FullBackground
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityName
 import EasySpec.Discover.SignatureInference.SyntacticSimilaritySymbols
@@ -72,6 +73,25 @@ onDemandPlotRules = do
                   , IndepDepPairEvaluator
                         (Pair scopeSizeEvaluator runtimeEvaluator)
                   , [inferFullBackground, inferChunks, inferChunksPlus])
+            , onDemandEvaluatedCartRule
+                  boxPlotterPerGroupEvaluatorOnDemand
+                  ( evaluationGroup
+                  , relevantEquationsEvaluator
+                  , [ inferFullBackground
+                    , inferChunksPlusReachabilityName 7 5
+                    , inferChunksPlusReachabilitySymbols 7 5
+                    , inferChunksPlusReachabilityType 7 5
+                    ])
+            , onDemandEvaluatedCartRule
+                  barsPerGroupEvaluatorsStrategiesPlotterOnDemand
+                  ( runtimeGroup
+                  , IndepDepPairEvaluator
+                        (Pair scopeSizeEvaluator runtimeEvaluator)
+                  , [ inferFullBackground
+                    , inferChunksPlusReachabilityName 7 5
+                    , inferChunksPlusReachabilitySymbols 7 5
+                    , inferChunksPlusReachabilityType 7 5
+                    ])
             ]
     onDemandPlotRule ~> needP files
     pure onDemandPlotRule

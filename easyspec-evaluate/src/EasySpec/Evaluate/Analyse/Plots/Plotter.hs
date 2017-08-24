@@ -76,7 +76,10 @@ evaluatedCartRule ::
 evaluatedCartRule = cartRuleWith getDataFileFor
 
 onDemandEvaluatedCartRule ::
-       (Cart a, OnDemandData a) => EvaluatedCartPlotter a -> a -> Rules (Path Abs File)
+       (Cart a, OnDemandData a)
+    => EvaluatedCartPlotter a
+    -> a
+    -> Rules (Path Abs File)
 onDemandEvaluatedCartRule cp option = do
     plotF <- plotFileFor cp option
     dataFile <- onDemandDataFileRule option

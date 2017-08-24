@@ -26,6 +26,7 @@ library
         EasySpec.Discover.SignatureInference.ChunksSimilarityName
         EasySpec.Discover.SignatureInference.ChunksSimilaritySymbols
         EasySpec.Discover.SignatureInference.ChunksSimilarityType
+        EasySpec.Discover.SignatureInference.ChunksReachability
         EasySpec.Discover.SignatureInference.ChunksUtils
         EasySpec.Discover.SignatureInference.EmptyBackground
         EasySpec.Discover.SignatureInference.FullBackground

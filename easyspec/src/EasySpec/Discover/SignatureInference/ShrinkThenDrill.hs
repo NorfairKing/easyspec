@@ -1,5 +1,7 @@
 module EasySpec.Discover.SignatureInference.ShrinkThenDrill where
 
+import Import
+
 import EasySpec.Discover.Types
 
 inferShrinkThenDrill ::
@@ -14,3 +16,11 @@ inferShrinkThenDrill shrink drill focus scope =
 
 noShrink :: [EasyId] -> [EasyId] -> [EasyId]
 noShrink _ scope = scope
+
+composeShrinks ::
+       ([EasyId] -> [EasyId] -> [EasyId])
+    -> ([EasyId] -> [EasyId] -> [EasyId])
+    -> [EasyId]
+    -> [EasyId]
+    -> [EasyId]
+composeShrinks s1 s2 focus = s2 focus . s1 focus

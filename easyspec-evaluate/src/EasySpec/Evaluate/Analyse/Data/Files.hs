@@ -27,7 +27,7 @@ rawDataFileFor ::
     -> ExampleFunction
     -> SignatureInferenceStrategy
     -> m (Path Abs File)
-rawDataFileFor g e n s =
+rawDataFileFor (GroupName g) e n s =
     fileWithComponentsAndExtension
         ((</> $(mkRelDir "raw")) <$> dataDir)
         [g, exampleModule e, prettyPrint n]
@@ -94,16 +94,19 @@ dataFilesForGroupAndExample groupName is = do
     fmap concat $ forM names $ dataFilesForGroupExampleAndName groupName is
 
 dataFilesForExampleGroupAndStrategy ::
-       MonadIO m => String -> ES.SignatureInferenceStrategy -> m [Path Abs File]
+       MonadIO m
+    => GroupName
+    -> ES.SignatureInferenceStrategy
+    -> m [Path Abs File]
 dataFilesForExampleGroupAndStrategy groupName s = do
     tups <- groupExamplesAndNames groupName
     mapM (\(is, n) -> dataFileFor groupName is n s) tups
 
 dataFileForExampleGroupAndStrategy ::
-       MonadIO m => String -> SignatureInferenceStrategy -> m (Path Abs File)
+       MonadIO m => GroupName -> SignatureInferenceStrategy -> m (Path Abs File)
 dataFileForExampleGroupAndStrategy = evaluatedFileForGroupStrategy
 
-dataFilesForExampleGroup :: MonadIO m => String -> m [Path Abs File]
+dataFilesForExampleGroup :: MonadIO m => GroupName -> m [Path Abs File]
 dataFilesForExampleGroup groupName = do
     tups <- groupExamplesAndNames groupName
     concat <$> mapM (uncurry $ dataFilesForGroupExampleAndName groupName) tups
@@ -125,7 +128,8 @@ evaluatedFileForAllData :: MonadIO m => m (Path Abs File)
 evaluatedFileForAllData = evaluatedCSVFileWithComponents [] ["all-data"]
 
 evaluatedFileForGroup :: MonadIO m => GroupName -> m (Path Abs File)
-evaluatedFileForGroup g = evaluatedCSVFileWithComponents ["per-group"] [g]
+evaluatedFileForGroup (GroupName g) =
+    evaluatedCSVFileWithComponents ["per-group"] [g]
 
 evaluatedFileForStrategy ::
        MonadIO m => SignatureInferenceStrategy -> m (Path Abs File)
@@ -138,12 +142,12 @@ evaluatedFileForEvaluator e =
 
 evaluatedFileForGroupStrategy ::
        MonadIO m => GroupName -> SignatureInferenceStrategy -> m (Path Abs File)
-evaluatedFileForGroupStrategy g s =
+evaluatedFileForGroupStrategy (GroupName g) s =
     evaluatedCSVFileWithComponents ["per-group-strategy", g] [strategyName s]
 
 evaluatedFileForGroupEvaluator ::
        MonadIO m => GroupName -> Evaluator -> m (Path Abs File)
-evaluatedFileForGroupEvaluator g e =
+evaluatedFileForGroupEvaluator (GroupName g) e =
     evaluatedCSVFileWithComponents ["per-group-evaluator", g] [evaluatorName e]
 
 evaluatedFileForStrategyEvaluator ::
@@ -159,14 +163,14 @@ evaluatedFileForGroupStrategyEvaluator ::
     -> SignatureInferenceStrategy
     -> Evaluator
     -> m (Path Abs File)
-evaluatedFileForGroupStrategyEvaluator g s e =
+evaluatedFileForGroupStrategyEvaluator (GroupName g) s e =
     evaluatedCSVFileWithComponents
         ["per-group-strategy-evaluator", g, strategyName s]
         [evaluatorName e]
 
 evaluatedFileForGroupExample ::
        MonadIO m => GroupName -> Example -> m (Path Abs File)
-evaluatedFileForGroupExample g m =
+evaluatedFileForGroupExample (GroupName g) m =
     evaluatedCSVFileWithComponents ["per-group-example", g] [exampleModule m]
 
 evaluatedFileForGroupExampleStrategy ::
@@ -175,14 +179,14 @@ evaluatedFileForGroupExampleStrategy ::
     -> Example
     -> SignatureInferenceStrategy
     -> m (Path Abs File)
-evaluatedFileForGroupExampleStrategy g m s =
+evaluatedFileForGroupExampleStrategy (GroupName g) m s =
     evaluatedCSVFileWithComponents
         ["per-group-example-strategy", g, exampleModule m]
         [strategyName s]
 
 evaluatedFileForGroupExampleEvaluator ::
        MonadIO m => GroupName -> Example -> Evaluator -> m (Path Abs File)
-evaluatedFileForGroupExampleEvaluator g m e =
+evaluatedFileForGroupExampleEvaluator (GroupName g) m e =
     evaluatedCSVFileWithComponents
         ["per-group-example-evaluator", g, exampleModule m]
         [evaluatorName e]
@@ -194,7 +198,7 @@ evaluatedFileForGroupExampleStrategyEvaluator ::
     -> SignatureInferenceStrategy
     -> Evaluator
     -> m (Path Abs File)
-evaluatedFileForGroupExampleStrategyEvaluator g m s e =
+evaluatedFileForGroupExampleStrategyEvaluator (GroupName g) m s e =
     evaluatedCSVFileWithComponents
         [ "per-group-example-strategy-evaluator"
         , g
@@ -205,7 +209,7 @@ evaluatedFileForGroupExampleStrategyEvaluator g m s e =
 
 evaluatedFileForGroupExampleName ::
        MonadIO m => GroupName -> Example -> ExampleFunction -> m (Path Abs File)
-evaluatedFileForGroupExampleName g m n =
+evaluatedFileForGroupExampleName (GroupName g) m n =
     evaluatedCSVFileWithComponents
         ["per-group-example-name", g, exampleModule m]
         [prettyPrint n]
@@ -217,7 +221,7 @@ evaluatedFileForGroupExampleNameStrategy ::
     -> ExampleFunction
     -> SignatureInferenceStrategy
     -> m (Path Abs File)
-evaluatedFileForGroupExampleNameStrategy g m n s =
+evaluatedFileForGroupExampleNameStrategy (GroupName g) m n s =
     evaluatedCSVFileWithComponents
         ["per-group-example-name-strategy", g, exampleModule m, prettyPrint n]
         [strategyName s]
@@ -229,7 +233,7 @@ evaluatedFileForGroupExampleNameEvaluator ::
     -> ExampleFunction
     -> Evaluator
     -> m (Path Abs File)
-evaluatedFileForGroupExampleNameEvaluator g m n e =
+evaluatedFileForGroupExampleNameEvaluator (GroupName g) m n e =
     evaluatedCSVFileWithComponents
         ["per-group-example-name-evaluator", g, exampleModule m, prettyPrint n]
         [evaluatorName e]
@@ -242,7 +246,7 @@ evaluatedFileForGroupExampleNameStrategyEvaluator ::
     -> SignatureInferenceStrategy
     -> Evaluator
     -> m (Path Abs File)
-evaluatedFileForGroupExampleNameStrategyEvaluator g m n s e =
+evaluatedFileForGroupExampleNameStrategyEvaluator (GroupName g) m n s e =
     evaluatedCSVFileWithComponents
         [ "per-group-example-name-strategy-evaluator"
         , g
@@ -251,6 +255,33 @@ evaluatedFileForGroupExampleNameStrategyEvaluator g m n s e =
         , strategyName s
         ]
         [evaluatorName e]
+
+evaluatedFileForGroupEvaluatorStrategies ::
+       MonadIO m
+    => GroupName
+    -> Evaluator
+    -> [SignatureInferenceStrategy]
+    -> m (Path Abs File)
+evaluatedFileForGroupEvaluatorStrategies (GroupName g) e ss =
+    evaluatedCSVFileWithComponents
+        ["on-demand-per-group-evaluator-strategies", g, evaluatorName e]
+        [intercalate "-" $ map strategyName ss]
+
+evaluatedFileForGroupIndepDepPairEvaluatorStrategies ::
+       MonadIO m
+    => GroupName
+    -> Evaluator
+    -> Evaluator
+    -> [SignatureInferenceStrategy]
+    -> m (Path Abs File)
+evaluatedFileForGroupIndepDepPairEvaluatorStrategies (GroupName g) e1 e2 ss =
+    evaluatedCSVFileWithComponents
+        [ "on-demand-per-group-independent-dependent-pair-evaluators-strategies"
+        , g
+        , evaluatorName e1
+        , evaluatorName e2
+        ]
+        [intercalate "-" $ map strategyName ss]
 
 evaluatedCSVFileWithComponents ::
        MonadIO m => [String] -> [String] -> m (Path Abs File)

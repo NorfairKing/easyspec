@@ -11,6 +11,7 @@ import Import hiding (Alt)
 import qualified Data.Aeson as JSON
 import Data.Aeson (FromJSON(..), ToJSON(..))
 import Data.Csv hiding (Name)
+import Data.String
 
 import qualified EasySpec.Discover.Types as ES
 import qualified EasySpec.Evaluate.Evaluate.Evaluator.Types as ES
@@ -155,7 +156,12 @@ instance DefaultOrdered EvaluatorCsvLine where
             , "pretty output"
             ]
 
-type GroupName = String
+newtype GroupName =
+    GroupName String
+    deriving (Show, Eq, Ord, Generic)
+
+instance IsString GroupName where
+    fromString = GroupName
 
 type Example = ES.InputSpec
 

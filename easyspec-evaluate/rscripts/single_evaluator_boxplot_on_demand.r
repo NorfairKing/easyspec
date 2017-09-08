@@ -1,6 +1,6 @@
 args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) != 9) {
+if (length(args) < 9) {
   print(args)
   stop("Usage: single_evaluator_boxplot_average_global.r common.r input.csv output.pdf granularity group evaluator unit quantity indication")
 }
@@ -22,14 +22,9 @@ res <- res[res$evaluator == evaluator,]
 res <- res[!is.na(res$output),]
 
 if (length(res$output) != 0) {
-  pdf(
-      outPdf
-    , height=8
-    , width=8
-    , bg="white"
-    )
+  startPdf(outPdf)
   aggregate(output ~ strategy, res, mean)
-  par(mar=c(5,16,2,1))
+  par(mar=c(5,14,2,1))
   boxplot(output ~ strategy, res, main=paste("Boxplot for", evaluator, paste("(", indication, ")", sep="")), horizontal=TRUE, las=2, xlab=paste(evaluator, "(", unit, quantity, ")"))
 } else {
   invalidDataPdf(outPdf)

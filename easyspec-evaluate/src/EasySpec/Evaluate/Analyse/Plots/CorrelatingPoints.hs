@@ -18,7 +18,6 @@ import qualified EasySpec.Discover.Types as ES
 
 import EasySpec.Evaluate.Types
 
-import EasySpec.Evaluate.Evaluate.Evaluator
 import EasySpec.Evaluate.Evaluate.Evaluator.Types
 
 import EasySpec.Evaluate.Analyse.Plots.Files
@@ -42,8 +41,6 @@ plotsRulesForPointsPlotWithEvaluatorsPerExample ::
     -> Rules ()
 plotsRulesForPointsPlotWithEvaluatorsPerExample plotF genDataF (GE _ is, OrderedDistinct (Pair e1 e2)) =
     plotF $%> do
-        dependOnEvaluator e1
-        dependOnEvaluator e2
         dataF <- genDataF
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
@@ -71,10 +68,8 @@ plotsRulesForPointsPlotsWithGroupsOfExamples ::
     -> Action (Path Abs File)
     -> (GroupName, OrderedDistinct Evaluator)
     -> Rules ()
-plotsRulesForPointsPlotsWithGroupsOfExamples plotF genDataF (groupName, OrderedDistinct (Pair e1 e2)) =
+plotsRulesForPointsPlotsWithGroupsOfExamples plotF genDataF (GroupName groupName, OrderedDistinct (Pair e1 e2)) =
     plotF $%> do
-        dependOnEvaluator e1
-        dependOnEvaluator e2
         dataF <- genDataF
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
@@ -104,10 +99,8 @@ plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy ::
     -> Action (Path Abs File)
     -> (GroupName, SignatureInferenceStrategy, OrderedDistinct Evaluator)
     -> Rules ()
-plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy plotF genDataF (groupName, s, OrderedDistinct (Pair e1 e2)) =
+plotsRulesForPointsPlotsWithGroupsOfExamplesPerStrategy plotF genDataF (GroupName groupName, s, OrderedDistinct (Pair e1 e2)) =
     plotF $%> do
-        dependOnEvaluator e1
-        dependOnEvaluator e2
         dataF <- genDataF
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript
@@ -137,8 +130,6 @@ plotsRulesForPointsPlotWithEvaluators ::
     -> Rules ()
 plotsRulesForPointsPlotWithEvaluators plotF genDataF (OrderedDistinct (Pair e1 e2)) =
     plotF $%> do
-        dependOnEvaluator e1
-        dependOnEvaluator e2
         dataF <- genDataF
         needP [dataF]
         scriptF <- pointsPlotAnalysisScript

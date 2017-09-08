@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module EasySpec.Discover.SignatureInference.SimilarityUtils where
 
@@ -16,23 +15,19 @@ import EasySpec.Discover.Types
 similarityInferAlg ::
        (Eq a, Ord a, Foldable f)
     => String
-    -> [Path Rel File]
     -> Int
     -> (EasyId -> f a)
     -> SignatureInferenceStrategy
-similarityInferAlg name fs i distil =
-    differenceInferAlg name ($(mkRelFile __FILE__) : fs) i $ simDiff distil
+similarityInferAlg name i distil = differenceInferAlg name i $ simDiff distil
 
 -- Make a signature inference strategy, by describing the difference between two 'EasyId's.
 differenceInferAlg ::
        (Ord n, Show n, Num n)
     => String
-    -> [Path Rel File]
     -> Int
     -> (EasyId -> EasyId -> n)
     -> SignatureInferenceStrategy
-differenceInferAlg name fs i diff =
-    splitInferAlg name ($(mkRelFile __FILE__) : fs) $ diffChoice i diff
+differenceInferAlg name i diff = splitInferAlg name $ diffChoice i diff
 
 diffChoice ::
        (Ord n, Show n, Num n)

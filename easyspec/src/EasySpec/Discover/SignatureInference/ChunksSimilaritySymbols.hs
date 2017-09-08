@@ -1,6 +1,3 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
-
 module EasySpec.Discover.SignatureInference.ChunksSimilaritySymbols where
 
 import Import
@@ -12,7 +9,7 @@ import EasySpec.Discover.Types
 
 inferChunksSimilaritySymbols :: Int -> SignatureInferenceStrategy
 inferChunksSimilaritySymbols i =
-    (inferChunksFrom $ diffChoice i diffIdImpl)
+    SignatureInferenceStrategy
     { sigInfStratName = "chunks-similarity-symbols-" ++ show i
-    , sigInfRelevantSources = [$(mkRelFile __FILE__)]
+    , inferSignature = inferChunksFrom $ diffChoice i diffIdImpl
     }

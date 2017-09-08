@@ -1,6 +1,4 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module EasySpec.Evaluate.Evaluate.Evaluator.MaximumRelatedFunctions
     ( maximumRelatedFunctionsEvaluator
@@ -24,7 +22,6 @@ maximumRelatedFunctionsEvaluator =
     , evaluatorUnit = "#"
     , evaluatorQuantity = "functions"
     , evaluatorIndication = GreaterIsBetter
-    , evaluatorRelevantFiles = [$(mkRelFile __FILE__)]
     }
   where
     go :: (Num a, Ord a) => EvaluationInput -> a

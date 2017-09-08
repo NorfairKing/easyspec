@@ -1,6 +1,3 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
-
 module EasySpec.Discover.SignatureInference.Utils where
 
 import Import
@@ -34,9 +31,6 @@ unionInferAlg si1 si2 =
           intercalate
               "-"
               ["union", "of", sigInfStratName si1, "and", sigInfStratName si2]
-    , sigInfRelevantSources =
-          $(mkRelFile __FILE__) :
-          (sigInfRelevantSources si1 ++ sigInfRelevantSources si2)
     , inferSignature =
           \ei1 ei2 ->
               let InferredSignature s1 = inferSignature si1 ei1 ei2
@@ -46,13 +40,11 @@ unionInferAlg si1 si2 =
 
 splitInferAlg ::
        String
-    -> [Path Rel File]
     -> ([EasyId] -> [EasyId] -> [EasyId]) -- ^ Something that chooses the background ids.
     -> SignatureInferenceStrategy
-splitInferAlg name fs func =
+splitInferAlg name func =
     SignatureInferenceStrategy
     { sigInfStratName = name
-    , sigInfRelevantSources = $(mkRelFile __FILE__) : fs
     , inferSignature =
           \focus scope ->
               InferredSignature $ do

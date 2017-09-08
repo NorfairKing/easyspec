@@ -1,6 +1,3 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
-
 module EasySpec.Evaluate.Evaluate.Evaluator.Combinators
     ( addEvaluators
     , subtractEvaluators
@@ -39,9 +36,6 @@ addEvaluators e1 e2 =
                  , evaluatorUnit = evaluatorUnit e1
                  , evaluatorQuantity = evaluatorQuantity e1
                  , evaluatorIndication = evaluatorIndication e1
-                 , evaluatorRelevantFiles =
-                       $(mkRelFile __FILE__) :
-                       (evaluatorRelevantFiles e1 ++ evaluatorRelevantFiles e2)
                  }
         else Nothing
 
@@ -71,9 +65,6 @@ subtractEvaluators i e1 e2 =
                  , evaluatorUnit = evaluatorUnit e1
                  , evaluatorQuantity = evaluatorQuantity e1
                  , evaluatorIndication = i
-                 , evaluatorRelevantFiles =
-                       $(mkRelFile __FILE__) :
-                       (evaluatorRelevantFiles e1 ++ evaluatorRelevantFiles e2)
                  }
         else Nothing
 
@@ -113,9 +104,6 @@ multiplyEvaluators e1 e2 =
                                     , evaluatorQuantity e2
                                     ]
                  , evaluatorIndication = evaluatorIndication e1
-                 , evaluatorRelevantFiles =
-                       $(mkRelFile __FILE__) :
-                       (evaluatorRelevantFiles e1 ++ evaluatorRelevantFiles e2)
                  }
         else Nothing
 
@@ -154,9 +142,6 @@ divideEvaluators e1 e2 =
                                     , evaluatorQuantity e2
                                     ]
                  , evaluatorIndication = evaluatorIndication e1
-                 , evaluatorRelevantFiles =
-                       $(mkRelFile __FILE__) :
-                       (evaluatorRelevantFiles e1 ++ evaluatorRelevantFiles e2)
                  }
         else Nothing
 

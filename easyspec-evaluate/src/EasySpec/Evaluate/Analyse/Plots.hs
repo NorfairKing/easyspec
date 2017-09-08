@@ -13,6 +13,7 @@ import Development.Shake
 import EasySpec.Evaluate.Analyse.Plots.BarsPerGroup
 import EasySpec.Evaluate.Analyse.Plots.DistributionFromRawPlotter
 import EasySpec.Evaluate.Analyse.Plots.DistributionNrDifferentFunctions
+import EasySpec.Evaluate.Analyse.Plots.OnDemand
 import EasySpec.Evaluate.Analyse.Plots.Plotter
 import EasySpec.Evaluate.Analyse.Plots.SingleEvaluatorBox
 
@@ -43,4 +44,5 @@ plotsRules = do
             -- , evaluatedCartRule correlatingPointsPlotterPerGroupExample
             -- , evaluatedCartRule correlatingPointsPlotterPerGroupStrategy
             ]
-    plotsRule ~> need (rules ++ rules')
+    odRule <- onDemandPlotRules
+    plotsRule ~> need (odRule : rules ++ rules')

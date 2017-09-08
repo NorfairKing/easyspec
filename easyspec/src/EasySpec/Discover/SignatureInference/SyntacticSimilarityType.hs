@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module EasySpec.Discover.SignatureInference.SyntacticSimilarityType where
 
@@ -12,11 +11,10 @@ import EasySpec.Discover.Types
 
 inferSyntacticSimilarityType :: Int -> SignatureInferenceStrategy
 inferSyntacticSimilarityType i =
-    similarityInferAlg
-        ("syntactical-similarity-type-" ++ show i)
-        [$(mkRelFile __FILE__)]
-        i
-        idSubTypes
+    similarityInferAlg ("syntactical-similarity-type-" ++ show i) i idSubTypes
+
+simDiffType :: EasyId -> EasyId -> Int
+simDiffType = simDiff idSubTypes
 
 idSubTypes :: EasyId -> [EasyType]
 idSubTypes = getSubTypes . idType

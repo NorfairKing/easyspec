@@ -24,12 +24,14 @@ scriptFile :: MonadIO m => String -> m (Path Abs File)
 scriptFile fname = liftIO $ resolveFile' $ "rscripts/" ++ fname
 
 pdfPlotFileWithComponents ::
-       MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
+       MonadIO m => Path Abs File -> [String] -> m (Path Abs File)
 pdfPlotFileWithComponents = fileInDirWithExtensionAndComponents plotsDir "pdf"
 
 exampleModule :: Example -> String
 exampleModule = map go . dropExtensions . toFilePath . ES.inputSpecFile
   where
+    -- TODO: This method of converting paths to module names is just
+    -- incorrect.
     go :: Char -> Char
     go '/' = '.'
     go c = c

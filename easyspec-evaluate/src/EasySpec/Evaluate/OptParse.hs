@@ -32,14 +32,9 @@ combineToInstructions cmd Flags Configuration = (,) <$> disp <*> pure Settings
                 bd <- resolveDir' dirpath
                 fs <-
                     case mfilepath of
-                        Just f -> do
-                            af <- resolveFile' f
-                            rf <- makeRelative bd af
-                            pure [rf]
+                        Just f -> pure <$> resolveFile' f
                         Nothing ->
-                            (mapMaybe (makeRelative bd) .
-                             filter ES.isSourceFile . snd) <$>
-                            listDirRecur bd
+                          filter ES.isSourceFile . snd <$> listDirRecur bd
                 pure $ DispatchEvaluate $ map (ES.InputSpec bd) fs
             CommandBuild target -> pure $ DispatchBuild target
             CommandBuildEverything -> pure DispatchBuildEverything

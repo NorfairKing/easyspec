@@ -64,8 +64,8 @@ packageExamples (package, sourceDirs, modulePaths) = do
             fmap catMaybes $
             forM modulePaths $ \modulePath -> do
                 bd <- liftIO $ resolveDir pd sourceDir
-                fp <- liftIO $ parseRelFile $ modulePath ++ ".hs"
-                exists <- liftIO $ Path.IO.doesFileExist $ bd </> fp
+                fp <- liftIO . resolveFile bd $ modulePath ++ ".hs"
+                exists <- liftIO $ Path.IO.doesFileExist fp
                 pure $
                     if exists
                         then Just

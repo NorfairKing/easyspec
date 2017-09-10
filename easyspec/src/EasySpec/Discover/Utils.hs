@@ -1,16 +1,17 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ViewPatterns     #-}
 
 module EasySpec.Discover.Utils where
 
 import Import
-
-import System.FilePath
+import GHC
+import GHC.Paths (libdir)
 
 import qualified Data.Set as Set
 import DynFlags hiding (Settings)
 import GHC
-       (GhcMonad, LoadHowMuch, ModuleName, SuccessFlag(..),
-        getProgramDynFlags, load, mkModuleName, setSessionDynFlags)
+       (GhcMonad, LoadHowMuch, SuccessFlag(..),
+        getProgramDynFlags, load, setSessionDynFlags)
 import GHC.LanguageExtensions
 import Outputable (Outputable(..), showPpr)
 
@@ -27,14 +28,14 @@ loadSuccessfully hm = do
 prepareFlags :: DynFlags -> DynFlags
 prepareFlags dflags = foldl xopt_set dflags [Cpp, ImplicitPrelude, MagicHash]
 
-getTargetModName :: Path Rel File -> GHC.ModuleName
-getTargetModName = mkModuleName . filePathToModuleName
-
-filePathToModuleName :: Path Rel File -> String
-filePathToModuleName = map go . dropExtensions . toFilePath
-  where
-    go '/' = '.'
-    go c = c
+filePathToModuleName :: MonadIO m => Path Abs File -> m String
+filePathToModuleName (toFilePath -> p) = liftIO . runGhc (Just libdir) $ do
+  target <- guessTarget p Nothing
+  setTargets [target]
+  g <- depanal [] True
+  case [ m | m <- g, Just p == ml_hs_file (ms_location m) ] of
+    [] -> fail $ "Couldn't get ModSummary for " ++ p
+    m : _ -> pure . moduleNameString $ ms_mod_name m
 
 showGHC :: (GhcMonad m, Outputable a) => a -> m String
 showGHC a = do

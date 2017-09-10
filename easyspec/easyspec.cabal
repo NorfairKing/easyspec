@@ -71,6 +71,12 @@ library
         unordered-containers >=0.2 && <0.3,
         vector >=0.11 && <0.12,
         exceptions >=0.8 && <0.9
+      , binary
+      , bytestring >= 0.10
+      , deepseq
+      , fingertree >= 0.1.1
+      , text >= 1.2
+      , quickspec
     default-language: Haskell2010
     default-extensions: NoImplicitPrelude
     hs-source-dirs: src/

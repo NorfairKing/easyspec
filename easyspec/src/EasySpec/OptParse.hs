@@ -33,11 +33,11 @@ combineToInstructions cmd Flags {..} Configuration = (,) <$> disp <*> sets
         case cmd of
             CommandDiscover DiscoverArgs {..} ->
                 DispatchDiscover <$> do
-                    file <- parseRelFile argDiscFile
                     dir <-
                         case argDiscBaseDir of
                             Nothing -> getCurrentDir
                             Just bd -> resolveDir' bd
+                    file <- resolveFile dir argDiscFile
                     infStrat <-
                         case argDiscInfStratName of
                             Nothing -> pure defaultInferenceStrategy
@@ -81,6 +81,7 @@ combineToInstructions cmd Flags {..} Configuration = (,) <$> disp <*> sets
                                             , show e
                                             ]
                     let is = InputSpec dir file
+                    mname <- filePathToModuleName $ inputSpecFile is
                     let unqualification =
                             case argDiscUnqualified of
                                 UnqAll -> UnqualifyAll
@@ -89,10 +90,7 @@ combineToInstructions cmd Flags {..} Configuration = (,) <$> disp <*> sets
                                     UnqualifyLocal $
                                     case f of
                                         Just (Qual _ mn _) -> mn
-                                        _ ->
-                                            ModuleName () $
-                                            filePathToModuleName $
-                                            inputSpecFile is
+                                        _ -> ModuleName () mname
                     pure
                         DiscoverSettings
                         { setDiscInputSpec = is

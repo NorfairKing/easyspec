@@ -16,10 +16,15 @@ import Var
 import EasySpec.Discover.Types
 import EasySpec.Discover.Utils
 
+data RootModule = RootModule
+  { rmFile :: !(Path Abs File)
+  , rmModuleName :: !GHC.ModuleName
+  } deriving (Eq, Ord)
+
 data IdData = IdData
     { idDataId :: GHC.Id
     , idDataExportingMods :: [GHC.ModuleName]
-    , idDataRootloc :: Maybe (Path Rel File)
+    , idDataRootInfo :: !(Maybe RootModule)
     } deriving (Eq)
 
 getGHCIds :: MonadIO m => InputSpec -> m [IdData]
@@ -35,17 +40,24 @@ getGHCIds is =
                           [toFilePath $ inputSpecBaseDir is]
                     }
         setDFlagsNoLinking compdflags
-        let targetModName = getTargetModName $ inputSpecFile is
-        target <- guessTarget (moduleNameString targetModName) Nothing
+        let targetModFile = toFilePath $ inputSpecFile is
+        target <- guessTarget targetModFile Nothing
         setTargets [target]
         loadSuccessfully LoadAllTargets
-        modSum <- getModSummary targetModName
+        modSum <- do
+          g <- getModuleGraph
+          let ms' = [ ml_hs_file (ms_location m) | m <- g ]
+          let ms = [ m
+                   | m <- g, Just targetModFile == ml_hs_file (ms_location m) ]
+          case ms of
+            [] -> fail $ "Didn't find target " ++ targetModFile ++ " in module graph." ++ show ms'
+            m : _ -> pure m
         parsedModule <- parseModule modSum
         tmod <- typecheckModule parsedModule
         getGHCIdsFromTcModule (inputSpecFile is) tmod
 
 getGHCIdsFromTcModule ::
-       GhcMonad m => Path Rel File -> TypecheckedModule -> m [IdData]
+       GhcMonad m => Path Abs File -> TypecheckedModule -> m [IdData]
 getGHCIdsFromTcModule file tmod = do
     let (tcenv, _) = tm_internals_ tmod
         -- Get the global reader elementss out of the global env
@@ -59,7 +71,11 @@ getGHCIdsFromTcModule file tmod = do
                     IdData
                     { idDataId = i
                     , idDataExportingMods = []
-                    , idDataRootloc = Just file
+                    , idDataRootInfo = Just $! RootModule
+                        { rmFile = file
+                        , rmModuleName =
+                            ms_mod_name . pm_mod_summary $ tm_parsed_module tmod
+                        }
                     }
     others <-
         fmap concat $
@@ -76,7 +92,7 @@ getGHCIdsFromTcModule file tmod = do
                             { idDataId = i
                             , idDataExportingMods =
                                   modulesFromWhichWeImportedThis
-                            , idDataRootloc = Nothing
+                            , idDataRootInfo = Nothing
                             }
     pure $ nubBy (\i1 i2 -> idDataId i1 == idDataId i2) $ locals ++ others
   where

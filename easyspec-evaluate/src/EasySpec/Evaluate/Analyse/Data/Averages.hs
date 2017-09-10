@@ -216,7 +216,7 @@ instance FromJSON AverageEvaluatorOutput where
 
 data AverageCsvLine = AverageCsvLine
     { averageCsvLineBaseDir :: Path Abs Dir
-    , averageCsvLineSourceFile :: Path Rel File
+    , averageCsvLineSourceFile :: Path Abs File
     , averageCsvLineEvaluatorName :: String
     , averageCsvLineStrategyName :: String
     , averageCsvLineAverage :: AverageOutput
@@ -273,15 +273,15 @@ makeAverageCsvLinesFromAverageEvaluatorOutput is stratName AverageEvaluatorOutpu
     }
 
 jsonAverageFileWithComponents ::
-       MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
+       MonadIO m => Path Abs File -> [String] -> m (Path Abs File)
 jsonAverageFileWithComponents = averagesFile "json"
 
 csvAverageFileWithComponents ::
-       MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
+       MonadIO m => Path Abs File -> [String] -> m (Path Abs File)
 csvAverageFileWithComponents = averagesFile "csv"
 
 averagesFile ::
-       MonadIO m => String -> Path Rel File -> [String] -> m (Path Abs File)
+       MonadIO m => String -> Path Abs File -> [String] -> m (Path Abs File)
 averagesFile = fileInDirWithExtensionAndComponents averagesDir
 
 averagesDir :: MonadIO m => m (Path Abs Dir)

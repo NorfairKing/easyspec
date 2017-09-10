@@ -57,11 +57,8 @@ deriving instance TH.Lift l => TH.Lift (SpecialCon l)
 
 data InputSpec = InputSpec
     { inputSpecBaseDir :: Path Abs Dir
-    , inputSpecFile :: Path Rel File
+    , inputSpecFile :: !(Path Abs File)
     } deriving (Show, Eq, Data, Typeable, TH.Lift)
-
-inputSpecAbsFile :: InputSpec -> Path Abs File
-inputSpecAbsFile InputSpec {..} = inputSpecBaseDir </> inputSpecFile
 
 data SignatureInferenceStrategy = SignatureInferenceStrategy
     { sigInfStratName :: String
@@ -119,7 +116,7 @@ data Id m = Id
     { idName :: QName m
     , idType :: Type m
     , idImpl :: Maybe (Impl m)
-    , idRootloc :: Maybe (Path Rel File) -- The module name where it was defined
+    , idRootloc :: !(Maybe (Path Abs File)) -- The module name where it was defined
     } deriving (Show, Eq, Ord, Generic)
 
 type EasyId = Id ()

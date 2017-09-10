@@ -38,12 +38,12 @@ fileInDirWithExtensionAndComponents ::
        MonadIO m
     => m (Path Abs Dir)
     -> String
-    -> Path Rel File
+    -> Path Abs File
     -> [String]
     -> m (Path Abs File)
 fileInDirWithExtensionAndComponents genDir ext f comps = do
     dd <- genDir
-    let fileStr = intercalate "-" $ dropExtensions (toFilePath f) : comps
+    let fileStr = intercalate "-" $ dropExtensions (toFilePath $ filename f) : comps
     liftIO $ (dd </>) <$> parseRelFile (concat [fileStr, ".", ext])
 
 signatureInferenceStrategies :: [ES.SignatureInferenceStrategy]

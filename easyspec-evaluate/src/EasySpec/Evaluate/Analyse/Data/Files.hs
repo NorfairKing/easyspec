@@ -84,7 +84,7 @@ dataFileForStrategy ::
 dataFileForStrategy = evaluatedFileForStrategy
 
 csvDataFileWithComponents ::
-       MonadIO m => Path Rel File -> [String] -> m (Path Abs File)
+       MonadIO m => Path Abs File -> [String] -> m (Path Abs File)
 csvDataFileWithComponents = dataFileWithComponents "csv"
 
 dataFilesForGroupAndExample ::
@@ -118,7 +118,7 @@ allDataFile :: MonadIO m => m (Path Abs File)
 allDataFile = evaluatedFileForAllData
 
 dataFileWithComponents ::
-       MonadIO m => String -> Path Rel File -> [String] -> m (Path Abs File)
+       MonadIO m => String -> Path Abs File -> [String] -> m (Path Abs File)
 dataFileWithComponents = fileInDirWithExtensionAndComponents dataDir
 
 --

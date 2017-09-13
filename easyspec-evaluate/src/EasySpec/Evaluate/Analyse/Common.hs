@@ -25,14 +25,12 @@ examplesDir = do
     liftIO $ resolveDir bd "../examples"
 
 tmpDir :: MonadIO m => m (Path Abs Dir)
-tmpDir = do
-    bd <- buildDir
-    liftIO $ resolveDir bd "tmp"
+tmpDir =
+    (</> $(mkRelDir "tmp")) <$> buildDir
 
 outDir :: MonadIO m => m (Path Abs Dir)
 outDir = do
-    bd <- buildDir
-    liftIO $ resolveDir bd "out"
+    (</> $(mkRelDir "out")) <$> buildDir
 
 fileInDirWithExtensionAndComponents ::
        MonadIO m

@@ -14,6 +14,10 @@ import Development.Shake.Path
 import EasySpec.Discover.SignatureInference.Chunks
 import EasySpec.Discover.SignatureInference.ChunksPlus
 import EasySpec.Discover.SignatureInference.ChunksReachability
+import EasySpec.Discover.SignatureInference.ChunksSimilarityName
+import EasySpec.Discover.SignatureInference.ChunksSimilaritySymbols
+import EasySpec.Discover.SignatureInference.ChunksPlusSimilarity
+import EasySpec.Discover.SignatureInference.ChunksSimilarityType
 import EasySpec.Discover.SignatureInference.FullBackground
 import EasySpec.Discover.SignatureInference.SyntacticSimilarityName
 import EasySpec.Discover.SignatureInference.SyntacticSimilaritySymbols
@@ -73,6 +77,48 @@ onDemandPlotRules = do
                   , IndepDepPairEvaluator
                         (Pair scopeSizeEvaluator runtimeEvaluator)
                   , [inferFullBackground, inferChunks, inferChunksPlus])
+            , onDemandEvaluatedCartRule
+                  boxPlotterPerGroupEvaluatorOnDemand
+                  ( evaluationGroup
+                  , relevantEquationsEvaluator
+                  , [ inferFullBackground
+                    , inferChunksSimilarityName 5
+                    , inferChunksSimilaritySymbols 5
+                    , inferChunksSimilarityType 5
+                    , inferChunksTypeReachability 7
+                    ])
+            , onDemandEvaluatedCartRule
+                  barsPerGroupEvaluatorsStrategiesPlotterOnDemand
+                  ( runtimeGroup
+                  , IndepDepPairEvaluator
+                        (Pair scopeSizeEvaluator runtimeEvaluator)
+                  , [ inferFullBackground
+                    , inferChunksSimilarityName 5
+                    , inferChunksSimilaritySymbols 5
+                    , inferChunksSimilarityType 5
+                    , inferChunksTypeReachability 7
+                    ])
+            , onDemandEvaluatedCartRule
+                  boxPlotterPerGroupEvaluatorOnDemand
+                  ( evaluationGroup
+                  , relevantEquationsEvaluator
+                  , [ inferFullBackground
+                    , inferChunksPlusSimilarityName 5
+                    , inferChunksPlusSimilaritySymbols 5
+                    , inferChunksPlusSimilarityType 5
+                    , inferChunksPlusTypeReachability 7
+                    ])
+            , onDemandEvaluatedCartRule
+                  barsPerGroupEvaluatorsStrategiesPlotterOnDemand
+                  ( runtimeGroup
+                  , IndepDepPairEvaluator
+                        (Pair scopeSizeEvaluator runtimeEvaluator)
+                  , [ inferFullBackground
+                    , inferChunksPlusSimilarityName 5
+                    , inferChunksPlusSimilaritySymbols 5
+                    , inferChunksPlusSimilarityType 5
+                    , inferChunksPlusTypeReachability 7
+                    ])
             , onDemandEvaluatedCartRule
                   boxPlotterPerGroupEvaluatorOnDemand
                   ( evaluationGroup

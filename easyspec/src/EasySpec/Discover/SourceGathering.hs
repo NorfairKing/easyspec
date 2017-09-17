@@ -28,7 +28,7 @@ gatherSourceOf is d@IdData {..} = do
             (_:_) -> pure Nothing
         -- It was defined locally, so we may be able to get the implementation out of the current file.
             [] -> do
-                let sourceFile = inputSpecAbsFile is
+                let sourceFile = inputSpecFile is
                 mainContents <- liftIO $ readFile $ toFilePath sourceFile
                 case parseModule mainContents of
                     ParseFailed loc err -> do

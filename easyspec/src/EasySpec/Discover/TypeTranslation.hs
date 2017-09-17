@@ -3,9 +3,6 @@
 module EasySpec.Discover.TypeTranslation where
 
 import Import hiding (tyConName)
-
-import System.FilePath as FP
-
 import Class
 import GHC
 import qualified Module
@@ -26,7 +23,7 @@ toEasyId d impl =
     { E.idName = toEasyQNameFromSources d
     , E.idType = toEasyType $ Var.varType $ idDataId d
     , E.idImpl = impl
-    , E.idRootloc = idDataRootloc d
+    , E.idRootloc = rmFile <$> idDataRootInfo d
     }
 
 toEasyName :: Monoid a => GHC.Name -> H.Name a
@@ -40,17 +37,12 @@ toEasyQNameFromSources :: Monoid a => IdData -> H.QName a
 toEasyQNameFromSources d =
     case idDataExportingMods d of
         [] ->
-            case idDataRootloc d of
+            case idDataRootInfo d of
                 Nothing ->
                     UnQual mempty (toEasyName $ Var.varName $ idDataId d) -- This should not occur, but it's not enforced by the type system.
-                Just fp ->
-                    toEasyQName (Var.varName $ idDataId d) $
-                    map
-                        (\c ->
-                             case c of
-                                 '/' -> '.'
-                                 _ -> c) $
-                    FP.dropExtensions $ toFilePath fp
+                Just (RootModule { rmModuleName = mname }) ->
+                    toEasyQName (Var.varName $ idDataId d)
+                                (GHC.moduleNameString mname)
         (mn:_) ->
             toEasyQName (Var.varName $ idDataId d) (Module.moduleNameString mn)
 

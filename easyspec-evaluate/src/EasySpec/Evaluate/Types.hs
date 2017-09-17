@@ -94,7 +94,7 @@ instance FromJSON EvaluationInputPoint where
 
 data EvaluatorCsvLine = EvaluatorCsvLine
     { eclBaseDir :: Path Abs Dir
-    , eclFile :: Path Rel File
+    , eclFile :: !(Path Abs File)
     , eclStratName :: String
     , eclFocusFuncName :: String
     , eclEvaluatorName :: ES.EvaluatorName
@@ -106,7 +106,7 @@ data EvaluatorCsvLine = EvaluatorCsvLine
 
 instance FromNamedRecord EvaluatorCsvLine where
     parseNamedRecord r =
-        EvaluatorCsvLine <$> p parseAbsDir "base-dir" <*> p parseRelFile "file" <*>
+        EvaluatorCsvLine <$> p parseAbsDir "base-dir" <*> p parseAbsFile "file" <*>
         r .: "strategy" <*>
         r .: "focus" <*>
         r .: "evaluator" <*>

@@ -55,8 +55,7 @@ makeExampleCache = do
                 putStrLn $
                     unlines $
                     [ "Gathering a cache of the functions defined in the following file:"
-                    , toFilePath $
-                      ES.inputSpecBaseDir ex </> ES.inputSpecFile ex
+                    , toFilePath $ ES.inputSpecFile ex
                     , unwords
                           [ "Found these"
                           , show (length ns)

@@ -37,7 +37,7 @@ runEasySpec ::
 runEasySpec ds iSig = do
     sets <- ask
     liftIO $ do
-        let sourceFile = inputSpecAbsFile $ setDiscInputSpec ds
+        let sourceFile = toFilePath . inputSpecFile $ setDiscInputSpec ds
         runGhc (Just libdir) $ do
             initGhcMonad (Just libdir)
             dflags <- getSessionDynFlags
@@ -54,9 +54,16 @@ runEasySpec ds iSig = do
                 -- See these:
                 -- - https://stackoverflow.com/questions/12790341/haskell-ghc-dynamic-compliation-only-works-on-first-compile
                 -- - https://mail.haskell.org/pipermail/glasgow-haskell-users/2011-October/021009.html
-            target <- guessTarget ("*" ++ toFilePath sourceFile) Nothing
+            target <- guessTarget ("*" ++ sourceFile) Nothing
             setTargets [target]
             loadSuccessfully LoadAllTargets
+            modName <- do
+              g <- getModuleGraph
+              let mns = [ ms_mod_name m
+                        | m <- g, Just sourceFile == ml_hs_file (ms_location m) ]
+              case mns of
+                [] -> fail $ "Didn't find target " ++ sourceFile ++ " in module graph."
+                mn : _ -> pure mn
             let imp = GHC.simpleImportDecl . GHC.mkModuleName
             let qsModules =
                     [ IIDecl $ (imp "QuickSpec") {ideclQualified = True}
@@ -72,8 +79,7 @@ runEasySpec ds iSig = do
                     , IIDecl $ (imp "Data.Maybe") {ideclQualified = True}
                     , IIDecl $ (imp "Data.Monoid") {ideclQualified = True}
                     , IIDecl $ imp "Prelude"
-                    , IIModule $
-                      getTargetModName $ inputSpecFile $ setDiscInputSpec ds
+                    , IIModule modName
                     ]
             setContext qsModules
             let declaretc =

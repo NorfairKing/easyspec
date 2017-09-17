@@ -22,7 +22,7 @@ spec =
                  ]) $ \ex -> do
         ghcEasyIds <- runReaderT (getEasyIds ex) defaultSettings
         -- the hse ids
-        pr <- parseFile $ toFilePath $ inputSpecAbsFile ex
+        pr <- parseFile $ toFilePath $ inputSpecFile ex
         md <-
             case pr of
                 ParseFailed srcloc err ->

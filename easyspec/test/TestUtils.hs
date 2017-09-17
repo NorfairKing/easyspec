@@ -64,7 +64,7 @@ allExamples =
 
 getHSEEasyIds :: InputSpec -> IO [EasyId]
 getHSEEasyIds is = do
-    pr <- parseFile $ toFilePath $ inputSpecAbsFile is
+    pr <- parseFile $ toFilePath $ inputSpecFile is
     case pr of
         ParseFailed srcloc err ->
             fail $

@@ -27,7 +27,5 @@ isSourceFile p =
     let e = fileExtension p
     in e == ".hs" || e == ".lhs"
 
-sourcesIn :: MonadIO m => Path Abs Dir -> m [Path Rel File]
-sourcesIn dir = do
-    fs <- liftIO $ (filter isSourceFile . snd) <$> listDirRecur dir
-    pure $ mapMaybe (stripDir dir) fs
+sourcesIn :: MonadIO m => Path Abs Dir -> m [Path Abs File]
+sourcesIn dir = liftIO $ filter isSourceFile . snd <$> listDirRecur dir
